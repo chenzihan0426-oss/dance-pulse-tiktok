@@ -21,7 +21,8 @@ import { BeatCounterBadge } from "@/components/player/BeatCounterBadge";
 import { TeachingPanelKpop, parseBeatsRange } from "@/components/TeachingPanelKpop";
 import { cn } from "@/lib/utils";
 
-const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5] as const;
+// 排序：1x 起步，先降速 (0.75 → 0.5)，再升速 (1.25 → 1.5)，循环回 1x
+const SPEEDS = [1, 0.75, 0.5, 1.25, 1.5] as const;
 
 function clampDifficulty(value: number): number {
   if (!Number.isFinite(value)) return 1;
