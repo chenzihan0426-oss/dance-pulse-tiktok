@@ -1,9 +1,6 @@
 "use client";
 
-// 跟拍挑战(桌面版) · 整支为单位
-//   主窗: 全屏用户摄像头 + 金色幽灵剪影(MatteOverlay) + 大动作烟火(FireworksOverlay)
-//   小窗: 固定右上角 1/9 宽, 老师扣出来的原色前景(matte_rgb)+ 轩哥 33 点棍图骨架
-//   评分: combo / 飘字 / 节奏判定 / 结算页,没有失败机制
+// Tracking challenge: camera view with a selectable teacher skeleton or silhouette layer.
 
 import * as React from "react";
 import Link from "next/link";
@@ -12,41 +9,14 @@ import { ArrowLeft, Camera, Pause, Play, Volume2, VolumeX } from "lucide-react";
 
 import AdaptiveSkeletonOverlay from "@/components/tracking/AdaptiveSkeletonOverlay";
 import MatteOverlay, { type MatteOverlayStatus } from "@/components/tracking/MatteOverlay";
-import { type FireworkTrigger } from "@/components/tracking/FireworksOverlay";
-import { useHitShakeClass, type HitLevel } from "@/components/tracking/HitEffects";
 import CameraPicker from "@/components/tracking/CameraPicker";
 import CameraControls from "@/components/tracking/CameraControls";
 import MatteTuningPanel, { type MatteTuning, type TrackingOverlayLayer } from "@/components/tracking/MatteTuningPanel";
-import { type WristFrame } from "@/components/tracking/MotionTrailOverlay";
 import { Button } from "@/components/ui/button";
 import { getLesson } from "@/lib/api";
-import {
-  findNearestTeacherFrame,
-  scoreWithDTW,
-  SmoothedScore,
-  toGrade,
-  type Grade,
-  type Kpt,
-  type TeacherFrame,
-} from "@/lib/pose/scoring";
-import { useLivePose } from "@/lib/pose/useLivePose";
+import type { Kpt, TeacherFrame } from "@/lib/pose/scoring";
 import type { Lesson, Segment } from "@/lib/types";
 import { fmtTime } from "@/lib/utils";
-
-type ScoreEvent = {
-  id: number;
-  grade: Grade;
-  value: number;
-  x: number;
-  y: number;
-};
-
-const BP_LEFT_WRIST = 15;
-const BP_RIGHT_WRIST = 16;
-const BP_LEFT_ANKLE = 27;
-const BP_RIGHT_ANKLE = 28;
-const BP_LEFT_HIP = 23;
-const BP_RIGHT_HIP = 24;
 
 const DEFAULT_POSE_ASPECT = 9 / 16;
 const MATTE_TUNING_KEY = "dp_tracking_matte_tuning_v2";
@@ -234,38 +204,12 @@ export default function TrackingDesktopPage() {
   const teacherPlayheadRef = React.useRef(0);
   React.useEffect(() => { teacherPlayheadRef.current = teacherPlayhead; }, [teacherPlayhead]);
 
-  const [finished, setFinished] = React.useState(false);
-
   // 评分
   const teacherFramesRef = React.useRef<TeacherFrame[]>([]);
   const teacherFramesLoadedRef = React.useRef<Set<string>>(new Set());
   const teacherFramesCacheRef = React.useRef<Map<string, TeacherFrame[]>>(new Map());
   const teacherPoseAspectCacheRef = React.useRef<Map<string, number>>(new Map());
   const [teacherPoseAspect, setTeacherPoseAspect] = React.useState(DEFAULT_POSE_ASPECT);
-  const smootherRef = React.useRef(new SmoothedScore(15));
-  const [totalScore, setTotalScore] = React.useState(0);
-  const totalScoreRef = React.useRef(0);
-  const [combo, setCombo] = React.useState(0);
-  const [maxCombo, setMaxCombo] = React.useState(0);
-  const [tallies, setTallies] = React.useState<Record<Grade, number>>({ PERFECT: 0, GOOD: 0, OK: 0, MISS: 0 });
-  const [scoreEvents, setScoreEvents] = React.useState<ScoreEvent[]>([]);
-  const scoreEventSeq = React.useRef(0);
-  // 分级命中震撼: 每次命中 +1, level 决定效果强度
-  const [hitToken, setHitToken] = React.useState(0);
-  const [hitLevel, setHitLevel] = React.useState<HitLevel>("strong");
-  const shakeClass = useHitShakeClass(hitToken, hitLevel);
-  // Motion Trail 手腕历史 (normalized)
-  const wristHistoryRef = React.useRef<WristFrame[]>([]);
-
-  // 节奏判定: 在 beat 点附近才发评分事件
-  const beatsRef = React.useRef<number[]>([]);
-  const lastBeatIdxRef = React.useRef(-1);
-  const BEAT_WINDOW = 0.18; // ±180ms
-
-  // 烟火触发
-  const [fireworks, setFireworks] = React.useState<FireworkTrigger[]>([]);
-  const lastTriggerRef = React.useRef(0);
-  const prevWristsRef = React.useRef<{ lx: number; ly: number; rx: number; ry: number; t: number } | null>(null);
 
   // 预加载剪影素材到 HTTP 缓存 (lesson 一加载就开始)
   React.useEffect(() => {
@@ -289,7 +233,6 @@ export default function TrackingDesktopPage() {
       .then((detail) => {
         if (cancelled) return;
         setLesson(detail);
-        beatsRef.current = detail.beats ?? [];
         setLoadError(null);
       })
       .catch((err) => {
@@ -368,110 +311,6 @@ export default function TrackingDesktopPage() {
       });
   }, [currentSegment]);
 
-  // BlazePose 实时评分
-  const handleUserPose = React.useCallback((kpts: Kpt[]) => {
-    // ① 烟火触发 + 手腕轨迹历史(Motion Trail)
-    const prev = prevWristsRef.current;
-    const lw = kpts[BP_LEFT_WRIST], rw = kpts[BP_RIGHT_WRIST];
-    const now = performance.now();
-    if (lw && rw) {
-      wristHistoryRef.current.push({
-        lx: lw.x, ly: lw.y, lvis: lw.visibility,
-        rx: rw.x, ry: rw.y, rvis: rw.visibility,
-        t: now,
-      });
-      if (wristHistoryRef.current.length > 28) wristHistoryRef.current.shift();
-    }
-    if (lw && rw && prev && now - prev.t > 0 && now - lastTriggerRef.current > 450) {
-      const dt = (now - prev.t) / 1000;
-      const vL = Math.hypot(lw.x - prev.lx, lw.y - prev.ly) / dt;
-      const vR = Math.hypot(rw.x - prev.rx, rw.y - prev.ry) / dt;
-      const vMax = Math.max(vL, vR);
-      // 阈值降到 0.9(归一化/秒) —— 普通挥手就能触发
-      if (vMax > 0.9 && lw.visibility > 0.4 && rw.visibility > 0.4) {
-        lastTriggerRef.current = now;
-        const src = vL > vR ? lw : rw;
-        const fx = (1 - src.x) * 100;
-        const fy = src.y * 100;
-        setFireworks((prev) => [...prev.slice(-4), { id: scoreEventSeq.current++, x: fx, y: fy, at: now }]);
-      }
-    }
-    prevWristsRef.current = lw && rw
-      ? { lx: lw.x, ly: lw.y, rx: rw.x, ry: rw.y, t: now }
-      : prev;
-
-    // ② 评分(必须要老师数据 + 正在播放)
-    const teacherFrames = teacherFramesRef.current;
-    const tNow = teacherPlayheadRef.current;
-    if (!teacherFrames.length || tNow <= 0 || !playing) return;
-
-    // 节奏判定: 命中 beat 附近才计分
-    const beats = beatsRef.current;
-    if (!beats.length) return;
-    // 找最近的未消费 beat
-    let nearIdx = -1;
-    for (let i = lastBeatIdxRef.current + 1; i < beats.length; i++) {
-      const dt = tNow - beats[i];
-      if (dt > BEAT_WINDOW) { lastBeatIdxRef.current = i; continue; }
-      if (Math.abs(dt) <= BEAT_WINDOW) { nearIdx = i; break; }
-      break;
-    }
-    if (nearIdx < 0) return;
-    if (nearIdx <= lastBeatIdxRef.current) return;
-    lastBeatIdxRef.current = nearIdx;
-
-    const frameIdx = findNearestTeacherFrame(teacherFrames, tNow);
-    const instant = scoreWithDTW(kpts, teacherFrames, frameIdx, 6);
-    const smoothed = smootherRef.current.push(instant);
-    const grade = toGrade(smoothed);
-
-    const gain = grade === "PERFECT" ? 100 : grade === "GOOD" ? 60 : grade === "OK" ? 30 : 0;
-    totalScoreRef.current += gain;
-    setTotalScore(totalScoreRef.current);
-
-    setTallies((prev) => ({ ...prev, [grade]: prev[grade] + 1 }));
-    let nextCombo = 0;
-    if (grade === "MISS") {
-      setCombo(0);
-    } else {
-      setCombo((c) => {
-        nextCombo = c + 1;
-        setMaxCombo((m) => Math.max(m, nextCombo));
-        return nextCombo;
-      });
-    }
-    if (grade !== "MISS") {
-      const isMilestone = nextCombo > 0 && nextCombo % 10 === 0;
-      const lvl: HitLevel = isMilestone
-        ? "mega"
-        : grade === "PERFECT"
-        ? "strong"
-        : grade === "GOOD"
-        ? "mid"
-        : "soft";
-      setHitLevel(lvl);
-      setHitToken((t) => t + 1);
-    }
-
-    // 飘字: 用核心关键点附近的位置
-    const hip = kpts[BP_LEFT_HIP] && kpts[BP_RIGHT_HIP]
-      ? { x: (kpts[BP_LEFT_HIP].x + kpts[BP_RIGHT_HIP].x) / 2, y: (kpts[BP_LEFT_HIP].y + kpts[BP_RIGHT_HIP].y) / 2 - 0.2 }
-      : { x: 0.5, y: 0.4 };
-    const pct = { x: (1 - hip.x) * 100, y: hip.y * 100 };
-    setScoreEvents((prev) => [
-      ...prev.slice(-6),
-      { id: scoreEventSeq.current++, grade, value: gain, x: pct.x, y: pct.y },
-    ]);
-  }, [playing]);
-
-  useLivePose({
-    videoRef: cameraRef,
-    active: cameraReady,
-    onPose: handleUserPose,
-    mirror: true,
-  });
-
-  // 老师视频播放/暂停/进度同步
   React.useEffect(() => {
     const v = teacherRef.current;
     if (!v) return;
@@ -704,7 +543,6 @@ export default function TrackingDesktopPage() {
       return;
     }
     setPlaying(false);
-    setFinished(true);
   }, [startTeacherPlayback, teacherMuted]);
 
   const toggleTeacherSound = React.useCallback(async () => {
@@ -727,14 +565,6 @@ export default function TrackingDesktopPage() {
   }, [playing, teacherMuted]);
 
   const resetChallengeState = React.useCallback(() => {
-    totalScoreRef.current = 0;
-    setTotalScore(0);
-    setCombo(0);
-    setMaxCombo(0);
-    setTallies({ PERFECT: 0, GOOD: 0, OK: 0, MISS: 0 });
-    setFinished(false);
-    lastBeatIdxRef.current = -1;
-    smootherRef.current.reset();
     teacherVideoIndexRef.current = 0;
     setTeacherVideoIndex(0);
     setTeacherPlayhead(0);
@@ -858,7 +688,6 @@ export default function TrackingDesktopPage() {
             </div>
           ) : null}
 
-          {/* 烟火 */}
           {cameraReady && trackingOverlayLayer === "skeleton" ? (
             <AdaptiveSkeletonOverlay
               framesRef={teacherFramesRef}
@@ -870,9 +699,7 @@ export default function TrackingDesktopPage() {
             />
           ) : null}
 
-          {/* 命中震撼效果: flash / vignette / chroma + fever 持续光晕 */}
 
-          {/* ═════ 游戏化 HUD ═════ */}
           {cameraReady ? (
             <MatteTuningPanel
               value={matteTuning}
