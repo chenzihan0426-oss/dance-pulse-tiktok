@@ -1,0 +1,22 @@
+{
+  "name": "DancePulse",
+  "short_name": "舞拍",
+  "description": "AI 拆解编舞视频，八拍一张卡片",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0a14",
+  "theme_color": "#a855f7",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+# Local secrets and machine-specific config
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node / Next.js
+node_modules/
+.next/
+.next-dev/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Local runtime data, generated media, and temporary workspaces
+logs/
+.media-work/
+.media-backups/
+.chrome-codex/
+browser-profile-*/
+**/backend/data/
+**/pipeline/models/
+**/pipeline/rvm_weights/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+
+# Large local artifacts
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.torchscript
+*.onnx
+*.tflite

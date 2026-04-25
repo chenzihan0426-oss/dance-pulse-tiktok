@@ -1,0 +1,11 @@
+# 合并参考文件
+# 你的 M2 backend 如果已经有 requirements.txt，直接用你的
+# 把这个文件作为对照，确保至少包含下列项
+# 合并完可以删掉这个文件
+
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+pydantic>=2.5.0
+python-multipart>=0.0.9
+python-dotenv>=1.0.0
+aiofiles>=23.2.0
