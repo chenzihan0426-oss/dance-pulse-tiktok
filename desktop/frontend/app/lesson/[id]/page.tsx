@@ -5,18 +5,22 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
   ArrowLeft,
+  ChevronDown,
   Clock,
   Music,
   Play,
   Sparkles,
   Video,
+  X,
   Zap,
 } from "lucide-react";
-import { getLesson } from "@/lib/api";
+import { getLesson, regenerateTeaching } from "@/lib/api";
 import { getLastViewedSegmentId } from "@/lib/storage";
 import type { Lesson, Segment } from "@/lib/types";
 import { useLearningProgress } from "@/hooks/useLearningProgress";
 import { lessonIsDemoReady, segmentIsReady } from "@/lib/demoReady";
+import { TeachingPanelKpop } from "@/components/TeachingPanelKpop";
+import { cn } from "@/lib/utils";
 
 function formatDuration(sec: number): string {
   const s = Math.floor(sec);
@@ -152,6 +156,11 @@ export default function LessonPageDesktop() {
   const [showCustomCursor, setShowCustomCursor] = React.useState(false);
   const mouseRef = React.useRef({ x: -1000, y: -1000 });
 
+  // AI 图文教学：当前展开的 segment id + 重生成中的 segment id
+  const [activeTeachingSegId, setActiveTeachingSegId] = React.useState<string | null>(null);
+  const [regeneratingSegId, setRegeneratingSegId] = React.useState<string | null>(null);
+  const detailRef = React.useRef<HTMLDivElement | null>(null);
+
   const { setTotal, isLearned } = useLearningProgress(lessonId);
 
   React.useEffect(() => {
@@ -189,6 +198,50 @@ export default function LessonPageDesktop() {
     if (!lesson) return;
     setLastSegId(getLastViewedSegmentId(lesson.id));
   }, [lesson]);
+
+  const handleToggleTeaching = React.useCallback((segId: string) => {
+    setActiveTeachingSegId((prev) => {
+      const next = prev === segId ? null : segId;
+      if (next) {
+        // 切换到新 segment 时滚动到详情面板
+        requestAnimationFrame(() => {
+          detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      }
+      return next;
+    });
+  }, []);
+
+  const handleRegenerate = React.useCallback(
+    async (segId: string) => {
+      if (!lesson) return;
+      setRegeneratingSegId(segId);
+      try {
+        await regenerateTeaching(lesson.id, segId);
+        // 1.2s 后整体拉一次，然后每 3s 轮询直到非 pending（最多 6 次 = 18s）
+        let tries = 0;
+        const poll = async () => {
+          try {
+            const fresh = await getLesson(lesson.id);
+            setLesson(fresh);
+            const updated = fresh.segments.find((s) => s.id === segId);
+            if (updated?.teaching?.status === "pending" && tries < 6) {
+              tries += 1;
+              setTimeout(poll, 3000);
+            }
+          } catch (err) {
+            console.error("poll teaching failed", err);
+          }
+        };
+        setTimeout(poll, 1200);
+      } catch (err) {
+        console.error("regenerate teaching failed", err);
+      } finally {
+        setRegeneratingSegId(null);
+      }
+    },
+    [lesson]
+  );
 
   if (loading) {
     return <main className="flex min-h-screen items-center justify-center text-white/40">加载中...</main>;
@@ -553,46 +606,139 @@ export default function LessonPageDesktop() {
             const learned = isLearned(seg.id);
             const ready = segmentIsReady(seg);
             const cover = idx % 2 === 0 ? "#00f3ff" : "#ff0055";
+            const teachingStatus = seg.teaching?.status;
+            const isExpanded = activeTeachingSegId === seg.id;
+            const showTeachingBtn = !seg.is_still && !!seg.teaching;
 
             return (
-              <Link
+              <div
                 key={seg.id}
-                href={`/player/${seg.id}?lesson=${lesson.id}`}
                 className="neon-card group relative overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] p-1"
                 style={{ "--hover-color": cover } as React.CSSProperties}
-                onMouseEnter={() => setIsHovering(true)}
-                onMouseLeave={() => setIsHovering(false)}
               >
-                <div
-                  className="aspect-[9/16] w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-[1.04]"
-                  style={{ backgroundImage: `url("${seg.thumbnail}")` }}
-                />
-                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0)_45%,rgba(0,0,0,0.85)_100%)]" />
-                <div className="absolute left-3 top-3 rounded-full border border-white/20 bg-black/55 px-2 py-0.5 text-[10px] uppercase tracking-wider text-white/85">
-                  #{seg.index + 1}
-                </div>
-                {ready ? (
-                  <div className="absolute right-3 top-3 rounded-full bg-amber-400/95 px-2 py-0.5 text-[9px] font-bold text-amber-950">
-                    READY
+                <Link
+                  href={`/player/${seg.id}?lesson=${lesson.id}`}
+                  className="block"
+                  onMouseEnter={() => setIsHovering(true)}
+                  onMouseLeave={() => setIsHovering(false)}
+                >
+                  <div
+                    className="aspect-[9/16] w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-[1.04]"
+                    style={{ backgroundImage: `url("${seg.thumbnail}")` }}
+                  />
+                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0)_45%,rgba(0,0,0,0.85)_100%)]" />
+                  <div className="absolute left-3 top-3 rounded-full border border-white/20 bg-black/55 px-2 py-0.5 text-[10px] uppercase tracking-wider text-white/85">
+                    #{seg.index + 1}
                   </div>
-                ) : null}
-                {learned ? (
-                  <div className="absolute right-3 top-9 rounded-full bg-emerald-400/95 px-2 py-0.5 text-[9px] font-bold text-emerald-950">
-                    LEARNED
+                  {ready ? (
+                    <div className="absolute right-3 top-3 rounded-full bg-amber-400/95 px-2 py-0.5 text-[9px] font-bold text-amber-950">
+                      READY
+                    </div>
+                  ) : null}
+                  {learned ? (
+                    <div className="absolute right-3 top-9 rounded-full bg-emerald-400/95 px-2 py-0.5 text-[9px] font-bold text-emerald-950">
+                      LEARNED
+                    </div>
+                  ) : null}
+                  <div
+                    className={cn(
+                      "absolute inset-x-0 px-3",
+                      showTeachingBtn ? "bottom-[58px]" : "bottom-3"
+                    )}
+                  >
+                    <div className="line-clamp-1 text-[13px] font-semibold text-white">{seg.section_label}</div>
+                    <div className="mt-1 flex items-center justify-between text-[10px] text-white/55">
+                      <span>{seg.duration.toFixed(1)}s</span>
+                      <span>{seg.beat_count} 拍</span>
+                    </div>
                   </div>
-                ) : null}
-                <div className="absolute inset-x-0 bottom-0 p-3">
-                  <div className="line-clamp-1 text-[13px] font-semibold text-white">{seg.section_label}</div>
-                  <div className="mt-1 flex items-center justify-between text-[10px] text-white/55">
-                    <span>{seg.duration.toFixed(1)}s</span>
-                    <span>{seg.beat_count} 拍</span>
+                </Link>
+
+                {showTeachingBtn && (
+                  <div className="absolute inset-x-1 bottom-1 z-10 rounded-b-xl border-t border-[#00f3ff]/20 bg-black/85 px-3 py-2 backdrop-blur-sm">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="line-clamp-2 flex-1 text-[10px] leading-snug text-white/70">
+                        {teachingStatus === "ready"
+                          ? seg.teaching!.summary
+                          : teachingStatus === "pending"
+                            ? "教学生成中..."
+                            : "教学未就绪"}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleToggleTeaching(seg.id);
+                        }}
+                        onMouseEnter={() => setIsHovering(true)}
+                        onMouseLeave={() => setIsHovering(false)}
+                        className={cn(
+                          "inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider transition",
+                          isExpanded
+                            ? "border-[#ccff00] bg-[#ccff00] text-[#050505]"
+                            : "border-[#00f3ff]/60 bg-[#00f3ff]/10 text-[#00f3ff] hover:bg-[#00f3ff]/20"
+                        )}
+                      >
+                        <Sparkles className="h-3 w-3" />
+                        <span>教学</span>
+                        <ChevronDown
+                          className={cn("h-3 w-3 transition-transform", isExpanded && "rotate-180")}
+                        />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </Link>
+                )}
+              </div>
             );
           })}
         </div>
       </section>
+
+      {activeTeachingSegId
+        ? (() => {
+            const activeSeg = activeSegments.find((s) => s.id === activeTeachingSegId);
+            if (!activeSeg) return null;
+            return (
+              <section
+                ref={detailRef}
+                className="relative z-10 mx-auto max-w-7xl px-6 pb-16 md:px-12"
+              >
+                <div className="rounded-3xl border border-[#00f3ff]/30 bg-gradient-to-br from-[#0a0a0a] to-[#1a0033]/40 p-6 shadow-[0_30px_80px_rgba(0,243,255,0.12)] md:p-8">
+                  <div className="mb-5 flex items-center justify-between gap-4">
+                    <h3 className="flex flex-wrap items-baseline gap-3 text-2xl font-black uppercase tracking-tight md:text-3xl">
+                      <span className="kpop-text">AI 图文教学</span>
+                      <span className="text-sm font-normal normal-case tracking-normal text-white/50">
+                        #{activeSeg.index + 1} · {activeSeg.section_label}
+                      </span>
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTeachingSegId(null)}
+                      onMouseEnter={() => setIsHovering(true)}
+                      onMouseLeave={() => setIsHovering(false)}
+                      className="rounded-full border border-white/20 bg-white/5 p-2 text-white/70 transition hover:border-[#ff0055]/60 hover:bg-[#ff0055]/10 hover:text-[#ff0055]"
+                      aria-label="关闭教学详情"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="grid gap-6 md:grid-cols-[280px_1fr]">
+                    <div
+                      className="aspect-[9/16] w-full overflow-hidden rounded-2xl border border-white/10 bg-cover bg-center shadow-[0_18px_40px_rgba(0,0,0,0.5)]"
+                      style={{ backgroundImage: `url("${activeSeg.thumbnail}")` }}
+                    />
+                    <TeachingPanelKpop
+                      segment={activeSeg}
+                      regenerating={regeneratingSegId === activeSeg.id}
+                      onRegenerate={() => handleRegenerate(activeSeg.id)}
+                    />
+                  </div>
+                </div>
+              </section>
+            );
+          })()
+        : null}
 
     </main>
   );

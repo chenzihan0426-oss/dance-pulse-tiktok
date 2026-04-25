@@ -18,6 +18,8 @@ import {
 import type { Lesson, Segment } from "@/lib/types";
 import { XuangeGuideOverlay } from "@/components/player/XuangeGuideOverlay";
 import { BeatCounterBadge } from "@/components/player/BeatCounterBadge";
+import { TeachingPanelKpop, parseBeatsRange } from "@/components/TeachingPanelKpop";
+import { cn } from "@/lib/utils";
 
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5] as const;
 
@@ -166,6 +168,23 @@ export function DesktopPlayer({
   const [mousePos, setMousePos] = React.useState({ x: -1000, y: -1000 });
   const mouseRef = React.useRef({ x: -1000, y: -1000 });
 
+  // AI 图文教学折叠卡片，切换 segment 时自动收起
+  const [teachingExpanded, setTeachingExpanded] = React.useState(false);
+  React.useEffect(() => {
+    setTeachingExpanded(false);
+  }, [segment.id]);
+
+  // 当前 beat 命中的教学 step（用于视频上 overlay 提示词）
+  const currentStep = React.useMemo(() => {
+    const steps = segment.teaching?.steps ?? [];
+    if (!steps.length) return null;
+    const hit = steps.find((s) => {
+      const r = parseBeatsRange(s.beats);
+      return r !== null && currentBeat >= r[0] && currentBeat <= r[1];
+    });
+    return hit ?? null;
+  }, [segment.teaching, currentBeat]);
+
   React.useEffect(() => {
     setShowCustomCursor(window.matchMedia("(pointer:fine)").matches);
     const onMove = (e: MouseEvent) => {
@@ -303,6 +322,13 @@ export function DesktopPlayer({
           background: #050505;
           cursor: ${showCustomCursor ? "none" : "auto"};
         }
+        @keyframes dp-step-hint-in {
+          from { opacity: 0; transform: translate(-50%, -8px); }
+          to   { opacity: 1; transform: translate(-50%, 0); }
+        }
+        .dp-step-hint {
+          animation: dp-step-hint-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
       `}</style>
 
       {showCustomCursor ? (
@@ -392,6 +418,16 @@ export function DesktopPlayer({
               />
             </div>
 
+            {currentStep ? (
+              <div
+                key={`${segment.id}-${currentStep.beats}`}
+                className="dp-step-hint pointer-events-none absolute left-1/2 top-[112px] z-20 w-[88%] -translate-x-1/2 text-center text-[18px] font-semibold leading-snug text-white md:text-[20px]"
+                style={{ textShadow: "0 2px 8px rgba(0,0,0,0.9), 0 0 3px rgba(0,0,0,0.95)" }}
+              >
+                {currentStep.content}
+              </div>
+            ) : null}
+
             {immersive ? (
               <div className="pointer-events-none absolute bottom-6 right-6 rounded-xl border border-white/10 bg-black/60 px-4 py-2 text-[11px] text-white/70">
                 ←/→ 切段 · Space 暂停 · M 镜像 · Esc 退出
@@ -456,6 +492,50 @@ export function DesktopPlayer({
             <div className="px-6 pb-3 pt-8">
               <div className="text-[11px] font-medium tracking-[0.22em] text-white/42">动作段落</div>
               <div className="mt-1 text-[28px] font-black leading-none text-white">{headingText}</div>
+            </div>
+
+            <div className="px-5 pb-3">
+              <div className="overflow-hidden rounded-2xl border border-[#00f3ff]/30 bg-black/40 backdrop-blur-md">
+                <button
+                  type="button"
+                  onClick={() => setTeachingExpanded((p) => !p)}
+                  className="flex w-full items-start justify-between gap-3 px-4 py-3 text-left transition hover:bg-white/5"
+                  aria-expanded={teachingExpanded}
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em]">
+                      <span className="rounded-full border border-[#ccff00]/40 bg-[#ccff00]/15 px-2 py-0.5 font-bold text-[#ccff00]">
+                        AI 图文教学
+                      </span>
+                    </div>
+                    <p className="mt-2 line-clamp-2 text-[12px] leading-snug text-white/75">
+                      {segment.teaching?.status === "ready"
+                        ? segment.teaching.summary
+                        : segment.teaching?.status === "pending"
+                          ? "教学生成中..."
+                          : segment.teaching?.status === "failed"
+                            ? "教学未就绪（可去课程页重新生成）"
+                            : "暂无教学内容"}
+                    </p>
+                  </div>
+                  <ChevronDown
+                    className={cn(
+                      "mt-0.5 h-4 w-4 shrink-0 text-white/65 transition-transform",
+                      teachingExpanded && "rotate-180"
+                    )}
+                  />
+                </button>
+                {teachingExpanded && segment.teaching ? (
+                  <div className="border-t border-white/10 p-4">
+                    <TeachingPanelKpop
+                      segment={segment}
+                      currentBeat={currentBeat}
+                      autoScrollSteps
+                      className="border-0 bg-transparent p-0 shadow-none"
+                    />
+                  </div>
+                ) : null}
+              </div>
             </div>
 
             <div className="flex items-center gap-2 px-6 pb-3">
