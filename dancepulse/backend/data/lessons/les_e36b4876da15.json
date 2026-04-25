@@ -1,0 +1,415 @@
+{
+  "id": "les_e36b4876da15",
+  "title": "2026-04-18 13:34",
+  "source_url": "https://v.douyin.com/F9do-evsmCU/",
+  "duration": 40.98,
+  "bpm": 107.67,
+  "video_url": "/videos/les_e36b4876da15.mp4",
+  "thumbnail": "/thumbs/les_e36b4876da15_seg_000.jpg",
+  "confirmed": false,
+  "beat_quality": "high",
+  "beats": [
+    0.49,
+    1.04,
+    1.6,
+    2.18,
+    2.74,
+    3.3,
+    3.85,
+    4.41,
+    4.99,
+    5.57,
+    6.13,
+    6.71,
+    7.27,
+    7.83,
+    8.41,
+    8.99,
+    9.54,
+    10.1,
+    10.66,
+    11.24,
+    11.8,
+    12.38,
+    12.93,
+    13.51,
+    14.07,
+    14.63,
+    15.19,
+    15.77,
+    16.32,
+    16.9,
+    17.46,
+    18.02,
+    18.6,
+    19.16,
+    19.71,
+    20.29,
+    20.85,
+    21.41,
+    21.99,
+    22.55,
+    23.1,
+    23.68,
+    24.24,
+    24.82,
+    25.38,
+    25.96,
+    26.52,
+    27.1,
+    27.65,
+    28.21,
+    28.77,
+    29.35,
+    29.91,
+    30.49,
+    31.05,
+    31.6,
+    32.16,
+    32.74,
+    33.3,
+    33.88,
+    34.44,
+    34.99,
+    35.57,
+    36.13,
+    36.71,
+    37.27,
+    37.83,
+    38.41,
+    38.96,
+    39.52,
+    39.98,
+    40.47
+  ],
+  "sections": [
+    {
+      "id": "intro",
+      "label": "前奏",
+      "start": 0.0,
+      "end": 2.21
+    },
+    {
+      "id": "verse_1",
+      "label": "主歌 1",
+      "start": 2.21,
+      "end": 4.95
+    },
+    {
+      "id": "chorus_1",
+      "label": "副歌 1",
+      "start": 4.95,
+      "end": 7.78
+    },
+    {
+      "id": "chorus_2",
+      "label": "副歌 2",
+      "start": 7.78,
+      "end": 27.72
+    },
+    {
+      "id": "outro",
+      "label": "尾声",
+      "start": 27.72,
+      "end": 40.98
+    }
+  ],
+  "segments": [
+    {
+      "id": "seg_000",
+      "lesson_id": "les_e36b4876da15",
+      "index": 0,
+      "section": "verse_1",
+      "section_label": "主歌 1",
+      "start": 0.49,
+      "end": 4.99,
+      "duration": 4.5,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_e36b4876da15_seg_000.jpg",
+      "clip_url": "/clips/les_e36b4876da15_seg_000.mp4",
+      "difficulty": 3,
+      "is_still": false,
+      "ai_description": "主歌 1·常规节奏,动作清晰",
+      "user_edited": false,
+      "teaching": {
+        "status": "failed",
+        "summary": "主歌 1·常规节奏,动作清晰",
+        "steps": [],
+        "tips": [
+          "生成失败，请稍后重试或检查 teaching 配置"
+        ],
+        "beat_cues": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "generated_at": "2026-04-19T04:46:24Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_001",
+      "lesson_id": "les_e36b4876da15",
+      "index": 1,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 4.99,
+      "end": 9.54,
+      "duration": 4.55,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_e36b4876da15_seg_001.jpg",
+      "clip_url": "/clips/les_e36b4876da15_seg_001.mp4",
+      "difficulty": 4,
+      "is_still": false,
+      "ai_description": "副歌 1·节奏紧凑,动作幅度大",
+      "user_edited": false,
+      "teaching": {
+        "status": "failed",
+        "summary": "副歌 1·节奏紧凑,动作幅度大",
+        "steps": [],
+        "tips": [
+          "生成失败，请稍后重试或检查 teaching 配置"
+        ],
+        "beat_cues": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "generated_at": "2026-04-19T02:08:52Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_002",
+      "lesson_id": "les_e36b4876da15",
+      "index": 2,
+      "section": "chorus_2",
+      "section_label": "副歌 2",
+      "start": 9.54,
+      "end": 14.07,
+      "duration": 4.53,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_e36b4876da15_seg_002.jpg",
+      "clip_url": "/clips/les_e36b4876da15_seg_002.mp4",
+      "difficulty": 5,
+      "is_still": false,
+      "ai_description": "副歌 2·爆发段落,快速连续移动",
+      "user_edited": false,
+      "teaching": {
+        "status": "failed",
+        "summary": "副歌 2·爆发段落,快速连续移动",
+        "steps": [],
+        "tips": [
+          "生成失败，请稍后重试或检查 teaching 配置"
+        ],
+        "beat_cues": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "generated_at": "2026-04-19T02:08:55Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_003",
+      "lesson_id": "les_e36b4876da15",
+      "index": 3,
+      "section": "chorus_2",
+      "section_label": "副歌 2",
+      "start": 14.07,
+      "end": 18.6,
+      "duration": 4.53,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_e36b4876da15_seg_003.jpg",
+      "clip_url": "/clips/les_e36b4876da15_seg_003.mp4",
+      "difficulty": 3,
+      "is_still": false,
+      "ai_description": "副歌 2·常规节奏,动作清晰",
+      "user_edited": false,
+      "teaching": {
+        "status": "failed",
+        "summary": "副歌 2·常规节奏,动作清晰",
+        "steps": [],
+        "tips": [
+          "生成失败，请稍后重试或检查 teaching 配置"
+        ],
+        "beat_cues": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "generated_at": "2026-04-19T02:08:59Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_004",
+      "lesson_id": "les_e36b4876da15",
+      "index": 4,
+      "section": "chorus_2",
+      "section_label": "副歌 2",
+      "start": 18.6,
+      "end": 23.1,
+      "duration": 4.5,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_e36b4876da15_seg_004.jpg",
+      "clip_url": "/clips/les_e36b4876da15_seg_004.mp4",
+      "difficulty": 1,
+      "is_still": true,
+      "ai_description": "副歌 2·静止定格,保持姿态",
+      "user_edited": false,
+      "teaching": {
+        "status": "failed",
+        "summary": "副歌 2·静止定格,保持姿态",
+        "steps": [],
+        "tips": [
+          "生成失败，请稍后重试或检查 teaching 配置"
+        ],
+        "beat_cues": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "generated_at": "2026-04-19T02:09:02Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_005",
+      "lesson_id": "les_e36b4876da15",
+      "index": 5,
+      "section": "chorus_2",
+      "section_label": "副歌 2",
+      "start": 23.1,
+      "end": 27.65,
+      "duration": 4.55,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_e36b4876da15_seg_005.jpg",
+      "clip_url": "/clips/les_e36b4876da15_seg_005.mp4",
+      "difficulty": 1,
+      "is_still": false,
+      "ai_description": "副歌 2·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "failed",
+        "summary": "副歌 2·动作平缓,幅度较小",
+        "steps": [],
+        "tips": [
+          "生成失败，请稍后重试或检查 teaching 配置"
+        ],
+        "beat_cues": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "generated_at": "2026-04-19T02:09:06Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_006",
+      "lesson_id": "les_e36b4876da15",
+      "index": 6,
+      "section": "outro",
+      "section_label": "尾声",
+      "start": 27.65,
+      "end": 32.16,
+      "duration": 4.51,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_e36b4876da15_seg_006.jpg",
+      "clip_url": "/clips/les_e36b4876da15_seg_006.mp4",
+      "difficulty": 1,
+      "is_still": false,
+      "ai_description": "尾声·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "failed",
+        "summary": "尾声·动作平缓,幅度较小",
+        "steps": [],
+        "tips": [
+          "生成失败，请稍后重试或检查 teaching 配置"
+        ],
+        "beat_cues": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "generated_at": "2026-04-19T02:09:17Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_007",
+      "lesson_id": "les_e36b4876da15",
+      "index": 7,
+      "section": "outro",
+      "section_label": "尾声",
+      "start": 32.16,
+      "end": 36.71,
+      "duration": 4.55,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_e36b4876da15_seg_007.jpg",
+      "clip_url": "/clips/les_e36b4876da15_seg_007.mp4",
+      "difficulty": 2,
+      "is_still": false,
+      "ai_description": "尾声·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "failed",
+        "summary": "尾声·动作平缓,幅度较小",
+        "steps": [],
+        "tips": [
+          "生成失败，请稍后重试或检查 teaching 配置"
+        ],
+        "beat_cues": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "generated_at": "2026-04-19T02:09:21Z"
+      },
+      "deleted": false
+    }
+  ]
+}

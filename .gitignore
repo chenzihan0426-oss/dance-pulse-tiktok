@@ -47,3 +47,15 @@ desktop.ini
 *.torchscript
 *.onnx
 *.tflite
+
+# Project seed assets that should travel with the repository.
+!dancepulse/backend/data/
+!dancepulse/backend/data/**
+!dancepulse/pipeline/models/
+!dancepulse/pipeline/models/**
+!dancepulse/pipeline/rvm_weights/
+!dancepulse/pipeline/rvm_weights/**
+
+# Keep local users, sessions, and run results off GitHub.
+dancepulse/backend/data/auth/*.json
+dancepulse/backend/data/tracking/results.json

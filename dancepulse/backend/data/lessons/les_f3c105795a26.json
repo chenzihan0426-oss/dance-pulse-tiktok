@@ -1,0 +1,320 @@
+{
+  "id": "les_f3c105795a26",
+  "title": "2026-04-18 22:44",
+  "source_url": "",
+  "duration": 40.3,
+  "bpm": 103.36,
+  "video_url": "/videos/les_f3c105795a26.mp4",
+  "thumbnail": "/thumbs/les_f3c105795a26_seg_001.jpg",
+  "confirmed": false,
+  "beat_quality": "high",
+  "beats": [
+    0.51,
+    1.09,
+    1.7,
+    2.28,
+    2.86,
+    3.46,
+    4.04,
+    4.64,
+    5.2,
+    5.78,
+    6.39,
+    6.97,
+    7.57,
+    8.15,
+    8.73,
+    9.36,
+    9.91,
+    10.5,
+    11.1,
+    11.68,
+    12.28,
+    12.86,
+    13.44,
+    14.05,
+    14.61,
+    15.21,
+    15.79,
+    16.39,
+    16.97,
+    17.58,
+    18.16,
+    18.76,
+    19.32,
+    19.92,
+    20.5,
+    20.99,
+    21.48,
+    21.97,
+    22.57,
+    23.15,
+    23.75,
+    24.33,
+    24.92,
+    25.5,
+    26.08,
+    26.68,
+    27.28,
+    27.86,
+    28.44,
+    29.02,
+    29.63,
+    30.23,
+    30.81,
+    31.39,
+    32.0,
+    32.55,
+    33.16,
+    33.74,
+    34.34,
+    34.92,
+    35.5,
+    36.08,
+    36.69,
+    37.27,
+    37.85
+  ],
+  "sections": [
+    {
+      "id": "intro",
+      "label": "前奏",
+      "start": 0.0,
+      "end": 10.45
+    },
+    {
+      "id": "chorus_1",
+      "label": "副歌 1",
+      "start": 10.45,
+      "end": 18.11
+    },
+    {
+      "id": "chorus_2",
+      "label": "副歌 2",
+      "start": 18.11,
+      "end": 18.97
+    },
+    {
+      "id": "verse_1",
+      "label": "主歌 1",
+      "start": 18.97,
+      "end": 19.74
+    },
+    {
+      "id": "outro",
+      "label": "尾声",
+      "start": 19.74,
+      "end": 40.3
+    }
+  ],
+  "segments": [
+    {
+      "id": "seg_000",
+      "lesson_id": "les_f3c105795a26",
+      "index": 0,
+      "section": "intro",
+      "section_label": "前奏",
+      "start": 0.51,
+      "end": 9.91,
+      "duration": 9.4,
+      "beat_count": 16,
+      "thumbnail": "/thumbs/les_f3c105795a26_seg_001.jpg",
+      "clip_url": "/clips/les_f3c105795a26_seg_001.mp4",
+      "difficulty": 1,
+      "is_still": false,
+      "ai_description": "前奏·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双手举过头顶，身体下蹲并左右摆动",
+        "steps": [
+          {
+            "beats": "1-4",
+            "content": "双臂从身体两侧向上举过头顶，掌心相对，同时膝盖微屈，重心下沉。"
+          },
+          {
+            "beats": "5-8",
+            "content": "双手在头顶上方交叉，然后向右侧摆动，身体随之向右倾斜，左腿保持稳定。"
+          },
+          {
+            "beats": "9-12",
+            "content": "双手移至胸前，掌心向前，身体重心回到中间，膝盖伸直。随后双手向左侧摆动，身体向左倾斜。"
+          },
+          {
+            "beats": "13-16",
+            "content": "双手放下至腰部，指尖指向地面，身体轻微下蹲，膝盖弯曲，重心再次下沉。"
+          }
+        ],
+        "tips": [
+          "保持核心收紧，动作流畅连贯。",
+          "注意手臂和身体的协调性，避免僵硬。",
+          "重心移动时，脚部要稳住，不要晃动。"
+        ],
+        "generated_at": "2026-04-18T17:33:38Z"
+      },
+      "deleted": false,
+      "pose_full_url": "/pose_full/les_f3c105795a26/seg_000.json",
+      "particle_url": "/particles/les_f3c105795a26/seg_000.mp4"
+    },
+    {
+      "id": "seg_001",
+      "lesson_id": "les_f3c105795a26",
+      "index": 1,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 9.91,
+      "end": 19.32,
+      "duration": 9.41,
+      "beat_count": 16,
+      "thumbnail": "/thumbs/les_f3c105795a26_seg_003.jpg",
+      "clip_url": "/clips/les_f3c105795a26_seg_003.mp4",
+      "difficulty": 2,
+      "is_still": false,
+      "ai_description": "副歌 1·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双手交叉胸前，身体扭动，单腿点地。",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双脚并拢站立，双手在胸前交叉，掌心相对，头部微向右侧倾斜。"
+          },
+          {
+            "beats": "3-4",
+            "content": "左腿保持不动，右腿向外侧迈出一小步，同时双手向上举过头顶，掌心向外。"
+          },
+          {
+            "beats": "5-6",
+            "content": "重心移至左腿，右腿向后撤一步，双手收回至胸前交叉姿势，头部转向左侧。"
+          },
+          {
+            "beats": "7-8",
+            "content": "左腿保持不动，右腿向前迈出一大步，同时双手从胸前交叉位置向外打开，掌心向前。"
+          },
+          {
+            "beats": "9-10",
+            "content": "重心移至右腿，左腿向后撤一步，双手收回至胸前交叉，头部转向右侧。"
+          },
+          {
+            "beats": "11-12",
+            "content": "右腿保持不动，左腿向外侧迈出一小步，同时双手向上举过头顶，掌心向外。"
+          },
+          {
+            "beats": "13-14",
+            "content": "重心移至左腿，右腿向后撤一步，双手收回至胸前交叉姿势，头部转向左侧。"
+          },
+          {
+            "beats": "15-16",
+            "content": "左腿保持不动，右腿向前迈出一大步，同时双手从胸前交叉位置向外打开，掌心向前完成动作。"
+          }
+        ],
+        "tips": [
+          "注意手臂动作的流畅性，避免僵硬。",
+          "重心转移时保持核心稳定，膝盖微屈增加缓冲。",
+          "面部表情跟随音乐节奏变化，增强表现力。"
+        ],
+        "generated_at": "2026-04-18T17:33:46Z"
+      },
+      "deleted": false,
+      "pose_full_url": "/pose_full/les_f3c105795a26/seg_001.json",
+      "particle_url": "/particles/les_f3c105795a26/seg_001.mp4"
+    },
+    {
+      "id": "seg_002",
+      "lesson_id": "les_f3c105795a26",
+      "index": 2,
+      "section": "outro",
+      "section_label": "尾声",
+      "start": 19.32,
+      "end": 28.44,
+      "duration": 9.12,
+      "beat_count": 16,
+      "thumbnail": "/thumbs/les_f3c105795a26_seg_005.jpg",
+      "clip_url": "/clips/les_f3c105795a26_seg_005.mp4",
+      "difficulty": 3,
+      "is_still": false,
+      "ai_description": "尾声·节奏紧凑,动作幅度大",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "弯腰起身，甩头并整理外套的流畅动作",
+        "steps": [
+          {
+            "beats": "1-4",
+            "content": "身体前倾弯腰，头部自然下垂，双臂放松垂于身前"
+          },
+          {
+            "beats": "5-8",
+            "content": "迅速起身，同时头部向右侧甩动，左臂向外伸展，右臂保持弯曲"
+          },
+          {
+            "beats": "9-12",
+            "content": "上半身向左侧扭转，同时将外套向上拉起覆盖头部"
+          },
+          {
+            "beats": "13-16",
+            "content": "放下外套，双臂自然摆动，重心回到双脚，面向前方站定"
+          }
+        ],
+        "tips": [
+          "弯腰时注意膝盖微屈，避免过度伸直",
+          "甩头动作要干净利落，利用腰部力量带动",
+          "整理外套时可配合眼神变化增强表现力"
+        ],
+        "generated_at": "2026-04-18T17:33:55Z"
+      },
+      "deleted": false,
+      "pose_full_url": "/pose_full/les_f3c105795a26/seg_002.json",
+      "particle_url": "/particles/les_f3c105795a26/seg_002.mp4"
+    },
+    {
+      "id": "seg_003",
+      "lesson_id": "les_f3c105795a26",
+      "index": 3,
+      "section": "outro",
+      "section_label": "尾声",
+      "start": 28.44,
+      "end": 37.85,
+      "duration": 9.41,
+      "beat_count": 16,
+      "thumbnail": "/thumbs/les_f3c105795a26_seg_006.jpg",
+      "clip_url": "/clips/les_f3c105795a26_seg_006.mp4",
+      "difficulty": 4,
+      "is_still": false,
+      "ai_description": "尾声·节奏紧凑,动作幅度大",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "跪地单腿抬起，甩动外套结束动作",
+        "steps": [
+          {
+            "beats": "1-4",
+            "content": "从站立姿势开始，重心下沉，左腿向后抬起，同时右手持外套向外甩动。"
+          },
+          {
+            "beats": "5-8",
+            "content": "身体转向右侧，左膝跪地，右腿弯曲支撑，同时左手将外套披在肩上。"
+          },
+          {
+            "beats": "9-12",
+            "content": "保持跪姿，上半身向后倾斜，右手轻抚背部，头部微仰。"
+          },
+          {
+            "beats": "13-16",
+            "content": "快速起身，同时将外套完全脱下并甩向身后，完成结束动作。"
+          }
+        ],
+        "tips": [
+          "甩外套时注意手部力度和方向，避免打到自己。",
+          "跪地时保持核心收紧，避免身体前倾或后仰。",
+          "起身动作要迅速有力，与甩外套动作协调一致。"
+        ],
+        "generated_at": "2026-04-18T17:34:02Z"
+      },
+      "deleted": false,
+      "pose_full_url": "/pose_full/les_f3c105795a26/seg_003.json",
+      "particle_url": "/particles/les_f3c105795a26/seg_003.mp4"
+    }
+  ]
+}

@@ -1,0 +1,370 @@
+{
+  "id": "les_8b103249be5b",
+  "title": "2026-04-18 13:57",
+  "source_url": "https://v.douyin.com/Io4nqNFPnAM/",
+  "duration": 27.01,
+  "bpm": 95.7,
+  "video_url": "/videos/les_8b103249be5b.mp4",
+  "thumbnail": "/thumbs/les_8b103249be5b_seg_000.jpg",
+  "confirmed": false,
+  "beat_quality": "high",
+  "beats": [
+    0.07,
+    0.74,
+    1.37,
+    1.97,
+    2.6,
+    3.23,
+    3.83,
+    4.46,
+    5.09,
+    5.69,
+    6.29,
+    6.92,
+    7.55,
+    8.17,
+    8.78,
+    9.4,
+    10.03,
+    10.63,
+    11.26,
+    11.89,
+    12.49,
+    13.12,
+    13.75,
+    14.35,
+    14.98,
+    15.58,
+    16.21,
+    16.83,
+    17.46,
+    18.07,
+    18.67,
+    19.3,
+    19.92,
+    20.55,
+    21.18,
+    21.78,
+    22.41,
+    23.01,
+    23.64,
+    24.26,
+    24.96,
+    25.66,
+    26.38
+  ],
+  "sections": [
+    {
+      "id": "intro",
+      "label": "前奏",
+      "start": 0.0,
+      "end": 1.93
+    },
+    {
+      "id": "verse_1",
+      "label": "主歌 1",
+      "start": 1.93,
+      "end": 3.55
+    },
+    {
+      "id": "chorus_1",
+      "label": "副歌 1",
+      "start": 3.55,
+      "end": 6.8
+    },
+    {
+      "id": "chorus_2",
+      "label": "副歌 2",
+      "start": 6.8,
+      "end": 26.12
+    },
+    {
+      "id": "outro",
+      "label": "尾声",
+      "start": 26.12,
+      "end": 27.01
+    }
+  ],
+  "segments": [
+    {
+      "id": "seg_000",
+      "lesson_id": "les_8b103249be5b",
+      "index": 0,
+      "section": "verse_1",
+      "section_label": "主歌 1",
+      "start": 0.07,
+      "end": 5.09,
+      "duration": 5.02,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_8b103249be5b_seg_000.jpg",
+      "clip_url": "/clips/les_8b103249be5b_seg_000.mp4",
+      "difficulty": 1,
+      "is_still": false,
+      "ai_description": "主歌 1·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "身体波浪与头部摆动的简单组合",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双脚站定，身体自然站立"
+          },
+          {
+            "beats": "3-4",
+            "content": "从腰部开始做波浪动作，带动上半身"
+          },
+          {
+            "beats": "5-6",
+            "content": "配合波浪同时头部向右侧摆动"
+          },
+          {
+            "beats": "7-8",
+            "content": "头部回正，身体波浪结束保持姿态"
+          }
+        ],
+        "tips": [
+          "注意波浪从下往上流畅传递",
+          "头部摆动要轻柔自然",
+          "保持呼吸均匀，不要憋气"
+        ],
+        "beat_cues": [
+          null,
+          null,
+          "波浪",
+          null,
+          "头摆右",
+          null,
+          "头摆回",
+          null
+        ],
+        "generated_at": "2026-04-19T06:45:54Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_001",
+      "lesson_id": "les_8b103249be5b",
+      "index": 1,
+      "section": "chorus_2",
+      "section_label": "副歌 2",
+      "start": 5.09,
+      "end": 10.03,
+      "duration": 4.94,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_8b103249be5b_seg_001.jpg",
+      "clip_url": "/clips/les_8b103249be5b_seg_001.mp4",
+      "difficulty": 3,
+      "is_still": false,
+      "ai_description": "副歌 2·常规节奏,动作清晰",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "右脚点地转身，双臂推胯摆动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左脚站立，右脚点地"
+          },
+          {
+            "beats": "3-4",
+            "content": "身体向右转，双臂推胯"
+          },
+          {
+            "beats": "5-6",
+            "content": "重心下沉，手臂随腰摆动"
+          },
+          {
+            "beats": "7-8",
+            "content": "左脚点地，身体转向左侧"
+          }
+        ],
+        "tips": [
+          "注意转身后重心保持稳定",
+          "推胯动作要配合腰部发力",
+          "点地时膝盖微屈缓冲"
+        ],
+        "beat_cues": [
+          "右脚点",
+          null,
+          "转身推胯",
+          null,
+          "下沉摆臂",
+          null,
+          "左脚点",
+          null
+        ],
+        "generated_at": "2026-04-19T07:06:29Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_002",
+      "lesson_id": "les_8b103249be5b",
+      "index": 2,
+      "section": "chorus_2",
+      "section_label": "副歌 2",
+      "start": 10.03,
+      "end": 14.98,
+      "duration": 4.95,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_8b103249be5b_seg_002.jpg",
+      "clip_url": "/clips/les_8b103249be5b_seg_002.mp4",
+      "difficulty": 4,
+      "is_still": false,
+      "ai_description": "副歌 2·节奏紧凑,动作幅度大",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "身体波浪与手臂流畅摆动的性感舞蹈",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "重心放低，左腿微屈，右手向右侧伸展，左手自然下垂，头部微向右转。"
+          },
+          {
+            "beats": "3-4",
+            "content": "身体从腰部开始向左侧做波浪动作，同时双臂向上举过头顶，指尖相对，头部随之转向左侧。"
+          },
+          {
+            "beats": "5-6",
+            "content": "身体波浪向下移动至臀部，双臂自然放下并向两侧打开，头部转向正面，目光直视前方。"
+          },
+          {
+            "beats": "7-8",
+            "content": "重心再次放低，右腿微屈，左手向左侧伸展，右手自然下垂，头部微向左转，完成一个循环。"
+          }
+        ],
+        "tips": [
+          "注意身体波浪的流畅性，从上到下依次带动。",
+          "手臂动作要跟随身体波浪自然延伸，避免僵硬。",
+          "保持眼神与动作协调，展现自信和性感的舞台表现力。"
+        ],
+        "beat_cues": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "generated_at": "2026-04-18T05:58:19Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_003",
+      "lesson_id": "les_8b103249be5b",
+      "index": 3,
+      "section": "chorus_2",
+      "section_label": "副歌 2",
+      "start": 14.98,
+      "end": 19.92,
+      "duration": 4.94,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_8b103249be5b_seg_003.jpg",
+      "clip_url": "/clips/les_8b103249be5b_seg_003.mp4",
+      "difficulty": 5,
+      "is_still": false,
+      "ai_description": "副歌 2·爆发段落,快速连续移动",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "快速手臂波浪与重心转移的连续动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂从胸前位置向外划出，指尖指向两侧，头部随手臂方向转动。"
+          },
+          {
+            "beats": "3-4",
+            "content": "双腿跳起，同时双臂向上伸展至头顶上方，落地时膝盖微屈保持弹性。"
+          },
+          {
+            "beats": "5-6",
+            "content": "左腿向左侧迈出一大步成弓步，右臂向前指，左臂向后伸展以保持平衡。"
+          },
+          {
+            "beats": "7-8",
+            "content": "身体重心移回中间，双臂收回胸前交叉，头部转向右侧完成动作。"
+          }
+        ],
+        "tips": [
+          "注意手臂动作的流畅性，避免生硬转折。",
+          "跳跃时膝盖微屈缓冲，落地轻盈减少冲击。",
+          "弓步时保持上身直立，核心收紧以维持稳定。"
+        ],
+        "beat_cues": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "generated_at": "2026-04-18T05:58:25Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_004",
+      "lesson_id": "les_8b103249be5b",
+      "index": 4,
+      "section": "chorus_2",
+      "section_label": "副歌 2",
+      "start": 19.92,
+      "end": 24.96,
+      "duration": 5.04,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_8b103249be5b_seg_004.jpg",
+      "clip_url": "/clips/les_8b103249be5b_seg_004.mp4",
+      "difficulty": 2,
+      "is_still": false,
+      "ai_description": "副歌 2·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "甩头、侧身指、扭胯的流畅动作组合",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左腿微屈，右手叉腰，左手自然摆动，快速甩头向右后方，眼神跟随头部转动。"
+          },
+          {
+            "beats": "3-4",
+            "content": "重心移至右腿，左腿向外伸展，同时身体转向左侧，右手向前水平伸出，左手轻触腰部。"
+          },
+          {
+            "beats": "5-6",
+            "content": "身体回正，双腿并拢，双手在胸前合十，随后右手放下轻抚大腿外侧，左手保持胸前位置。"
+          },
+          {
+            "beats": "7-8",
+            "content": "左腿再次微屈，身体向右侧倾斜，右手叉腰，左手从背后绕过轻抚腰部，头部随之转向右侧。"
+          }
+        ],
+        "tips": [
+          "注意甩头时颈部发力，动作干净利落。",
+          "侧身指时手臂伸直，指尖方向明确。",
+          "扭胯动作要配合重心转移，展现流畅感。"
+        ],
+        "beat_cues": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "generated_at": "2026-04-18T05:58:34Z"
+      },
+      "deleted": false
+    }
+  ]
+}

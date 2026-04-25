@@ -1,0 +1,262 @@
+{
+  "id": "les_797715f0e903",
+  "title": "2026-04-17 23:47",
+  "source_url": "",
+  "duration": 22.71,
+  "bpm": 99.38,
+  "video_url": "/videos/les_797715f0e903.mp4",
+  "thumbnail": "/thumbs/les_797715f0e903_seg_000.jpg",
+  "confirmed": true,
+  "beat_quality": "high",
+  "beats": [
+    0.26,
+    0.93,
+    1.63,
+    2.25,
+    2.86,
+    3.48,
+    4.09,
+    4.71,
+    5.32,
+    5.92,
+    6.52,
+    7.13,
+    7.76,
+    8.36,
+    8.99,
+    9.61,
+    10.22,
+    10.82,
+    11.42,
+    12.05,
+    12.65,
+    13.28,
+    13.89,
+    14.51,
+    15.12,
+    15.72,
+    16.32,
+    16.97,
+    17.55,
+    18.13,
+    18.76,
+    19.39,
+    20.02,
+    20.62,
+    21.22,
+    21.85,
+    22.45
+  ],
+  "sections": [
+    {
+      "id": "intro",
+      "label": "前奏",
+      "start": 0.21,
+      "end": 2.02
+    },
+    {
+      "id": "chorus_1",
+      "label": "副歌 1",
+      "start": 2.02,
+      "end": 18.34
+    },
+    {
+      "id": "chorus_2",
+      "label": "副歌 2",
+      "start": 18.34,
+      "end": 19.34
+    },
+    {
+      "id": "outro",
+      "label": "尾声",
+      "start": 19.34,
+      "end": 22.71
+    }
+  ],
+  "segments": [
+    {
+      "id": "seg_000",
+      "lesson_id": "les_797715f0e903",
+      "index": 0,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 0.26,
+      "end": 5.32,
+      "duration": 5.06,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_797715f0e903_seg_000.jpg",
+      "clip_url": "/clips/les_797715f0e903_seg_000.mp4",
+      "difficulty": 2,
+      "is_still": false,
+      "ai_description": "副歌 1·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "身体波浪与手部流畅移动的组合动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "头部和上半身向右侧倾斜，同时右手向外伸展，左手自然下垂，重心在右腿。"
+          },
+          {
+            "beats": "3-4",
+            "content": "身体转向正面，双手在胸前做小幅度摆动，膝盖微屈，重心均匀分布。"
+          },
+          {
+            "beats": "5-6",
+            "content": "头部向左侧倾斜，同时左手向外伸展，右手放在腰部，重心转移到左腿。"
+          },
+          {
+            "beats": "7-8",
+            "content": "身体回到正面，双手自然下垂，双脚并拢，重心稳定，准备下一个动作。"
+          }
+        ],
+        "tips": [
+          "注意头部和身体的波浪动作要连贯流畅。",
+          "手臂动作要轻柔，与身体节奏同步。",
+          "保持膝盖微屈，增加动作的柔韧性。"
+        ],
+        "generated_at": "2026-04-17T16:36:29Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_001",
+      "lesson_id": "les_797715f0e903",
+      "index": 1,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 5.32,
+      "end": 10.22,
+      "duration": 4.9,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_797715f0e903_seg_001.jpg",
+      "clip_url": "/clips/les_797715f0e903_seg_001.mp4",
+      "difficulty": 1,
+      "is_still": false,
+      "ai_description": "副歌 1·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "下蹲、扭胯、单膝跪地的流畅动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双腿微屈下蹲，双手自然放于膝盖上方，身体重心下沉"
+          },
+          {
+            "beats": "3-4",
+            "content": "保持下蹲姿势，身体向右侧扭动，左手轻触右膝，头部随之转向右侧"
+          },
+          {
+            "beats": "5-6",
+            "content": "左腿向前迈出一步成弓步，右膝着地，右手撑地，身体转向左侧"
+          },
+          {
+            "beats": "7-8",
+            "content": "起身恢复站立姿势，双臂自然摆动，身体重心回到中心"
+          }
+        ],
+        "tips": [
+          "下蹲时注意膝盖不要超过脚尖",
+          "扭胯动作要流畅，避免僵硬",
+          "单膝跪地时保持上身挺直"
+        ],
+        "generated_at": "2026-04-17T16:36:38Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_002",
+      "lesson_id": "les_797715f0e903",
+      "index": 2,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 10.22,
+      "end": 15.12,
+      "duration": 4.9,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_797715f0e903_seg_002.jpg",
+      "clip_url": "/clips/les_797715f0e903_seg_002.mp4",
+      "difficulty": 4,
+      "is_still": false,
+      "ai_description": "副歌 1·节奏紧凑,动作幅度大",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "身体波浪与手臂环绕动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左腿在前呈弓步，右手轻触大腿，左手自然下垂；随后上半身做小幅度左右波浪，双手随之摆动。"
+          },
+          {
+            "beats": "3-4",
+            "content": "双腿并拢站立，双手从身体两侧向上举过头顶，掌心相对，完成一个流畅的弧形动作。"
+          },
+          {
+            "beats": "5-6",
+            "content": "左腿再次迈出成弓步，同时双手在胸前交叉，指尖相对；接着上半身向右侧倾斜，头部跟随转动。"
+          },
+          {
+            "beats": "7-8",
+            "content": "双臂从胸前向外打开，手掌朝外，同时身体重心转移到右腿，左腿向后伸展，头部转向左侧。"
+          }
+        ],
+        "tips": [
+          "注意波浪动作的连贯性，保持节奏感。",
+          "手臂环绕时要流畅，避免生硬。",
+          "弓步时膝盖不要超过脚尖，注意腿部力量支撑。"
+        ],
+        "generated_at": "2026-04-17T16:36:48Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_003",
+      "lesson_id": "les_797715f0e903",
+      "index": 3,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 15.12,
+      "end": 20.02,
+      "duration": 4.9,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_797715f0e903_seg_003.jpg",
+      "clip_url": "/clips/les_797715f0e903_seg_003.mp4",
+      "difficulty": 5,
+      "is_still": false,
+      "ai_description": "副歌 1·爆发段落,快速连续移动",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "快速身体波浪与重心转移的连续动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左腿支撑，右腿微屈，双手置于髋部，身体向右侧倾斜并完成一个胸部波浪动作。"
+          },
+          {
+            "beats": "3-4",
+            "content": "重心转移到右腿，左腿向外伸展，同时上半身向左侧扭转，右手向上举过头顶。"
+          },
+          {
+            "beats": "5-6",
+            "content": "左腿收回，双脚并拢，双手在胸前交叉后迅速向外打开，头部随之转向右侧。"
+          },
+          {
+            "beats": "7-8",
+            "content": "身体向后倾斜，重心放低，双臂向两侧伸展，同时头部向后仰，目光看向斜上方。"
+          }
+        ],
+        "tips": [
+          "注意每个波浪动作的流畅衔接，保持节奏感。",
+          "重心转移时膝盖微屈以缓冲动作，避免僵硬。",
+          "手臂和头部动作要与身体波浪同步，增强整体协调性。"
+        ],
+        "generated_at": "2026-04-17T16:36:57Z"
+      },
+      "deleted": false
+    }
+  ]
+}

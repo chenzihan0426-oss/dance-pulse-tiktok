@@ -1,0 +1,373 @@
+{
+  "id": "les_6a7758803979",
+  "title": "2026-04-19 14:15",
+  "source_url": "https://v.douyin.com/x_iavooia44/",
+  "duration": 23.64,
+  "bpm": 123.05,
+  "video_url": "/videos/les_6a7758803979.mp4",
+  "thumbnail": "/thumbs/les_6a7758803979_seg_000.jpg",
+  "confirmed": false,
+  "beat_quality": "high",
+  "beats": [
+    0.09,
+    0.49,
+    0.98,
+    1.46,
+    1.97,
+    2.46,
+    2.97,
+    3.48,
+    3.99,
+    4.48,
+    4.99,
+    5.48,
+    5.99,
+    6.48,
+    6.99,
+    7.48,
+    7.96,
+    8.48,
+    8.96,
+    9.47,
+    9.98,
+    10.47,
+    10.98,
+    11.47,
+    11.96,
+    12.47,
+    12.96,
+    13.47,
+    13.98,
+    14.47,
+    14.98,
+    15.46,
+    15.95,
+    16.46,
+    16.97,
+    17.46,
+    17.97,
+    18.46,
+    18.97,
+    19.48,
+    19.97,
+    20.46,
+    20.97,
+    21.46,
+    21.97,
+    22.45,
+    22.96,
+    23.48
+  ],
+  "sections": [
+    {
+      "id": "intro",
+      "label": "前奏",
+      "start": 0.05,
+      "end": 2.41
+    },
+    {
+      "id": "chorus_1",
+      "label": "副歌 1",
+      "start": 2.41,
+      "end": 18.41
+    },
+    {
+      "id": "outro",
+      "label": "尾声",
+      "start": 18.41,
+      "end": 23.64
+    }
+  ],
+  "segments": [
+    {
+      "id": "seg_000",
+      "lesson_id": "les_6a7758803979",
+      "index": 0,
+      "section": "intro",
+      "section_label": "前奏",
+      "start": 0.09,
+      "end": 3.99,
+      "duration": 3.9,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_6a7758803979_seg_000.jpg",
+      "clip_url": "/clips/les_6a7758803979_seg_000.mp4",
+      "difficulty": 1,
+      "is_still": false,
+      "ai_description": "前奏·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双手举过头顶，随后放下并轻微摆动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手举过头顶"
+          },
+          {
+            "beats": "3-4",
+            "content": "双手放下至胸前"
+          },
+          {
+            "beats": "5-6",
+            "content": "身体轻微左右摆动"
+          },
+          {
+            "beats": "7-8",
+            "content": "保持站立姿势"
+          }
+        ],
+        "tips": [
+          "注意手部动作流畅",
+          "重心放低保持稳定",
+          "面部表情自然放松"
+        ],
+        "beat_cues": [
+          "举手过头",
+          null,
+          "放下双手",
+          null,
+          "左右摆动",
+          null,
+          null,
+          null
+        ],
+        "generated_at": "2026-04-19T06:15:56Z"
+      },
+      "deleted": false,
+      "matte_rgb_url": "/matte/les_6a7758803979/seg_000_rgb.mp4",
+      "matte_mask_url": "/matte/les_6a7758803979/seg_000_mask.mp4"
+    },
+    {
+      "id": "seg_001",
+      "lesson_id": "les_6a7758803979",
+      "index": 1,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 3.99,
+      "end": 7.96,
+      "duration": 3.97,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_6a7758803979_seg_001.jpg",
+      "clip_url": "/clips/les_6a7758803979_seg_001.mp4",
+      "difficulty": 2,
+      "is_still": false,
+      "ai_description": "副歌 1·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "三人同步进行胯部推转和身体摆动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双膝微屈，双手胸前交叠"
+          },
+          {
+            "beats": "3-4",
+            "content": "右胯向前推转，左臂上举"
+          },
+          {
+            "beats": "5-6",
+            "content": "左胯向后拉回，右臂下压"
+          },
+          {
+            "beats": "7-8",
+            "content": "重心移至右腿，左腿点地"
+          }
+        ],
+        "tips": [
+          "保持核心收紧，动作流畅连贯",
+          "注意胯部发力带动身体",
+          "眼神跟随手部方向移动"
+        ],
+        "beat_cues": [
+          null,
+          null,
+          "推胯",
+          null,
+          "拉胯",
+          null,
+          null,
+          "点地"
+        ],
+        "generated_at": "2026-04-19T06:16:03Z"
+      },
+      "deleted": false,
+      "matte_rgb_url": "/matte/les_6a7758803979/seg_001_rgb.mp4",
+      "matte_mask_url": "/matte/les_6a7758803979/seg_001_mask.mp4"
+    },
+    {
+      "id": "seg_002",
+      "lesson_id": "les_6a7758803979",
+      "index": 2,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 7.96,
+      "end": 11.96,
+      "duration": 4.0,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_6a7758803979_seg_002.jpg",
+      "clip_url": "/clips/les_6a7758803979_seg_002.mp4",
+      "difficulty": 5,
+      "is_still": false,
+      "ai_description": "副歌 1·爆发段落,快速连续移动",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双臂交叉胸前，身体左右摆动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂交叉于胸前，重心下沉"
+          },
+          {
+            "beats": "3-4",
+            "content": "左肩上提，身体向左侧倾斜"
+          },
+          {
+            "beats": "5-6",
+            "content": "右肩上提，身体向右侧倾斜"
+          },
+          {
+            "beats": "7-8",
+            "content": "重心回正，双臂保持交叉"
+          }
+        ],
+        "tips": [
+          "注意肩膀动作的流畅性",
+          "腰部发力带动身体摆动",
+          "保持核心稳定，避免晃动"
+        ],
+        "beat_cues": [
+          "交叉双臂",
+          null,
+          "左肩上",
+          null,
+          "右肩上",
+          null,
+          "重心回正",
+          null
+        ],
+        "generated_at": "2026-04-19T06:16:09Z"
+      },
+      "deleted": false,
+      "matte_rgb_url": "/matte/les_6a7758803979/seg_002_rgb.mp4",
+      "matte_mask_url": "/matte/les_6a7758803979/seg_002_mask.mp4"
+    },
+    {
+      "id": "seg_003",
+      "lesson_id": "les_6a7758803979",
+      "index": 3,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 11.96,
+      "end": 15.95,
+      "duration": 3.99,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_6a7758803979_seg_003.jpg",
+      "clip_url": "/clips/les_6a7758803979_seg_003.mp4",
+      "difficulty": 4,
+      "is_still": false,
+      "ai_description": "副歌 1·节奏紧凑,动作幅度大",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "副歌1段落，8拍舞蹈动作包含转身与手部配合。",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左脚点地，双手胸前交叠"
+          },
+          {
+            "beats": "3-4",
+            "content": "转身同时右肩上提，左手向外打开"
+          },
+          {
+            "beats": "5-6",
+            "content": "重心下沉，右手向下划动"
+          },
+          {
+            "beats": "7-8",
+            "content": "左脚向前迈出，双手于身前定点"
+          }
+        ],
+        "tips": [
+          "注意转身时身体重心转移",
+          "手部动作与脚步配合流畅",
+          "保持节奏感，避免抢拍"
+        ],
+        "beat_cues": [
+          "左脚点",
+          null,
+          "转身推肩",
+          null,
+          "下沉划手",
+          null,
+          "迈步定点",
+          null
+        ],
+        "generated_at": "2026-04-19T06:16:16Z"
+      },
+      "deleted": false,
+      "matte_rgb_url": "/matte/les_6a7758803979/seg_003_rgb.mp4",
+      "matte_mask_url": "/matte/les_6a7758803979/seg_003_mask.mp4"
+    },
+    {
+      "id": "seg_004",
+      "lesson_id": "les_6a7758803979",
+      "index": 4,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 15.95,
+      "end": 19.97,
+      "duration": 4.02,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_6a7758803979_seg_004.jpg",
+      "clip_url": "/clips/les_6a7758803979_seg_004.mp4",
+      "difficulty": 3,
+      "is_still": false,
+      "ai_description": "副歌 1·常规节奏,动作清晰",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双臂交叉展开后迈步，身体转向一侧",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂胸前交叉展开"
+          },
+          {
+            "beats": "3-4",
+            "content": "重心下沉，身体转向右侧"
+          },
+          {
+            "beats": "5-6",
+            "content": "左脚向前迈一步，右肩上提"
+          },
+          {
+            "beats": "7-8",
+            "content": "重心移至右脚，左脚点地"
+          }
+        ],
+        "tips": [
+          "保持双臂动作流畅，避免僵硬",
+          "转向时注意核心收紧，身体稳定",
+          "迈步时膝盖微屈，步伐轻盈"
+        ],
+        "beat_cues": [
+          "交叉展开",
+          null,
+          "转向",
+          null,
+          "迈步",
+          null,
+          "点地",
+          null
+        ],
+        "generated_at": "2026-04-19T06:16:22Z"
+      },
+      "deleted": false,
+      "matte_rgb_url": "/matte/les_6a7758803979/seg_004_rgb.mp4",
+      "matte_mask_url": "/matte/les_6a7758803979/seg_004_mask.mp4"
+    }
+  ]
+}

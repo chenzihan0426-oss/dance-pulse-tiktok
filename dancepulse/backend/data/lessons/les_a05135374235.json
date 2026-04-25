@@ -1,0 +1,302 @@
+{
+  "id": "les_a05135374235",
+  "title": "2026-04-19 08:56",
+  "source_url": "https://v.douyin.com/C2BZDs9vZhg/",
+  "duration": 21.7,
+  "bpm": 107.67,
+  "video_url": "/videos/les_a05135374235.mp4",
+  "thumbnail": "/thumbs/les_a05135374235_seg_000.jpg",
+  "confirmed": false,
+  "beat_quality": "high",
+  "beats": [
+    0.26,
+    0.84,
+    1.49,
+    2.04,
+    2.6,
+    3.13,
+    3.69,
+    4.25,
+    4.81,
+    5.36,
+    5.9,
+    6.46,
+    7.01,
+    7.57,
+    8.13,
+    8.68,
+    9.22,
+    9.78,
+    10.33,
+    10.89,
+    11.45,
+    12.0,
+    12.54,
+    13.1,
+    13.65,
+    14.21,
+    14.77,
+    15.3,
+    15.86,
+    16.42,
+    16.97,
+    17.53,
+    18.09,
+    18.65,
+    19.18,
+    19.74,
+    20.29,
+    21.01
+  ],
+  "sections": [
+    {
+      "id": "intro",
+      "label": "前奏",
+      "start": 0.0,
+      "end": 1.44
+    },
+    {
+      "id": "chorus_1",
+      "label": "副歌 1",
+      "start": 1.44,
+      "end": 3.67
+    },
+    {
+      "id": "chorus_2",
+      "label": "副歌 2",
+      "start": 3.67,
+      "end": 5.04
+    },
+    {
+      "id": "outro",
+      "label": "尾声",
+      "start": 5.04,
+      "end": 21.7
+    }
+  ],
+  "segments": [
+    {
+      "id": "seg_000",
+      "lesson_id": "les_a05135374235",
+      "index": 0,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 0.26,
+      "end": 4.81,
+      "duration": 4.55,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_a05135374235_seg_000.jpg",
+      "clip_url": "/clips/les_a05135374235_seg_000.mp4",
+      "difficulty": 5,
+      "is_still": false,
+      "ai_description": "副歌 1·爆发段落,快速连续移动",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双臂伸展后单腿抬起，身体重心转移",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂向两侧打开，重心放低"
+          },
+          {
+            "beats": "3-4",
+            "content": "左腿抬起，右手轻触膝盖，身体转向右侧"
+          },
+          {
+            "beats": "5-6",
+            "content": "左腿放下，双手叉腰，身体重心回正"
+          },
+          {
+            "beats": "7-8",
+            "content": "右腿抬起，左手轻触膝盖，身体转向左侧"
+          }
+        ],
+        "tips": [
+          "保持核心收紧，动作流畅连贯",
+          "注意重心转移时的平衡感",
+          "眼神跟随手部动作移动"
+        ],
+        "beat_cues": [
+          "双臂打开",
+          null,
+          "左腿抬起",
+          null,
+          "左腿放下",
+          null,
+          "右腿抬起",
+          null
+        ],
+        "generated_at": "2026-04-19T00:57:25Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_001",
+      "lesson_id": "les_a05135374235",
+      "index": 1,
+      "section": "outro",
+      "section_label": "尾声",
+      "start": 4.81,
+      "end": 9.22,
+      "duration": 4.41,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_a05135374235_seg_001.jpg",
+      "clip_url": "/clips/les_a05135374235_seg_001.mp4",
+      "difficulty": 1,
+      "is_still": false,
+      "ai_description": "尾声·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "副歌主打动作，两拍一个 count",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "身体微下沉，重心转到左脚"
+          },
+          {
+            "beats": "3-4",
+            "content": "右手从腰部上举至头顶划圆"
+          },
+          {
+            "beats": "5-6",
+            "content": "左手下沉配合点胯"
+          },
+          {
+            "beats": "7-8",
+            "content": "回到起始位准备下一 count"
+          }
+        ],
+        "tips": [
+          "注意手臂弧度不要完全伸直",
+          "重心下压配合音乐 drop"
+        ],
+        "beat_cues": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "generated_at": "2026-04-24T08:13:03Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_002",
+      "lesson_id": "les_a05135374235",
+      "index": 2,
+      "section": "outro",
+      "section_label": "尾声",
+      "start": 9.22,
+      "end": 13.65,
+      "duration": 4.43,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_a05135374235_seg_002.jpg",
+      "clip_url": "/clips/les_a05135374235_seg_002.mp4",
+      "difficulty": 2,
+      "is_still": false,
+      "ai_description": "尾声·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "尾声部分，步伐轻盈，手部定点动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左脚点地 右肩上提"
+          },
+          {
+            "beats": "3-4",
+            "content": "重心下沉 双手向前推"
+          },
+          {
+            "beats": "5-6",
+            "content": "右脚点地 转身同时双手定点"
+          },
+          {
+            "beats": "7-8",
+            "content": "左脚点地 身体微倾"
+          }
+        ],
+        "tips": [
+          "保持腰部灵活带动身体",
+          "手部动作轻快定点即可",
+          "注意脚步点地的节奏感"
+        ],
+        "beat_cues": [
+          "左脚点",
+          null,
+          "右肩上",
+          null,
+          "重心下",
+          "转身定",
+          "左脚点",
+          null
+        ],
+        "generated_at": "2026-04-19T00:57:40Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_003",
+      "lesson_id": "les_a05135374235",
+      "index": 3,
+      "section": "outro",
+      "section_label": "尾声",
+      "start": 13.65,
+      "end": 18.09,
+      "duration": 4.44,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_a05135374235_seg_003.jpg",
+      "clip_url": "/clips/les_a05135374235_seg_003.mp4",
+      "difficulty": 4,
+      "is_still": false,
+      "ai_description": "尾声·节奏紧凑,动作幅度大",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "尾声部分，双臂展开后单腿点地",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂从身体两侧缓缓抬起至胸前"
+          },
+          {
+            "beats": "3-4",
+            "content": "双臂向外伸展至水平位置"
+          },
+          {
+            "beats": "5-6",
+            "content": "重心下沉，膝盖微屈，双臂保持展开"
+          },
+          {
+            "beats": "7-8",
+            "content": "左腿向左侧点地，双臂回收至胸前"
+          }
+        ],
+        "tips": [
+          "保持核心收紧，动作流畅连贯",
+          "注意节奏感，拍子要稳",
+          "眼神跟随手部移动，增加表现力"
+        ],
+        "beat_cues": [
+          null,
+          "抬臂",
+          "伸展",
+          null,
+          "下蹲",
+          null,
+          "点地",
+          null
+        ],
+        "generated_at": "2026-04-19T00:57:47Z"
+      },
+      "deleted": false
+    }
+  ]
+}

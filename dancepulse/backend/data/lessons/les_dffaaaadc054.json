@@ -1,0 +1,588 @@
+{
+  "id": "les_dffaaaadc054",
+  "title": "2026-04-19 01:41",
+  "source_url": "https://v.douyin.com/5rbhEl-CwuE/",
+  "duration": 49.3,
+  "bpm": 99.38,
+  "video_url": "/videos/les_dffaaaadc054.mp4",
+  "thumbnail": "/thumbs/les_dffaaaadc054_seg_000.jpg",
+  "confirmed": true,
+  "beat_quality": "high",
+  "beats": [
+    0.88,
+    1.49,
+    2.09,
+    2.67,
+    3.27,
+    3.88,
+    4.48,
+    5.06,
+    5.69,
+    6.29,
+    6.9,
+    7.5,
+    8.08,
+    8.68,
+    9.26,
+    9.89,
+    10.5,
+    11.08,
+    11.68,
+    12.28,
+    12.89,
+    13.47,
+    14.07,
+    14.68,
+    15.28,
+    15.88,
+    16.49,
+    17.09,
+    17.67,
+    18.27,
+    18.88,
+    19.48,
+    20.09,
+    20.69,
+    21.29,
+    21.87,
+    22.48,
+    23.08,
+    23.68,
+    24.29,
+    24.89,
+    25.47,
+    26.08,
+    26.68,
+    27.28,
+    27.86,
+    28.49,
+    29.09,
+    29.7,
+    30.28,
+    30.88,
+    31.49,
+    32.09,
+    32.69,
+    33.27,
+    33.88,
+    34.48,
+    35.09,
+    35.67,
+    36.27,
+    36.9,
+    37.5,
+    38.06,
+    38.68,
+    39.26,
+    39.87,
+    40.47,
+    41.08,
+    41.7,
+    42.31,
+    42.89,
+    43.49,
+    44.07,
+    44.68,
+    45.28,
+    45.88,
+    46.49,
+    47.09,
+    47.65,
+    48.16,
+    48.74
+  ],
+  "sections": [
+    {
+      "id": "intro",
+      "label": "前奏",
+      "start": 0.0,
+      "end": 8.64
+    },
+    {
+      "id": "verse_1",
+      "label": "主歌 1",
+      "start": 8.64,
+      "end": 11.84
+    },
+    {
+      "id": "chorus_1",
+      "label": "副歌 1",
+      "start": 11.84,
+      "end": 27.82
+    },
+    {
+      "id": "chorus_2",
+      "label": "副歌 2",
+      "start": 27.82,
+      "end": 31.05
+    },
+    {
+      "id": "outro",
+      "label": "尾声",
+      "start": 31.05,
+      "end": 49.3
+    }
+  ],
+  "segments": [
+    {
+      "id": "seg_000",
+      "lesson_id": "les_dffaaaadc054",
+      "index": 0,
+      "section": "intro",
+      "section_label": "前奏",
+      "start": 0.88,
+      "end": 5.69,
+      "duration": 4.81,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_dffaaaadc054_seg_000.jpg",
+      "clip_url": "/clips/les_dffaaaadc054_seg_000.mp4",
+      "difficulty": 1,
+      "is_still": true,
+      "ai_description": "前奏·静止定格,保持姿态",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "身体左右摆动，手臂跟随节奏画圈。",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "重心放左腿，右腿微屈，双手在身前做小幅度画圈动作。"
+          },
+          {
+            "beats": "3-4",
+            "content": "重心移至右腿，左腿微屈，身体向右侧倾斜，手臂随之摆动。"
+          },
+          {
+            "beats": "5-6",
+            "content": "重心回到左腿，右腿伸直，同时身体转向左侧，手臂向外打开。"
+          },
+          {
+            "beats": "7-8",
+            "content": "重心移至右腿，左腿微屈，身体转向正面，手臂恢复身前画圈姿势。"
+          }
+        ],
+        "tips": [
+          "保持上半身稳定，重心移动时注意腿部配合。",
+          "手臂动作轻柔流畅，与身体摆动同步。",
+          "面部表情自然，跟随音乐节奏变化。"
+        ],
+        "generated_at": "2026-04-18T08:35:07Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_001",
+      "lesson_id": "les_dffaaaadc054",
+      "index": 1,
+      "section": "intro",
+      "section_label": "前奏",
+      "start": 5.69,
+      "end": 10.5,
+      "duration": 4.81,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_dffaaaadc054_seg_001.jpg",
+      "clip_url": "/clips/les_dffaaaadc054_seg_001.mp4",
+      "difficulty": 2,
+      "is_still": false,
+      "ai_description": "前奏·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双手胸前交叠，侧步移动，举手过头后还原",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "站立，双手在胸前交叠，右手在外，身体微向右侧倾斜"
+          },
+          {
+            "beats": "3-4",
+            "content": "左脚向左侧迈出一步，重心移至左腿，同时双臂向左侧伸展，掌心向下"
+          },
+          {
+            "beats": "5-6",
+            "content": "双臂向上举过头顶，掌心相对，同时右脚向右前方小步跟进，重心略微前移"
+          },
+          {
+            "beats": "7-8",
+            "content": "双臂自然放下回到胸前交叠姿势，左脚收回，恢复初始站立位置"
+          }
+        ],
+        "tips": [
+          "保持核心收紧，动作流畅连贯",
+          "手臂伸展时注意肩部放松",
+          "重心转移时膝盖微屈以保持平衡"
+        ],
+        "generated_at": "2026-04-18T13:43:39Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_002",
+      "lesson_id": "les_dffaaaadc054",
+      "index": 2,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 10.5,
+      "end": 15.28,
+      "duration": 4.78,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_dffaaaadc054_seg_002.jpg",
+      "clip_url": "/clips/les_dffaaaadc054_seg_002.mp4",
+      "difficulty": 1,
+      "is_still": false,
+      "ai_description": "副歌 1·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双手握拳置于胸前，身体左右摆动并抬手过头",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双脚站立，双手握拳置于胸前，身体轻微左右晃动，头部跟随节奏摆动。"
+          },
+          {
+            "beats": "3-4",
+            "content": "左脚向左侧迈出一步，重心移至左腿，同时右手抬起过头顶，左手保持胸前位置。"
+          },
+          {
+            "beats": "5-6",
+            "content": "收回左脚并换右脚向右侧迈出，重心移至右腿，同时左手抬起过头顶，右手保持胸前位置。"
+          },
+          {
+            "beats": "7-8",
+            "content": "双脚并拢，双手握拳放于胸前，身体恢复初始姿势，准备进入下一个动作循环。"
+          }
+        ],
+        "tips": [
+          "注意重心转移时膝盖微屈以保持平衡。",
+          "手臂动作要流畅，与身体摆动协调一致。",
+          "眼神跟随手部动作，增加表现力。"
+        ],
+        "generated_at": "2026-04-18T08:35:21Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_003",
+      "lesson_id": "les_dffaaaadc054",
+      "index": 3,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 15.28,
+      "end": 20.09,
+      "duration": 4.81,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_dffaaaadc054_seg_003.jpg",
+      "clip_url": "/clips/les_dffaaaadc054_seg_003.mp4",
+      "difficulty": 1,
+      "is_still": false,
+      "ai_description": "副歌 1·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双手在脸旁做可爱手势，身体左右摆动。",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双脚并拢站立，双手举至脸颊两侧，指尖相对，身体重心在右脚。"
+          },
+          {
+            "beats": "3-4",
+            "content": "左脚向左侧迈出一大步，同时身体重心转移到左脚，右手向外打开，左手保持在脸旁。"
+          },
+          {
+            "beats": "5-6",
+            "content": "右脚跟上至左脚旁，双手在胸前交叉，然后迅速向外展开至身体两侧。"
+          },
+          {
+            "beats": "7-8",
+            "content": "双脚并拢，双手自然垂下，随后再次将双手举至脸颊两侧，完成动作循环。"
+          }
+        ],
+        "tips": [
+          "保持手腕灵活，动作轻快可爱。",
+          "重心转移时注意膝盖微屈以保持平衡。",
+          "面部表情要跟随动作展现活力感。"
+        ],
+        "generated_at": "2026-04-18T08:35:27Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_004",
+      "lesson_id": "les_dffaaaadc054",
+      "index": 4,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 20.09,
+      "end": 24.89,
+      "duration": 4.8,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_dffaaaadc054_seg_004.jpg",
+      "clip_url": "/clips/les_dffaaaadc054_seg_004.mp4",
+      "difficulty": 2,
+      "is_still": false,
+      "ai_description": "副歌 1·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "右腿点地，手臂上举后放下，身体转向右侧。",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双腿并拢站立，双手自然下垂，随后左脚保持不动，右脚轻轻点地，双手握拳置于腰间。"
+          },
+          {
+            "beats": "3-4",
+            "content": "右脚收回，重心移回双脚，同时双臂向前伸直，掌心相对，然后迅速向上举至头顶上方。"
+          },
+          {
+            "beats": "5-6",
+            "content": "双臂从头顶向两侧打开，身体随之向右侧转动，目光跟随手部动作，右腿向外迈出一步成弓步姿势。"
+          },
+          {
+            "beats": "7-8",
+            "content": "左腿收回并拢，身体转正面向前方，双臂自然垂下，恢复初始站立姿势。"
+          }
+        ],
+        "tips": [
+          "注意点地时膝盖微屈以保持平衡。",
+          "手臂上举时要舒展，带动肩部和背部发力。",
+          "转身时头部跟随手部动作，眼神保持专注。"
+        ],
+        "generated_at": "2026-04-18T08:35:33Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_005",
+      "lesson_id": "les_dffaaaadc054",
+      "index": 5,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 24.89,
+      "end": 29.7,
+      "duration": 4.81,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_dffaaaadc054_seg_005.jpg",
+      "clip_url": "/clips/les_dffaaaadc054_seg_005.mp4",
+      "difficulty": 3,
+      "is_still": false,
+      "ai_description": "副歌 1·常规节奏,动作清晰",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双手合十后展开，身体左右摆动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手于胸前合十，左腿向左侧迈出一步，重心移至左腿，头部微向右侧倾斜。"
+          },
+          {
+            "beats": "3-4",
+            "content": "双手从胸前向右侧水平展开，掌心向前，同时身体重心转移到右腿，左腿向后撤回。"
+          },
+          {
+            "beats": "5-6",
+            "content": "双臂向上举过头顶，掌心相对，手指伸展，同时双腿并拢，身体重心居中。"
+          },
+          {
+            "beats": "7-8",
+            "content": "双臂自然放下，恢复初始站立姿势，双脚并拢，身体面向前方。"
+          }
+        ],
+        "tips": [
+          "保持核心收紧，动作流畅不僵硬。",
+          "手部动作要轻盈，指尖带动节奏感。",
+          "注意重心转移时膝盖微屈以保持平衡。"
+        ],
+        "generated_at": "2026-04-18T08:35:38Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_006",
+      "lesson_id": "les_dffaaaadc054",
+      "index": 6,
+      "section": "outro",
+      "section_label": "尾声",
+      "start": 29.7,
+      "end": 34.48,
+      "duration": 4.78,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_dffaaaadc054_seg_006.jpg",
+      "clip_url": "/clips/les_dffaaaadc054_seg_006.mp4",
+      "difficulty": 5,
+      "is_still": false,
+      "ai_description": "尾声·爆发段落,快速连续移动",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "转身跳跃，手臂波浪摆动，重心前移。",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "面向镜头站立，双臂从身体两侧抬起至胸前，掌心相对，同时左腿向后轻点地。"
+          },
+          {
+            "beats": "3-4",
+            "content": "身体向右旋转约90度，面朝右侧，双臂随身体摆动至右侧，重心移至右腿。"
+          },
+          {
+            "beats": "5-6",
+            "content": "继续旋转至背对镜头，双臂自然下垂，随后向前弯腰，双手轻触大腿。"
+          },
+          {
+            "beats": "7-8",
+            "content": "起身直立，双臂从两侧向上划弧至胸前，同时双腿并拢，恢复初始站姿。"
+          }
+        ],
+        "tips": [
+          "旋转时保持核心收紧，避免过度晃动。",
+          "手臂动作要流畅，与身体转动协调。",
+          "落地时膝盖微屈缓冲，保护关节。"
+        ],
+        "generated_at": "2026-04-18T08:35:43Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_007",
+      "lesson_id": "les_dffaaaadc054",
+      "index": 7,
+      "section": "outro",
+      "section_label": "尾声",
+      "start": 34.48,
+      "end": 39.26,
+      "duration": 4.78,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_dffaaaadc054_seg_007.jpg",
+      "clip_url": "/clips/les_dffaaaadc054_seg_007.mp4",
+      "difficulty": 4,
+      "is_still": false,
+      "ai_description": "尾声·节奏紧凑,动作幅度大",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "转身、摆臂、点地的流畅尾声动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左腿支撑，右腿向右侧点地，同时双臂自然摆动至身体两侧"
+          },
+          {
+            "beats": "3-4",
+            "content": "身体向右后方转身，重心移至左腿，右腿抬起并向后伸展，双臂随之摆动"
+          },
+          {
+            "beats": "5-6",
+            "content": "转身面向前方，右腿落地，双臂从后向前划弧摆动至胸前位置"
+          },
+          {
+            "beats": "7-8",
+            "content": "双腿并拢站立，双臂自然下垂，头部转向右侧后转向前方完成动作"
+          }
+        ],
+        "tips": [
+          "注意转身时保持身体平衡，重心稳定在支撑腿上",
+          "手臂摆动要与腿部动作协调一致，动作流畅",
+          "点地和抬腿时膝盖微屈，动作更显轻盈"
+        ],
+        "generated_at": "2026-04-18T08:35:51Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_008",
+      "lesson_id": "les_dffaaaadc054",
+      "index": 8,
+      "section": "outro",
+      "section_label": "尾声",
+      "start": 39.26,
+      "end": 44.07,
+      "duration": 4.81,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_dffaaaadc054_seg_008.jpg",
+      "clip_url": "/clips/les_dffaaaadc054_seg_008.mp4",
+      "difficulty": 3,
+      "is_still": false,
+      "ai_description": "尾声·常规节奏,动作清晰",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "转身与摆手结合的流畅动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "面向镜头，双手从胸前向外打开至侧方，同时左脚向左侧迈出一步。"
+          },
+          {
+            "beats": "3-4",
+            "content": "身体转向右侧，重心移至右腿，左腿抬起并向后伸展，同时双臂自然摆动。"
+          },
+          {
+            "beats": "5-6",
+            "content": "转回正面，双脚并拢，双手在身前做小幅度摆动，头部跟随节奏轻微晃动。"
+          },
+          {
+            "beats": "7-8",
+            "content": "双膝微屈，双手向下轻抚大腿，随后起身恢复站立姿势，面带微笑。"
+          }
+        ],
+        "tips": [
+          "注意转身时保持上半身稳定，避免过度晃动。",
+          "摆动手臂要轻盈，与步伐协调一致。",
+          "膝盖微屈时注意核心收紧，保持平衡。"
+        ],
+        "generated_at": "2026-04-18T08:35:56Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_009",
+      "lesson_id": "les_dffaaaadc054",
+      "index": 9,
+      "section": "outro",
+      "section_label": "尾声",
+      "start": 44.07,
+      "end": 48.74,
+      "duration": 4.67,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_dffaaaadc054_seg_009.jpg",
+      "clip_url": "/clips/les_dffaaaadc054_seg_009.mp4",
+      "difficulty": 4,
+      "is_still": false,
+      "ai_description": "尾声·节奏紧凑,动作幅度大",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "转身与步伐结合的流畅尾声动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "面向镜头，双臂自然下垂，左腿向左侧迈出一步，重心转移至左腿，同时头部和视线转向右侧。"
+          },
+          {
+            "beats": "3-4",
+            "content": "保持左腿支撑，右腿抬起并向后撤步，同时身体向右转动，双臂随身体摆动，目光跟随转动方向。"
+          },
+          {
+            "beats": "5-6",
+            "content": "完成转身，面向右侧，左腿站立，右腿向前迈出一大步，双臂向前伸展，掌心相对，重心前移。"
+          },
+          {
+            "beats": "7-8",
+            "content": "右腿落地站稳，左腿抬起并向外侧跨步，双臂自然放下，身体重心回到中心，准备结束动作。"
+          }
+        ],
+        "tips": [
+          "注意转身时身体的流畅过渡，避免僵硬。",
+          "步伐要清晰，每一步都要有重心的明确转移。",
+          "手臂动作与身体协调，增强整体表现力。"
+        ],
+        "generated_at": "2026-04-18T08:36:01Z"
+      },
+      "deleted": false
+    }
+  ]
+}

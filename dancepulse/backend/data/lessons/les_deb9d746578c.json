@@ -1,0 +1,438 @@
+{
+  "id": "les_deb9d746578c",
+  "title": "2026-04-18 22:41",
+  "source_url": "",
+  "duration": 32.58,
+  "bpm": 129.2,
+  "video_url": "/videos/les_deb9d746578c.mp4",
+  "thumbnail": "/thumbs/les_deb9d746578c_seg_000.jpg",
+  "confirmed": false,
+  "beat_quality": "high",
+  "beats": [
+    1.42,
+    1.88,
+    2.35,
+    2.83,
+    3.32,
+    3.78,
+    4.25,
+    4.71,
+    5.2,
+    5.67,
+    6.13,
+    6.62,
+    7.08,
+    7.57,
+    8.03,
+    8.5,
+    8.99,
+    9.45,
+    9.91,
+    10.4,
+    10.87,
+    11.35,
+    11.82,
+    12.28,
+    12.77,
+    13.24,
+    13.7,
+    14.19,
+    14.65,
+    15.14,
+    15.6,
+    16.07,
+    16.53,
+    17.0,
+    17.48,
+    17.97,
+    18.44,
+    18.9,
+    19.39,
+    19.85,
+    20.32,
+    20.81,
+    21.27,
+    21.73,
+    22.22,
+    22.69,
+    23.15,
+    23.61,
+    24.1,
+    24.57,
+    25.05,
+    25.54,
+    26.01,
+    26.47,
+    26.94,
+    27.42,
+    27.89,
+    28.35,
+    28.82,
+    29.3,
+    29.77,
+    30.23,
+    30.72
+  ],
+  "sections": [
+    {
+      "id": "intro",
+      "label": "前奏",
+      "start": 0.0,
+      "end": 1.83
+    },
+    {
+      "id": "chorus_1",
+      "label": "副歌 1",
+      "start": 1.83,
+      "end": 15.33
+    },
+    {
+      "id": "verse_1",
+      "label": "主歌 1",
+      "start": 15.33,
+      "end": 16.09
+    },
+    {
+      "id": "verse_2",
+      "label": "主歌 2",
+      "start": 16.09,
+      "end": 16.95
+    },
+    {
+      "id": "chorus_2",
+      "label": "副歌 2",
+      "start": 16.95,
+      "end": 31.18
+    },
+    {
+      "id": "outro",
+      "label": "尾声",
+      "start": 31.18,
+      "end": 32.58
+    }
+  ],
+  "segments": [
+    {
+      "id": "seg_000",
+      "lesson_id": "les_deb9d746578c",
+      "index": 0,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 1.42,
+      "end": 5.2,
+      "duration": 3.78,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_deb9d746578c_seg_000.jpg",
+      "clip_url": "/clips/les_deb9d746578c_seg_000.mp4",
+      "difficulty": 5,
+      "is_still": false,
+      "ai_description": "副歌 1·爆发段落,快速连续移动",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "甩头、移重心、抬手至头顶的流畅动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "身体向右侧倾斜，左臂弯曲置于胸前，右臂伸展，同时快速甩头向右侧。"
+          },
+          {
+            "beats": "3-4",
+            "content": "重心移至右腿，左腿向外迈出一步成弓步，同时甩头回正，双臂自然摆动。"
+          },
+          {
+            "beats": "5-6",
+            "content": "双腿并拢，双手从身体两侧向上举过头顶，掌心相对，头部随之仰起。"
+          },
+          {
+            "beats": "7-8",
+            "content": "双手放下至腹部前方，指尖相对，身体微侧，头部转向一侧并轻点下巴。"
+          }
+        ],
+        "tips": [
+          "注意甩头时颈部发力，避免过度晃动。",
+          "弓步时保持核心收紧，膝盖不要超过脚尖。",
+          "手臂上举时保持肩部放松，动作流畅自然。"
+        ],
+        "generated_at": "2026-04-18T14:42:11Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_001",
+      "lesson_id": "les_deb9d746578c",
+      "index": 1,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 5.2,
+      "end": 8.99,
+      "duration": 3.79,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_deb9d746578c_seg_001.jpg",
+      "clip_url": "/clips/les_deb9d746578c_seg_001.mp4",
+      "difficulty": 3,
+      "is_still": false,
+      "ai_description": "副歌 1·常规节奏,动作清晰",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双手胸前交叉后甩头，双臂伸展再侧身摆手",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手在胸前交叉，指尖相对，身体轻微左右摆动，头部跟随节奏晃动。"
+          },
+          {
+            "beats": "3-4",
+            "content": "快速向后甩头，同时双手自然放下，重心保持稳定，面部表情跟随动作变化。"
+          },
+          {
+            "beats": "5-6",
+            "content": "双臂向两侧水平伸展，掌心向下，身体略微前倾，目光看向伸展的手指方向。"
+          },
+          {
+            "beats": "7-8",
+            "content": "左臂向上弯曲置于脑后，右臂向外侧伸展，身体向右侧倾斜，头部转向左侧。"
+          }
+        ],
+        "tips": [
+          "甩头时注意颈部放松，避免僵硬。",
+          "伸展手臂时保持肩部下沉，避免耸肩。",
+          "侧身动作时重心放在支撑腿，另一条腿微屈以保持平衡。"
+        ],
+        "generated_at": "2026-04-18T14:42:18Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_002",
+      "lesson_id": "les_deb9d746578c",
+      "index": 2,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 8.99,
+      "end": 12.77,
+      "duration": 3.78,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_deb9d746578c_seg_002.jpg",
+      "clip_url": "/clips/les_deb9d746578c_seg_002.mp4",
+      "difficulty": 3,
+      "is_still": false,
+      "ai_description": "副歌 1·常规节奏,动作清晰",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "头部甩动，双臂伸展后交叉抱胸。",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "头部向右侧甩动，双臂自然下垂后向外伸展至水平位置。"
+          },
+          {
+            "beats": "3-4",
+            "content": "身体略微前倾，双臂保持伸展，手掌张开，目光跟随手臂方向移动。"
+          },
+          {
+            "beats": "5-6",
+            "content": "头部转向左侧甩动，同时双臂从两侧向胸前交叉，双手轻触对侧肩膀。"
+          },
+          {
+            "beats": "7-8",
+            "content": "保持双臂交叉抱胸的姿势，身体微侧，头部看向一侧，重心稳定。"
+          }
+        ],
+        "tips": [
+          "注意头部甩动时利用腰部力量带动，避免仅靠颈部发力。",
+          "双臂伸展时保持线条流畅，指尖引导动作方向。",
+          "抱胸时收紧核心，保持身体稳定和姿态优美。"
+        ],
+        "generated_at": "2026-04-18T14:42:25Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_003",
+      "lesson_id": "les_deb9d746578c",
+      "index": 3,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 12.77,
+      "end": 16.53,
+      "duration": 3.76,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_deb9d746578c_seg_003.jpg",
+      "clip_url": "/clips/les_deb9d746578c_seg_003.mp4",
+      "difficulty": 1,
+      "is_still": false,
+      "ai_description": "副歌 1·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双手抓裤腰，甩头，举手比'V'，轻摆身体",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手抓住裤子腰部两侧，身体微微下蹲，重心放低"
+          },
+          {
+            "beats": "3-4",
+            "content": "快速甩动头部，同时右臂向前伸出，掌心向下"
+          },
+          {
+            "beats": "5-6",
+            "content": "双臂向上举起，双手在胸前比出'V'字手势，指尖朝上"
+          },
+          {
+            "beats": "7-8",
+            "content": "双臂自然放下，身体轻微左右摆动，重心转移"
+          }
+        ],
+        "tips": [
+          "甩头时注意节奏感，动作干净利落",
+          "比'V'手势时手腕要放松，保持自然",
+          "身体摆动幅度不宜过大，保持稳定"
+        ],
+        "generated_at": "2026-04-18T14:42:32Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_004",
+      "lesson_id": "les_deb9d746578c",
+      "index": 4,
+      "section": "chorus_2",
+      "section_label": "副歌 2",
+      "start": 16.53,
+      "end": 20.32,
+      "duration": 3.79,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_deb9d746578c_seg_004.jpg",
+      "clip_url": "/clips/les_deb9d746578c_seg_004.mp4",
+      "difficulty": 1,
+      "is_still": false,
+      "ai_description": "副歌 2·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双手上举后向两侧摆动，身体随之摇曳。",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂从身体两侧向上举至头顶上方，掌心相对，身体重心保持稳定。"
+          },
+          {
+            "beats": "3-4",
+            "content": "双臂向身体两侧水平摆动，指尖指向侧方，同时身体重心随手臂摆动轻微左右倾斜。"
+          },
+          {
+            "beats": "5-6",
+            "content": "双臂再次举过头顶，然后迅速向下摆动至腰部两侧，手指微屈，身体跟随手臂节奏上下弹动。"
+          },
+          {
+            "beats": "7-8",
+            "content": "双臂向身体两侧打开，指尖指向侧方，同时身体重心向左侧倾斜，头部微微转向左侧。"
+          }
+        ],
+        "tips": [
+          "保持核心收紧，动作流畅连贯。",
+          "注意手臂和身体的协调性，避免僵硬。",
+          "面部表情自然，跟随音乐节奏展现活力。"
+        ],
+        "generated_at": "2026-04-18T14:42:38Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_005",
+      "lesson_id": "les_deb9d746578c",
+      "index": 5,
+      "section": "chorus_2",
+      "section_label": "副歌 2",
+      "start": 20.32,
+      "end": 24.1,
+      "duration": 3.78,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_deb9d746578c_seg_005.jpg",
+      "clip_url": "/clips/les_deb9d746578c_seg_005.mp4",
+      "difficulty": 4,
+      "is_still": false,
+      "ai_description": "副歌 2·节奏紧凑,动作幅度大",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双手向上挥动，身体左右摆动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手自然下垂，随后握拳提起至腰部高度，身体重心保持稳定。"
+          },
+          {
+            "beats": "3-4",
+            "content": "双臂向上伸直挥动，掌心相对，同时头部轻微上扬，目光向前。"
+          },
+          {
+            "beats": "5-6",
+            "content": "双臂向两侧打开，掌心向下，身体重心转移到左腿，右腿微屈并向右侧迈出一小步。"
+          },
+          {
+            "beats": "7-8",
+            "content": "双臂收回至胸前，掌心相对，身体重心回到双脚，同时头部转向左侧。"
+          }
+        ],
+        "tips": [
+          "注意手臂动作的流畅性，避免僵硬。",
+          "重心转移时保持核心收紧，防止身体晃动。",
+          "面部表情跟随音乐节奏变化，增加表现力。"
+        ],
+        "generated_at": "2026-04-18T14:42:45Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_006",
+      "lesson_id": "les_deb9d746578c",
+      "index": 6,
+      "section": "chorus_2",
+      "section_label": "副歌 2",
+      "start": 24.1,
+      "end": 27.89,
+      "duration": 3.79,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_deb9d746578c_seg_006.jpg",
+      "clip_url": "/clips/les_deb9d746578c_seg_006.mp4",
+      "difficulty": 2,
+      "is_still": false,
+      "ai_description": "副歌 2·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双手插腰扭动身体，配合头部和眼神变化",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手插入裤腰，身体向右侧倾斜，头部随之转向右侧，目光跟随视线方向。"
+          },
+          {
+            "beats": "3-4",
+            "content": "身体回正，左手离开裤腰自然下垂，右手仍插在裤腰，头部转向左侧并保持眼神连接。"
+          },
+          {
+            "beats": "5-6",
+            "content": "身体向左侧倾斜，右手插入裤腰，左手自然下垂，头部转向左侧，目光注视左前方。"
+          },
+          {
+            "beats": "7-8",
+            "content": "身体回正，双手均从裤腰抽出，自然垂于身体两侧，头部转向正前方，恢复初始站姿。"
+          }
+        ],
+        "tips": [
+          "注意腰部的流畅扭动，动作要连贯。",
+          "头部转动时眼神要跟随，增强表现力。",
+          "保持节奏感，动作与音乐同步。"
+        ],
+        "generated_at": "2026-04-18T14:42:51Z"
+      },
+      "deleted": false
+    }
+  ]
+}

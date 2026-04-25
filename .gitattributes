@@ -1,0 +1,12 @@
+* text=auto
+
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.mp4 binary
+*.mov binary
+*.webm binary
+*.task binary
+*.torchscript binary
+
+dancepulse/backend/data/**/*.json text eol=lf
