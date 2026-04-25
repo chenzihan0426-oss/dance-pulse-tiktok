@@ -93,7 +93,7 @@ export default function HomePage() {
     .slice(0, 3);
 
   return (
-    <main className="mx-auto min-h-screen max-w-md px-5 pb-10 pt-10 text-white">
+    <main className="mx-auto min-h-screen max-w-6xl px-5 pb-10 pt-10 text-white md:px-8 md:pb-14 md:pt-12">
       <GreetingHeader
         nickname={HOME_USER.nickname}
         subtitle={HOME_USER.greeting}
@@ -110,30 +110,32 @@ export default function HomePage() {
         <span>搜索舞曲 / 歌手</span>
       </button>
 
-      <div className="mt-10">
-        <FeaturedLessonCard
-          lesson={resumingLesson}
-          progress={resumingLesson ? progressMap[resumingLesson.id] : undefined}
-          resumeMeta={resumingLesson ? resumeMap[resumingLesson.id] : null}
-          loading={loading}
-          error={error}
-        />
-      </div>
-
-      <section className="mt-10">
-        <div className="mb-6">
-          <h2 className="text-[22px] font-semibold tracking-tight text-white">
-            为你推荐
-          </h2>
+      <div className="mt-10 grid gap-10 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] xl:items-start">
+        <div>
+          <FeaturedLessonCard
+            lesson={resumingLesson}
+            progress={resumingLesson ? progressMap[resumingLesson.id] : undefined}
+            resumeMeta={resumingLesson ? resumeMap[resumingLesson.id] : null}
+            loading={loading}
+            error={error}
+          />
         </div>
-        <RecommendedList
-          lessons={recommendedLessons}
-          progressMap={progressMap}
-          resumeMap={resumeMap}
-          loading={loading}
-          error={error}
-        />
-      </section>
+
+        <section>
+          <div className="mb-6">
+            <h2 className="text-[22px] font-semibold tracking-tight text-white">
+              为你推荐
+            </h2>
+          </div>
+          <RecommendedList
+            lessons={recommendedLessons}
+            progressMap={progressMap}
+            resumeMap={resumeMap}
+            loading={loading}
+            error={error}
+          />
+        </section>
+      </div>
     </main>
   );
 }

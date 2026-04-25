@@ -147,7 +147,7 @@ export default function LearnPage() {
 
   return (
     <>
-      <main className="mx-auto min-h-screen max-w-md px-5 pb-10 pt-10 text-white">
+      <main className="mx-auto min-h-screen max-w-6xl px-5 pb-10 pt-10 text-white md:px-8 md:pb-14 md:pt-12">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[13px] text-white/45">你的课程库</p>

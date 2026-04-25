@@ -123,7 +123,7 @@ export default function LessonPage() {
 
   if (loading) {
     return (
-      <main className="mx-auto min-h-screen max-w-md px-5 py-8 text-white">
+      <main className="mx-auto min-h-screen max-w-6xl px-5 py-8 text-white md:px-8 md:py-12">
         <div className="h-[300px] animate-pulse rounded-[32px] bg-bg-raised" />
       </main>
     );
@@ -131,7 +131,7 @@ export default function LessonPage() {
 
   if (error || !lesson) {
     return (
-      <main className="mx-auto min-h-screen max-w-md px-5 py-8 text-white">
+      <main className="mx-auto min-h-screen max-w-6xl px-5 py-8 text-white md:px-8 md:py-12">
         <div className="rounded-[24px] border border-state-danger/20 bg-state-danger/10 px-5 py-5 text-sm text-red-200">
           课程加载失败：{error ?? "未知错误"}
         </div>
@@ -140,7 +140,7 @@ export default function LessonPage() {
   }
 
   return (
-    <main className="mx-auto min-h-screen max-w-md px-5 pb-10 pt-8 text-white">
+    <main className="mx-auto min-h-screen w-full max-w-[1320px] px-4 pb-12 pt-8 text-white sm:px-6 md:pb-16 md:pt-12 lg:px-10">
       <Link
         href="/learn"
         className="inline-flex items-center gap-2 text-sm text-white/45 transition hover:text-white"
@@ -149,8 +149,8 @@ export default function LessonPage() {
         返回学习页
       </Link>
 
-      <section className="mt-6 overflow-hidden rounded-[32px] bg-bg-raised">
-        <div className="relative min-h-[300px] overflow-hidden bg-[linear-gradient(135deg,#3A1F4A_0%,#24102D_100%)] px-6 pb-6 pt-6">
+      <section className="mt-6 overflow-hidden rounded-[32px] bg-bg-raised md:mt-8 md:grid md:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)] xl:grid-cols-[minmax(0,1.25fr)_380px]">
+        <div className="relative min-h-[320px] overflow-hidden bg-[linear-gradient(135deg,#3A1F4A_0%,#24102D_100%)] px-6 pb-6 pt-6 md:min-h-[420px] md:px-8 md:pb-8 md:pt-8 lg:px-10 lg:pb-10 lg:pt-10">
           {previewSegment?.thumbnail && (
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -171,12 +171,20 @@ export default function LessonPage() {
 
             <div className="mt-8 flex items-end justify-between gap-4">
               <div className="min-w-0 flex-1">
-                <h1 className="line-clamp-2 text-[32px] font-semibold uppercase tracking-tight text-white">
+                <h1 className="line-clamp-2 text-[32px] font-semibold uppercase tracking-tight text-white md:text-[42px] lg:text-[50px]">
                   {lesson.title}
                 </h1>
-                <p className="mt-3 text-[15px] text-white/50">
+                <p className="mt-3 text-[15px] text-white/50 md:text-[16px]">
                   {Math.round(lesson.duration)} 秒 · {Math.round(lesson.bpm)} BPM
                 </p>
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <span className="rounded-full border border-white/15 bg-white/[0.06] px-3 py-1 text-[12px] text-white/60">
+                    动作卡 {learnableSegments.length}
+                  </span>
+                  <span className="rounded-full border border-white/15 bg-white/[0.06] px-3 py-1 text-[12px] text-white/60">
+                    分组 {groupedSections.length}
+                  </span>
+                </div>
               </div>
 
               {previewSegment?.thumbnail && (
@@ -185,7 +193,7 @@ export default function LessonPage() {
                   <img
                     src={previewSegment.thumbnail}
                     alt={`${lesson.title} 缩略图`}
-                    className="h-28 w-20 object-cover"
+                    className="h-28 w-20 object-cover md:h-40 md:w-28 lg:h-44 lg:w-32"
                   />
                 </div>
               )}
@@ -207,7 +215,7 @@ export default function LessonPage() {
             {firstSegment ? (
               <Link
                 href={`/player/${firstSegment.id}?lesson=${lesson.id}&mode=fullplay`}
-                className="absolute bottom-6 right-6 flex h-12 w-12 items-center justify-center rounded-full border border-white/15 bg-black/40 text-white backdrop-blur-sm transition hover:bg-black/55"
+                className="absolute bottom-6 right-6 flex h-12 w-12 items-center justify-center rounded-full border border-white/15 bg-black/40 text-white backdrop-blur-sm transition hover:bg-black/55 md:bottom-8 md:right-8 md:h-14 md:w-14"
                 aria-label="完整预览"
               >
                 <Play className="h-4 w-4 fill-current" />
@@ -216,27 +224,29 @@ export default function LessonPage() {
           </div>
         </div>
 
-        <div className="bg-[#18162B] px-6 py-6">
-          <ProgressRing
-            percent={percent}
-            label={`已学 ${learnedCount}/${Math.max(total, 0)}`}
-          />
+        <div className="bg-[#18162B] px-6 py-6 md:border-l md:border-white/8 md:px-8 md:py-8 lg:px-9">
+          <div className="md:sticky md:top-24">
+            <ProgressRing
+              percent={percent}
+              label={`已学 ${learnedCount}/${Math.max(total, 0)}`}
+            />
 
-          <div className="mt-6 flex flex-col gap-3">
-            <Link href={`/player/${starterSegment?.id ?? lesson.segments[0]?.id}?lesson=${lesson.id}`}>
-              <Button variant="primary" className="h-14 w-full rounded-[18px] text-[15px]">
-                <PlayCircle className="h-4 w-4" />
-                {primaryActionLabel}
-              </Button>
-            </Link>
-            <Link href={adjustHref}>
-              <button
-                type="button"
-                className="w-full text-center text-[13px] text-white/40 transition hover:text-white/70"
-              >
-                AI 分段不对？手动调整
-              </button>
-            </Link>
+            <div className="mt-6 flex flex-col gap-3">
+              <Link href={`/player/${starterSegment?.id ?? lesson.segments[0]?.id}?lesson=${lesson.id}`}>
+                <Button variant="primary" className="h-14 w-full rounded-[18px] text-[15px] md:h-16 md:text-[16px]">
+                  <PlayCircle className="h-4 w-4" />
+                  {primaryActionLabel}
+                </Button>
+              </Link>
+              <Link href={adjustHref}>
+                <button
+                  type="button"
+                  className="w-full text-center text-[13px] text-white/40 transition hover:text-white/70"
+                >
+                  AI 分段不对？手动调整
+                </button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -268,12 +278,12 @@ export default function LessonPage() {
         return demoReady ? (
           <Link
             href={`/lesson/${lesson.id}/tracking-desktop`}
-            className="mt-6 block rounded-[28px] border border-amber-300/40 bg-[linear-gradient(135deg,rgba(251,191,36,0.14)_0%,rgba(30,18,51,1)_100%)] px-5 py-5"
+            className="mt-8 block rounded-[28px] border border-amber-300/40 bg-[linear-gradient(135deg,rgba(251,191,36,0.14)_0%,rgba(30,18,51,1)_100%)] px-5 py-5 md:px-6"
           >
             {inner}
           </Link>
         ) : (
-          <div className="mt-6 block cursor-not-allowed rounded-[28px] border border-white/10 bg-white/[0.03] px-5 py-5 opacity-70">
+          <div className="mt-8 block cursor-not-allowed rounded-[28px] border border-white/10 bg-white/[0.03] px-5 py-5 opacity-70 md:px-6">
             {inner}
           </div>
         );
@@ -289,7 +299,7 @@ export default function LessonPage() {
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 md:grid md:grid-cols-2 md:gap-4 md:space-y-0 xl:grid-cols-3">
           {groupedSections.map((section) => (
             <SectionGroupCard
               key={section.id}

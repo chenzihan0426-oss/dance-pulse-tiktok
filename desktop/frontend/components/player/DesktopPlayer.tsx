@@ -1,19 +1,132 @@
 "use client";
 
-// PC 端学习播放器: 影院沉浸风
-//   - 居中大视频 (9:16 纵向, 最大化利用高度)
-//   - 粒子引导叠加 (原视频老师 + 轩哥粒子图)
-//   - 右侧轨道: 段落列表, 点击快速切换
-//   - 底部薄控件条: 暂停 / 倍速 / 镜像
-
 import * as React from "react";
 import Link from "next/link";
-import { ArrowLeft, Pause, Play, FlipHorizontal2, ChevronUp, ChevronDown, Maximize2, Minimize2, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ArrowLeft,
+  Pause,
+  Play,
+  FlipHorizontal2,
+  ChevronUp,
+  ChevronDown,
+  Maximize2,
+  Minimize2,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+} from "lucide-react";
 import type { Lesson, Segment } from "@/lib/types";
 import { XuangeGuideOverlay } from "@/components/player/XuangeGuideOverlay";
 import { BeatCounterBadge } from "@/components/player/BeatCounterBadge";
 
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5] as const;
+
+function clampDifficulty(value: number): number {
+  if (!Number.isFinite(value)) return 1;
+  return Math.min(5, Math.max(1, Math.round(value)));
+}
+
+function DotFieldBackground({ mouseRef }: { mouseRef: React.MutableRefObject<{ x: number; y: number }> }) {
+  const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let rafId = 0;
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    const spacing = 28;
+
+    const dots: Array<{
+      ox: number;
+      oy: number;
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+    }> = [];
+
+    const reset = () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+      dots.length = 0;
+      for (let x = -spacing; x <= width + spacing; x += spacing) {
+        for (let y = -spacing; y <= height + spacing; y += spacing) {
+          dots.push({ ox: x, oy: y, x, y, vx: 0, vy: 0 });
+        }
+      }
+    };
+
+    let t = 0;
+    const render = () => {
+      t += 0.028;
+      ctx.fillStyle = "#040404";
+      ctx.fillRect(0, 0, width, height);
+
+      const mx = mouseRef.current.x;
+      const my = mouseRef.current.y;
+
+      for (let i = 0; i < dots.length; i += 1) {
+        const p = dots[i];
+        const waveX = Math.sin(p.oy * 0.005 + t) * 9;
+        const waveY = Math.cos(p.ox * 0.006 + t) * 10;
+        const tx = p.ox + waveX;
+        const ty = p.oy + waveY;
+
+        const dx = mx - p.x;
+        const dy = my - p.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist < 180) {
+          const force = ((180 - dist) / 180) ** 2;
+          const angle = Math.atan2(dy, dx);
+          p.vx -= Math.cos(angle) * force * 2.8;
+          p.vy -= Math.sin(angle) * force * 2.8;
+        }
+
+        p.vx += (tx - p.x) * 0.05;
+        p.vy += (ty - p.y) * 0.05;
+        p.vx *= 0.9;
+        p.vy *= 0.9;
+        p.x += p.vx;
+        p.y += p.vy;
+
+        const mag = Math.hypot(p.x - p.ox, p.y - p.oy);
+        let r = 255;
+        let g = 0;
+        let b = 122;
+        if (mag > 8) {
+          const f = Math.min((mag - 8) / 24, 1);
+          r = Math.round(255 - 55 * f);
+          g = Math.round(243 * f);
+          b = Math.round(122 + 133 * f);
+        }
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 1.8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      rafId = window.requestAnimationFrame(render);
+    };
+
+    reset();
+    render();
+
+    const onResize = () => reset();
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", onResize);
+    };
+  }, [mouseRef]);
+
+  return <canvas ref={canvasRef} className="pointer-events-none fixed inset-0 z-0" aria-hidden />;
+}
 
 export function DesktopPlayer({
   lesson,
@@ -26,23 +139,20 @@ export function DesktopPlayer({
   practiceSegments: Segment[];
   onSegmentChange?: (segId: string) => void;
 }) {
-  // segment 由内部 state 控制,切段不 unmount 整个组件 (保留全屏状态)
   const [segId, setSegId] = React.useState(initialSegmentId);
-  const segment = React.useMemo(
-    () => lesson.segments.find((s) => s.id === segId) ?? lesson.segments[0],
-    [lesson, segId]
-  );
+  const segment = React.useMemo(() => lesson.segments.find((s) => s.id === segId) ?? lesson.segments[0], [lesson, segId]);
 
-  // 切段时同步 URL (history.replaceState 不触发 Next.js 导航)
-  const onNavigate = React.useCallback((nextId: string) => {
-    if (nextId === segId) return;
-    setSegId(nextId);
-    onSegmentChange?.(nextId);
-    if (typeof window !== "undefined") {
-      const url = `/player/${nextId}?lesson=${lesson.id}`;
-      window.history.replaceState(null, "", url);
-    }
-  }, [lesson.id, onSegmentChange, segId]);
+  const onNavigate = React.useCallback(
+    (nextId: string) => {
+      if (nextId === segId) return;
+      setSegId(nextId);
+      onSegmentChange?.(nextId);
+      if (typeof window !== "undefined") {
+        window.history.replaceState(null, "", `/player/${nextId}?lesson=${lesson.id}`);
+      }
+    },
+    [lesson.id, onSegmentChange, segId]
+  );
 
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const stageRef = React.useRef<HTMLDivElement>(null);
@@ -52,7 +162,21 @@ export function DesktopPlayer({
   const [immersive, setImmersive] = React.useState(false);
   const [currentBeat, setCurrentBeat] = React.useState(1);
 
-  // Beat 计算: 根据 video.currentTime / (duration / beat_count)
+  const [showCustomCursor, setShowCustomCursor] = React.useState(false);
+  const [mousePos, setMousePos] = React.useState({ x: -1000, y: -1000 });
+  const mouseRef = React.useRef({ x: -1000, y: -1000 });
+
+  React.useEffect(() => {
+    setShowCustomCursor(window.matchMedia("(pointer:fine)").matches);
+    const onMove = (e: MouseEvent) => {
+      const next = { x: e.clientX, y: e.clientY };
+      setMousePos(next);
+      mouseRef.current = next;
+    };
+    window.addEventListener("mousemove", onMove);
+    return () => window.removeEventListener("mousemove", onMove);
+  }, []);
+
   React.useEffect(() => {
     let rafId = 0;
     let disposed = false;
@@ -69,7 +193,10 @@ export function DesktopPlayer({
       rafId = requestAnimationFrame(tick);
     };
     rafId = requestAnimationFrame(tick);
-    return () => { disposed = true; cancelAnimationFrame(rafId); };
+    return () => {
+      disposed = true;
+      cancelAnimationFrame(rafId);
+    };
   }, [segment.id, segment.duration, segment.beat_count]);
 
   React.useEffect(() => {
@@ -85,49 +212,15 @@ export function DesktopPlayer({
       v.muted = false;
       v.volume = 1;
       void v.play().catch(() => setPlaying(false));
+    } else {
+      v.pause();
     }
-    else v.pause();
   }, [playing, segment.id]);
 
   const idx = practiceSegments.findIndex((s) => s.id === segment.id);
   const prevSeg = idx > 0 ? practiceSegments[idx - 1] : null;
   const nextSeg = idx >= 0 && idx < practiceSegments.length - 1 ? practiceSegments[idx + 1] : null;
 
-  // 键盘快捷键: ← 上一段, → 下一段, F 全屏, Space 播放/暂停, Esc 退出全屏
-  React.useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      switch (e.key) {
-        case "ArrowLeft":
-          if (prevSeg) { e.preventDefault(); onNavigate(prevSeg.id); }
-          break;
-        case "ArrowRight":
-          if (nextSeg) { e.preventDefault(); onNavigate(nextSeg.id); }
-          break;
-        case "f":
-        case "F":
-          e.preventDefault();
-          toggleImmersive();
-          break;
-        case "Escape":
-          if (immersive) { e.preventDefault(); setImmersive(false); }
-          break;
-        case " ":
-          e.preventDefault();
-          setPlaying((p) => !p);
-          break;
-        case "m":
-        case "M":
-          setMirror((m) => !m);
-          break;
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [prevSeg, nextSeg, immersive]);
-
-  // 原生全屏 API (F11 模拟): 进入真实全屏, 退出时也同步 state
   const toggleImmersive = React.useCallback(() => {
     setImmersive((cur) => {
       const next = !cur;
@@ -141,6 +234,49 @@ export function DesktopPlayer({
   }, []);
 
   React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      switch (e.key) {
+        case "ArrowLeft":
+          if (prevSeg) {
+            e.preventDefault();
+            onNavigate(prevSeg.id);
+          }
+          break;
+        case "ArrowRight":
+          if (nextSeg) {
+            e.preventDefault();
+            onNavigate(nextSeg.id);
+          }
+          break;
+        case "f":
+        case "F":
+          e.preventDefault();
+          toggleImmersive();
+          break;
+        case "Escape":
+          if (immersive) {
+            e.preventDefault();
+            setImmersive(false);
+          }
+          break;
+        case " ":
+          e.preventDefault();
+          setPlaying((p) => !p);
+          break;
+        case "m":
+        case "M":
+          setMirror((m) => !m);
+          break;
+        default:
+          break;
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [prevSeg, nextSeg, immersive, onNavigate, toggleImmersive]);
+
+  React.useEffect(() => {
     const onFullscreenChange = () => {
       if (!document.fullscreenElement) setImmersive(false);
     };
@@ -148,209 +284,247 @@ export function DesktopPlayer({
     return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
   }, []);
 
+  const difficulty = clampDifficulty(segment.difficulty);
+  const segmentTotal = Math.max(practiceSegments.length, 1);
+  const currentOrder = idx >= 0 ? idx + 1 : 1;
+  const headingText = `${practiceSegments.length} 段 • ${currentOrder}/${segmentTotal}`;
+
   return (
-    <main ref={stageRef} className="fixed inset-0 flex bg-black text-white">
-      {/* 左侧: 视频区 */}
-      <section className="relative flex flex-1 items-center justify-center">
-        {/* 返回按钮 (全屏态隐藏) */}
-        {!immersive ? (
-          <Link
-            href={`/lesson/${lesson.id}`}
-            className="absolute left-8 top-8 z-20 inline-flex items-center gap-2 rounded-full bg-white/8 px-4 py-1.5 text-[13px] text-white/70 backdrop-blur hover:bg-white/14 hover:text-white"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            返回 {lesson.title}
-          </Link>
-        ) : null}
+    <main
+      ref={stageRef}
+      className="fixed inset-0 overflow-hidden bg-[#050505] text-white selection:bg-[#ff0055] selection:text-white"
+    >
+      <DotFieldBackground mouseRef={mouseRef} />
 
-        {/* 左右大箭头 (切段落) */}
-        {prevSeg ? (
-          <button
-            type="button"
-            onClick={() => onNavigate(prevSeg.id)}
-            className="group absolute left-4 top-1/2 z-20 flex h-16 w-16 -translate-y-1/2 items-center justify-center rounded-full bg-black/35 text-white/75 backdrop-blur transition hover:bg-black/60 hover:text-white"
-            aria-label={`上一段 ${prevSeg.section_label}`}
-            title={`← ${prevSeg.section_label}`}
-          >
-            <ChevronLeft className="h-7 w-7" />
-          </button>
-        ) : null}
-        {nextSeg ? (
-          <button
-            type="button"
-            onClick={() => onNavigate(nextSeg.id)}
-            className="group absolute right-4 top-1/2 z-20 flex h-16 w-16 -translate-y-1/2 items-center justify-center rounded-full bg-black/35 text-white/75 backdrop-blur transition hover:bg-black/60 hover:text-white"
-            aria-label={`下一段 ${nextSeg.section_label}`}
-            title={`→ ${nextSeg.section_label}`}
-          >
-            <ChevronRight className="h-7 w-7" />
-          </button>
-        ) : null}
+      <style jsx global>{`
+        @import url("https://fonts.googleapis.com/css2?family=Michroma&family=Noto+Sans+SC:wght@500;700;900&display=swap");
+        body {
+          font-family: "Michroma", "Noto Sans SC", sans-serif;
+          background: #050505;
+          cursor: ${showCustomCursor ? "none" : "auto"};
+        }
+      `}</style>
 
-        {/* 视频容器 9:16 */}
-        <div
-          className="relative h-full overflow-hidden bg-black transition-all duration-300"
-          style={{
-            aspectRatio: "9/16",
-            maxHeight: immersive ? "100vh" : "calc(100vh - 120px)",
-            borderRadius: immersive ? "0px" : "28px",
-            boxShadow: immersive ? "none" : "0 30px 80px rgba(0,0,0,0.6)",
-          }}
-        >
-          <video
-            ref={videoRef}
-            src={segment.clip_url}
-            poster={segment.thumbnail}
-            loop
-            playsInline
-            preload="metadata"
-            className="absolute inset-0 h-full w-full object-cover"
-            style={{ transform: mirror ? "scaleX(-1)" : undefined }}
-            onClick={() => setPlaying((p) => !p)}
+      {showCustomCursor ? (
+        <>
+          <div
+            className="pointer-events-none fixed left-0 top-0 z-[120] h-3 w-3 rounded-full bg-[#ccff00] mix-blend-difference"
+            style={{ transform: `translate(${mousePos.x - 6}px, ${mousePos.y - 6}px)` }}
           />
-          <XuangeGuideOverlay
-            videoRef={videoRef}
-            particleUrl={segment.particle_url}
-            mirror={mirror}
+          <div
+            className="pointer-events-none fixed left-0 top-0 z-[119] h-10 w-10 rounded-full border border-[#00f3ff]/70"
+            style={{ transform: `translate(${mousePos.x - 20}px, ${mousePos.y - 20}px)` }}
           />
+        </>
+      ) : null}
 
-          {/* 段落标签 */}
-          <div className="pointer-events-none absolute left-4 top-4 rounded-full bg-black/55 px-3 py-1 text-[12px] font-medium text-white/90 backdrop-blur">
-            {segment.section_label} · {segment.index + 1}
-          </div>
-          <div className="pointer-events-none absolute right-4 top-4 rounded-full bg-black/55 px-3 py-1 text-[12px] font-medium text-white/90 backdrop-blur">
-            {"★".repeat(segment.difficulty)}
-            <span className="text-white/30">{"★".repeat(5 - segment.difficulty)}</span>
-          </div>
-
-          {/* Beat 计数: 复用手机端 BeatCounterBadge 样式 */}
-          <div className="pointer-events-none absolute left-1/2 top-4 -translate-x-1/2">
-            <BeatCounterBadge currentBeat={currentBeat} beatCount={segment.beat_count} />
-          </div>
-
-          {/* 键盘提示 (全屏态右下角 fade-in) */}
-          {immersive ? (
-            <div className="pointer-events-none absolute bottom-6 right-6 rounded-lg bg-black/55 px-3 py-2 text-[11px] text-white/55 backdrop-blur">
-              ← → 切段 · Space 暂停 · M 镜像 · Esc 退出
-            </div>
+      <div className="relative z-10 flex h-full">
+        <section className="relative flex flex-1 items-center justify-center px-5 lg:px-6">
+          {!immersive ? (
+            <Link
+              href={`/lesson/${lesson.id}`}
+              className="absolute left-5 top-5 z-30 inline-flex max-w-[min(48vw,560px)] items-center gap-2 rounded-full border border-white/12 bg-black/45 px-3 py-1.5 text-sm font-medium text-white/82 backdrop-blur-sm transition hover:bg-black/60 hover:text-white"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="truncate">{`返回 ${lesson.title}`}</span>
+            </Link>
           ) : null}
-        </div>
 
-        {/* 底部控件条 */}
-        <div className="pointer-events-auto absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-3 rounded-full border border-white/10 bg-black/55 px-4 py-2 backdrop-blur-md">
-          <button
-            type="button"
-            onClick={() => setPlaying((p) => !p)}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-black transition hover:bg-white/90"
-            aria-label={playing ? "暂停" : "播放"}
-          >
-            {playing ? <Pause className="h-4 w-4 fill-current" /> : <Play className="h-4 w-4 fill-current" />}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              const i = SPEEDS.indexOf(speed as (typeof SPEEDS)[number]);
-              setSpeed(SPEEDS[(i + 1) % SPEEDS.length]);
+          {prevSeg ? (
+            <button
+              type="button"
+              onClick={() => onNavigate(prevSeg.id)}
+              className="absolute left-3 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/30 text-white/70 transition hover:bg-black/55 hover:text-white"
+              aria-label={`上一段 ${prevSeg.section_label}`}
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+          ) : null}
+
+          {nextSeg ? (
+            <button
+              type="button"
+              onClick={() => onNavigate(nextSeg.id)}
+              className="absolute right-3 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/30 text-white/70 transition hover:bg-black/55 hover:text-white"
+              aria-label={`下一段 ${nextSeg.section_label}`}
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+          ) : null}
+
+          <div
+            className="relative w-[min(34vw,520px)] min-w-[300px] overflow-hidden rounded-[26px] border border-white/15 bg-black/70 transition-all duration-300"
+            style={{
+              aspectRatio: "9/16",
+              maxHeight: immersive ? "100vh" : "calc(100vh - 130px)",
+              borderRadius: immersive ? "0px" : "26px",
+              boxShadow: immersive ? "none" : "0 22px 60px rgba(0,0,0,0.66)",
             }}
-            className="rounded-full bg-white/8 px-3 py-1.5 font-mono text-[13px] font-semibold tracking-wider text-white/85 transition hover:bg-white/14"
           >
-            {speed}x
-          </button>
-          <button
-            type="button"
-            onClick={toggleImmersive}
-            className={`flex h-9 w-9 items-center justify-center rounded-full transition ${
-              immersive ? "bg-amber-400/30 text-amber-100" : "bg-white/8 text-white/70 hover:bg-white/14"
-            }`}
-            aria-label={immersive ? "退出全屏" : "全屏播放"}
-            title={immersive ? "退出全屏 (Esc)" : "全屏 (F)"}
-          >
-            {immersive ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-          </button>
-          <button
-            type="button"
-            onClick={() => setMirror((m) => !m)}
-            className={`flex h-9 w-9 items-center justify-center rounded-full transition ${
-              mirror ? "bg-fuchsia-500/30 text-fuchsia-100" : "bg-white/8 text-white/70 hover:bg-white/14"
-            }`}
-            aria-label="镜像"
-          >
-            <FlipHorizontal2 className="h-4 w-4" />
-          </button>
-        </div>
-      </section>
+            <video
+              ref={videoRef}
+              src={segment.clip_url}
+              poster={segment.thumbnail}
+              loop
+              playsInline
+              preload="metadata"
+              className="absolute inset-0 h-full w-full object-cover"
+              style={{ transform: mirror ? "scaleX(-1)" : undefined }}
+              onClick={() => setPlaying((p) => !p)}
+            />
 
-      {/* 右侧: 段落列表 */}
-      <aside className={`flex w-[320px] flex-col border-l border-white/8 bg-black/50 backdrop-blur transition-all duration-300 ${immersive ? "hidden" : ""}`}>
-        <div className="px-6 pb-4 pt-8">
-          <div className="text-[11px] uppercase tracking-[0.22em] text-white/45">动作段落</div>
-          <div className="mt-1 text-[20px] font-semibold text-white">
-            {practiceSegments.length} 段 · {idx + 1}/{practiceSegments.length}
+            <XuangeGuideOverlay videoRef={videoRef} particleUrl={segment.particle_url} mirror={mirror} />
+
+            <div className="pointer-events-none absolute left-3 top-3 rounded-full border border-white/15 bg-black/60 px-3 py-1 text-[11px] font-semibold text-white/95">
+              {`${segment.section_label} · 第 ${segment.index + 1}`}
+            </div>
+
+            <div className="pointer-events-none absolute right-3 top-3 rounded-full border border-white/15 bg-black/60 px-3 py-1 text-[11px] font-semibold text-white/95">
+              {"★".repeat(difficulty)}
+              <span className="text-white/28">{"★".repeat(5 - difficulty)}</span>
+            </div>
+
+            <div className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 scale-[0.8] origin-top md:scale-[0.86]">
+              <BeatCounterBadge
+                currentBeat={currentBeat}
+                beatCount={segment.beat_count}
+                className="border-white/18 bg-[rgba(115,115,122,0.58)] shadow-[0_20px_45px_rgba(0,0,0,0.35)]"
+              />
+            </div>
+
+            {immersive ? (
+              <div className="pointer-events-none absolute bottom-6 right-6 rounded-xl border border-white/10 bg-black/60 px-4 py-2 text-[11px] text-white/70">
+                ←/→ 切段 · Space 暂停 · M 镜像 · Esc 退出
+              </div>
+            ) : null}
           </div>
-        </div>
 
-        {/* 上下切段快捷键 */}
-        <div className="flex items-center gap-2 px-6 pb-3">
-          <button
-            type="button"
-            onClick={() => prevSeg && onNavigate(prevSeg.id)}
-            disabled={!prevSeg}
-            className="flex h-9 flex-1 items-center justify-center gap-1 rounded-xl bg-white/6 text-[12px] text-white/70 transition hover:bg-white/12 disabled:opacity-40"
-          >
-            <ChevronUp className="h-3.5 w-3.5" />
-            上一段
-          </button>
-          <button
-            type="button"
-            onClick={() => nextSeg && onNavigate(nextSeg.id)}
-            disabled={!nextSeg}
-            className="flex h-9 flex-1 items-center justify-center gap-1 rounded-xl bg-white/6 text-[12px] text-white/70 transition hover:bg-white/12 disabled:opacity-40"
-          >
-            <ChevronDown className="h-3.5 w-3.5" />
-            下一段
-          </button>
-        </div>
+          <div className="absolute bottom-4 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/15 bg-black/65 px-3 py-1.5 shadow-[0_14px_30px_rgba(0,0,0,0.55)] backdrop-blur-md">
+            <button
+              type="button"
+              onClick={() => setPlaying((p) => !p)}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-black transition hover:bg-white/90"
+              aria-label={playing ? "暂停" : "播放"}
+            >
+              {playing ? <Pause className="h-4 w-4 fill-current" /> : <Play className="h-4 w-4 fill-current" />}
+            </button>
 
-        <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto px-4 pb-6">
-          {practiceSegments.map((s) => {
-            const active = s.id === segment.id;
-            return (
+            <button
+              type="button"
+              onClick={() => {
+                const i = SPEEDS.indexOf(speed as (typeof SPEEDS)[number]);
+                setSpeed(SPEEDS[(i + 1) % SPEEDS.length]);
+              }}
+              className="rounded-full bg-white/8 px-3 py-1 text-[12px] font-semibold tracking-[0.2em] text-white/90 transition hover:bg-white/16"
+            >
+              {speed}x
+            </button>
+
+            <button
+              type="button"
+              onClick={toggleImmersive}
+              className={`flex h-8 w-8 items-center justify-center rounded-full transition ${
+                immersive ? "bg-amber-400/30 text-amber-100" : "bg-white/8 text-white/70 hover:bg-white/16"
+              }`}
+              aria-label={immersive ? "退出全屏" : "全屏播放"}
+              title={immersive ? "退出全屏 (Esc)" : "全屏 (F)"}
+            >
+              {immersive ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setMirror((m) => !m)}
+              className={`flex h-8 w-8 items-center justify-center rounded-full transition ${
+                mirror ? "bg-fuchsia-500/30 text-fuchsia-100" : "bg-white/8 text-white/70 hover:bg-white/16"
+              }`}
+              aria-label="镜像"
+            >
+              <FlipHorizontal2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </section>
+
+        <aside
+          className={`relative w-[350px] border-l border-white/10 bg-black/72 transition-all duration-300 ${
+            immersive ? "hidden" : "flex"
+          } flex-col`}
+        >
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_0%_80%,rgba(255,0,85,0.12),transparent_45%)]" />
+
+          <div className="relative z-10 flex h-full flex-col">
+            <div className="px-6 pb-3 pt-8">
+              <div className="text-[11px] font-medium tracking-[0.22em] text-white/42">动作段落</div>
+              <div className="mt-1 text-[28px] font-black leading-none text-white">{headingText}</div>
+            </div>
+
+            <div className="flex items-center gap-2 px-6 pb-3">
               <button
-                key={s.id}
                 type="button"
-                onClick={() => onNavigate(s.id)}
-                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${
-                  active ? "bg-white/12 ring-1 ring-white/15" : "hover:bg-white/6"
-                }`}
+                onClick={() => prevSeg && onNavigate(prevSeg.id)}
+                disabled={!prevSeg}
+                className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 text-[13px] text-white/75 transition hover:bg-white/10 disabled:opacity-35"
               >
-                <div
-                  className="h-12 w-12 flex-shrink-0 rounded-lg bg-cover bg-center"
-                  style={{ backgroundImage: `url("${s.thumbnail}")` }}
-                />
-                <div className="min-w-0 flex-1">
-                  <div className={`truncate text-[13px] font-medium ${active ? "text-white" : "text-white/78"}`}>
-                    {s.section_label} · 第 {s.index + 1}
-                  </div>
-                  <div className="mt-0.5 flex items-center gap-2 text-[11px] text-white/40">
-                    <span>{s.duration.toFixed(1)}s</span>
-                    <span>·</span>
-                    <span>{"★".repeat(s.difficulty)}</span>
-                  </div>
-                </div>
+                <ChevronUp className="h-4 w-4" />
+                上一段
               </button>
-            );
-          })}
-        </div>
+              <button
+                type="button"
+                onClick={() => nextSeg && onNavigate(nextSeg.id)}
+                disabled={!nextSeg}
+                className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 text-[13px] text-white/75 transition hover:bg-white/10 disabled:opacity-35"
+              >
+                <ChevronDown className="h-4 w-4" />
+                下一段
+              </button>
+            </div>
 
-        <div className="border-t border-white/8 p-6">
-          <Link
-            href={`/lesson/${lesson.id}/tracking-desktop`}
-            className="block w-full rounded-full bg-gradient-to-r from-amber-400 to-fuchsia-500 px-4 py-3 text-center text-[14px] font-semibold text-white transition hover:brightness-110"
-          >
-            整支跟拍挑战
-          </Link>
-        </div>
-      </aside>
+            <div className="min-h-0 flex-1 space-y-2 overflow-y-auto px-4 pb-5">
+              {practiceSegments.map((s) => {
+                const active = s.id === segment.id;
+                const rowDifficulty = clampDifficulty(s.difficulty);
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => onNavigate(s.id)}
+                    className={`flex w-full items-center gap-3 rounded-2xl border px-3 py-2.5 text-left transition ${
+                      active
+                        ? "border-white/25 bg-black/68 shadow-[0_14px_40px_rgba(0,0,0,0.5)]"
+                        : "border-transparent bg-white/[0.02] hover:border-white/10 hover:bg-white/[0.06]"
+                    }`}
+                  >
+                    <div
+                      className="h-12 w-12 flex-shrink-0 rounded-xl bg-cover bg-center"
+                      style={{ backgroundImage: `url("${s.thumbnail}")` }}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className={`truncate text-[17px] font-semibold ${active ? "text-white" : "text-white/82"}`}>
+                        {`${s.section_label} · 第 ${s.index + 1}`}
+                      </div>
+                      <div className="mt-0.5 flex items-center gap-2 text-[12px] text-white/48">
+                        <span>{s.duration.toFixed(1)}s</span>
+                        <span>·</span>
+                        <span>{"★".repeat(rowDifficulty)}</span>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="border-t border-white/10 p-5">
+              <Link
+                href={`/lesson/${lesson.id}/tracking-desktop`}
+                className="group flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#ff0055] via-[#9d4edd] to-[#00f3ff] px-6 py-3 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(157,78,221,0.32)] transition hover:brightness-110"
+              >
+                <Sparkles className="h-4 w-4 transition group-hover:rotate-12" />
+                <span className="font-semibold text-white">整支跟拍挑战</span>
+              </Link>
+            </div>
+          </div>
+        </aside>
+      </div>
     </main>
   );
 }

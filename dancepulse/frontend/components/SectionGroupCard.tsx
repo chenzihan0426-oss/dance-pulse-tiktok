@@ -24,7 +24,7 @@ export function SectionGroupCard({
   const previewSegment = segments[0] ?? null;
 
   return (
-    <div className="relative overflow-hidden rounded-[24px] bg-bg-surface px-4 py-4">
+    <div className="relative overflow-hidden rounded-[24px] bg-bg-surface px-4 py-4 md:min-h-[350px] md:rounded-[28px] md:px-5 md:py-5">
       {previewSegment?.thumbnail && (
         <>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -41,19 +41,19 @@ export function SectionGroupCard({
         <div className="flex items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <span className={`rounded-full border px-3 py-1 text-[11px] font-medium ${tone.chip}`}>
+              <span className={`rounded-full border px-3 py-1 text-[11px] font-medium md:text-[12px] ${tone.chip}`}>
                 {label}
               </span>
-              <span className="text-[12px] text-white/40">{total} 张</span>
+              <span className="text-[12px] text-white/40 md:text-[13px]">{total} 张</span>
             </div>
-            <div className="mt-3 text-[14px] text-white/45">
+            <div className="mt-3 text-[14px] text-white/45 md:text-[15px]">
               已学 {learned}/{total}
             </div>
           </div>
 
           <div className="text-right">
-            <div className="text-[18px] font-semibold text-white">{percent}%</div>
-            <div className="mt-1 text-[12px] text-white/35">section</div>
+            <div className="text-[18px] font-semibold text-white md:text-[22px]">{percent}%</div>
+            <div className="mt-1 text-[12px] text-white/35 md:text-[13px]">section</div>
           </div>
         </div>
 
@@ -65,12 +65,13 @@ export function SectionGroupCard({
         </div>
 
         <div className="mt-4 space-y-3">
-          {segments.slice(0, 3).map((segment) => (
+          {segments.slice(0, 4).map((segment, index) => (
             <Link
               key={segment.id}
               href={`/player/${segment.id}?lesson=${lessonId}`}
               className={[
-                "flex items-center justify-between rounded-[18px] border px-4 py-3 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-sm transition",
+                "flex items-center justify-between rounded-[18px] border px-4 py-3 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-sm transition md:px-4 md:py-3.5",
+                index === 3 ? "hidden md:flex" : "",
                 segment.id === resumeSegmentId
                   ? "border-brand-light/70 bg-[rgba(168,85,247,0.16)] hover:bg-[rgba(168,85,247,0.22)]"
                   : "border-white/10 bg-[rgba(11,10,20,0.48)] hover:bg-[rgba(255,255,255,0.08)]",
@@ -78,14 +79,14 @@ export function SectionGroupCard({
             >
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <div className="truncate text-white">{segment.section_label}</div>
+                  <div className="truncate text-white md:text-[15px]">{segment.section_label}</div>
                   {segment.id === resumeSegmentId && (
                     <span className="rounded-full bg-brand/18 px-2 py-0.5 text-[10px] font-medium tracking-[0.12em] text-brand-light">
                       继续
                     </span>
                   )}
                 </div>
-                <div className="mt-1 text-[12px] text-white/40">
+                <div className="mt-1 text-[12px] text-white/40 md:text-[13px]">
                   {segment.beat_count} 拍 · {segment.duration.toFixed(2)}s
                 </div>
               </div>
@@ -93,6 +94,12 @@ export function SectionGroupCard({
             </Link>
           ))}
         </div>
+
+        {segments.length > 4 && (
+          <div className="mt-3 text-right text-[12px] text-white/35">
+            还有 {segments.length - 4} 张动作卡
+          </div>
+        )}
       </div>
     </div>
   );

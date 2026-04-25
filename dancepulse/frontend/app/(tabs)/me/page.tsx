@@ -201,7 +201,7 @@ export default function MePage() {
 
   if (!isAuthenticated || !user) {
     return (
-      <main className="mx-auto min-h-screen max-w-md px-5 pb-10 pt-10 text-white">
+      <main className="mx-auto min-h-screen max-w-6xl px-5 pb-10 pt-10 text-white md:px-8 md:pb-14 md:pt-12">
         <div className="rounded-[32px] border border-white/8 bg-bg-raised px-6 py-7">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand/16 text-brand-light">
             <ShieldCheck className="h-7 w-7" />
@@ -230,7 +230,7 @@ export default function MePage() {
 
   if (loading || !data) {
     return (
-      <main className="mx-auto min-h-screen max-w-md px-5 pb-10 pt-10 text-white">
+      <main className="mx-auto min-h-screen max-w-6xl px-5 pb-10 pt-10 text-white md:px-8 md:pb-14 md:pt-12">
         <div className="h-[220px] animate-pulse rounded-[32px] bg-bg-raised" />
       </main>
     );
@@ -250,7 +250,7 @@ export default function MePage() {
   ];
 
   return (
-    <main className="mx-auto min-h-screen max-w-md px-5 pb-10 pt-10 text-white">
+    <main className="mx-auto min-h-screen max-w-6xl px-5 pb-10 pt-10 text-white md:px-8 md:pb-14 md:pt-12">
       <div className="flex items-center gap-4">
         <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-brand text-[28px] font-semibold text-white">
           {data.user.avatar ? (

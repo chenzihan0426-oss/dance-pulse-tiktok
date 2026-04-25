@@ -182,6 +182,97 @@ function shouldSkipTeacherSource(
   return hasSegmentFallback && mediaDuration + 1 < lessonDuration * 0.6;
 }
 
+function DotFieldBackground({ mouseRef }: { mouseRef: React.MutableRefObject<{ x: number; y: number }> }) {
+  const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let rafId = 0;
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    const spacing = 28;
+    const dots: Array<{ ox: number; oy: number; x: number; y: number; vx: number; vy: number }> = [];
+
+    const reset = () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+      dots.length = 0;
+      for (let x = -spacing; x <= width + spacing; x += spacing) {
+        for (let y = -spacing; y <= height + spacing; y += spacing) {
+          dots.push({ ox: x, oy: y, x, y, vx: 0, vy: 0 });
+        }
+      }
+    };
+
+    let t = 0;
+    const render = () => {
+      t += 0.028;
+      ctx.fillStyle = "#050505";
+      ctx.fillRect(0, 0, width, height);
+
+      const mx = mouseRef.current.x;
+      const my = mouseRef.current.y;
+      for (let i = 0; i < dots.length; i += 1) {
+        const p = dots[i];
+        const waveX = Math.sin(p.oy * 0.005 + t) * 9;
+        const waveY = Math.cos(p.ox * 0.006 + t) * 10;
+        const tx = p.ox + waveX;
+        const ty = p.oy + waveY;
+        const dx = mx - p.x;
+        const dy = my - p.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist < 180) {
+          const force = ((180 - dist) / 180) ** 2;
+          const angle = Math.atan2(dy, dx);
+          p.vx -= Math.cos(angle) * force * 2.8;
+          p.vy -= Math.sin(angle) * force * 2.8;
+        }
+
+        p.vx += (tx - p.x) * 0.05;
+        p.vy += (ty - p.y) * 0.05;
+        p.vx *= 0.9;
+        p.vy *= 0.9;
+        p.x += p.vx;
+        p.y += p.vy;
+
+        const mag = Math.hypot(p.x - p.ox, p.y - p.oy);
+        let r = 255;
+        let g = 0;
+        let b = 122;
+        if (mag > 8) {
+          const f = Math.min((mag - 8) / 24, 1);
+          r = Math.round(255 - 55 * f);
+          g = Math.round(243 * f);
+          b = Math.round(122 + 133 * f);
+        }
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 1.8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      rafId = window.requestAnimationFrame(render);
+    };
+
+    reset();
+    render();
+    const onResize = () => reset();
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", onResize);
+    };
+  }, [mouseRef]);
+
+  return <canvas ref={canvasRef} className="pointer-events-none fixed inset-0 z-0" aria-hidden />;
+}
+
 export default function TrackingDesktopPage() {
   const params = useParams<{ id: string }>();
   const lessonId = params?.id ?? "";
@@ -195,8 +286,11 @@ export default function TrackingDesktopPage() {
   const cameraRef = React.useRef<HTMLVideoElement>(null);
   const streamRef = React.useRef<MediaStream | null>(null);
   const [cameraStream, setCameraStream] = React.useState<MediaStream | null>(null);
+  const [showCustomCursor, setShowCustomCursor] = React.useState(false);
+  const [mousePos, setMousePos] = React.useState({ x: -1000, y: -1000 });
+  const mouseRef = React.useRef({ x: -1000, y: -1000 });
 
-  // lesson video 作为整支挑战的"老师时间线"
+  // lesson video 浣滀负鏁存敮鎸戞垬鐨?鑰佸笀鏃堕棿绾?
   const teacherRef = React.useRef<HTMLVideoElement>(null);
   const [teacherVideoIndex, setTeacherVideoIndex] = React.useState(0);
   const teacherVideoIndexRef = React.useRef(0);
@@ -210,14 +304,14 @@ export default function TrackingDesktopPage() {
     setTeacherPlayhead(next);
   }, []);
 
-  // 评分
+  // 璇勫垎
   const teacherFramesRef = React.useRef<TeacherFrame[]>([]);
   const teacherFramesLoadedRef = React.useRef<Set<string>>(new Set());
   const teacherFramesCacheRef = React.useRef<Map<string, TeacherFrame[]>>(new Map());
   const teacherPoseAspectCacheRef = React.useRef<Map<string, number>>(new Map());
   const [teacherPoseAspect, setTeacherPoseAspect] = React.useState(DEFAULT_POSE_ASPECT);
 
-  // 预加载剪影素材到 HTTP 缓存 (lesson 一加载就开始)
+  // 棰勫姞杞藉壀褰辩礌鏉愬埌 HTTP 缂撳瓨 (lesson 涓€鍔犺浇灏卞紑濮?
   React.useEffect(() => {
     if (!lesson) return;
     const urls = lesson.segments
@@ -250,6 +344,17 @@ export default function TrackingDesktopPage() {
     return () => { cancelled = true; };
   }, [lessonId]);
 
+  React.useEffect(() => {
+    setShowCustomCursor(window.matchMedia("(pointer:fine)").matches);
+    const onMove = (e: MouseEvent) => {
+      const next = { x: e.clientX, y: e.clientY };
+      setMousePos(next);
+      mouseRef.current = next;
+    };
+    window.addEventListener("mousemove", onMove);
+    return () => window.removeEventListener("mousemove", onMove);
+  }, []);
+
   const teacherVideoSources = React.useMemo(() => buildTeacherVideoSources(lesson), [lesson]);
   const teacherVideoSource =
     teacherVideoSources[Math.min(teacherVideoIndex, Math.max(teacherVideoSources.length - 1, 0))];
@@ -268,7 +373,7 @@ export default function TrackingDesktopPage() {
     setTeacherVideoIndex(0);
   }, [lesson?.id]);
 
-  // 当前时间所在 segment
+  // 褰撳墠鏃堕棿鎵€鍦?segment
   const currentSegment = React.useMemo<Segment | null>(() => {
     if (!lesson) return null;
     for (const seg of lesson.segments) {
@@ -278,7 +383,7 @@ export default function TrackingDesktopPage() {
     return lesson.segments.find((s) => !s.deleted) ?? null;
   }, [lesson, teacherPlayhead]);
 
-  // 懒加载当前 segment 的 pose_full → TeacherFrame[]
+  // 鎳掑姞杞藉綋鍓?segment 鐨?pose_full 鈫?TeacherFrame[]
   React.useEffect(() => {
     if (!currentSegment?.pose_full_url) {
       teacherFramesRef.current = [];
@@ -298,7 +403,7 @@ export default function TrackingDesktopPage() {
     fetch(url)
       .then((res) => res.json())
       .then((doc: PoseJsonDoc) => {
-        // 转成 TeacherFrame[],时间偏移到 lesson 级
+        // 杞垚 TeacherFrame[],鏃堕棿鍋忕Щ鍒?lesson 绾?
         const frames: TeacherFrame[] = (doc.frames ?? [])
           .filter((f) => f.detected !== false)
           .map((f) => ({
@@ -351,13 +456,13 @@ export default function TrackingDesktopPage() {
     return () => window.cancelAnimationFrame(rafId);
   }, [playing]);
 
-  // 摄像头 (支持选择 deviceId, 外接 Insta / OBS 虚拟机也能用)
+  // 鎽勫儚澶?(鏀寔閫夋嫨 deviceId, 澶栨帴 Insta / OBS 铏氭嫙鏈轰篃鑳界敤)
   const CAMERA_STORAGE_KEY = "dp_tracking_camera_device";
   const [selectedDeviceId, setSelectedDeviceId] = React.useState<string | null>(() => {
     if (typeof window === "undefined") return null;
     return window.localStorage.getItem(CAMERA_STORAGE_KEY);
   });
-  // 镜像翻转 state, 同时作用于摄像头 <video> 的 CSS transform 和 MatteOverlay 的 userMirror
+  // 闀滃儚缈昏浆 state, 鍚屾椂浣滅敤浜庢憚鍍忓ご <video> 鐨?CSS transform 鍜?MatteOverlay 鐨?userMirror
   const [userMirror, setUserMirror] = React.useState(true);
   const [matteTuning, setMatteTuning] = React.useState<MatteTuning>(() => readMatteTuning());
   const [trackingOverlayLayer, setTrackingOverlayLayer] = React.useState<TrackingOverlayLayer>(() => readTrackingOverlayLayer());
@@ -372,10 +477,10 @@ export default function TrackingDesktopPage() {
   const resetMatteTuning = React.useCallback(() => {
     setMatteTuning(DEFAULT_MATTE_TUNING);
   }, []);
-  // facingMode (前/后摄像头), 用于 openStream fallback
+  // facingMode (鍓?鍚庢憚鍍忓ご), 鐢ㄤ簬 openStream fallback
   const [facingMode, setFacingMode] = React.useState<"user" | "environment">("user");
 
-  // 沉浸模式: 摄像头全屏 + 老师视频缩小到右上角小窗
+  // 娌夋蹈妯″紡: 鎽勫儚澶村叏灞?+ 鑰佸笀瑙嗛缂╁皬鍒板彸涓婅灏忕獥
   const mainRef = React.useRef<HTMLElement>(null);
   const [cinema, setCinema] = React.useState(false);
   const toggleCinema = React.useCallback(() => {
@@ -456,7 +561,7 @@ export default function TrackingDesktopPage() {
 
   React.useEffect(() => () => { stopCameraStream(); }, [stopCameraStream]);
 
-  // 切换摄像头: 停掉当前流 -> 换 deviceId -> 起新流 (只在已开启时立即切, 否则只记住选择)
+  // 鍒囨崲鎽勫儚澶? 鍋滄帀褰撳墠娴?-> 鎹?deviceId -> 璧锋柊娴?(鍙湪宸插紑鍚椂绔嬪嵆鍒? 鍚﹀垯鍙浣忛€夋嫨)
   const reopenWithFacing = React.useCallback(async (facing: "user" | "environment") => {
     setFacingMode(facing);
     setSelectedDeviceId(null);
@@ -465,7 +570,7 @@ export default function TrackingDesktopPage() {
     try {
       streamRef.current.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
-      // 切前后摄像头时, 不再用 deviceId 约束
+      // 鍒囧墠鍚庢憚鍍忓ご鏃? 涓嶅啀鐢?deviceId 绾︽潫
       const stream = await openStream(null, facing);
       streamRef.current = stream;
       setCameraStream(stream);
@@ -631,11 +736,11 @@ export default function TrackingDesktopPage() {
     }
   };
   if (loading) {
-    return <main className="flex min-h-screen items-center justify-center bg-[#0a0414] text-white/65">加载课程...</main>;
+    return <main className="flex min-h-screen items-center justify-center bg-[#050505] text-white/65">加载课程...</main>;
   }
   if (loadError || !lesson) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#0a0414] text-white/65">
+      <main className="flex min-h-screen items-center justify-center bg-[#050505] text-white/65">
         <div className="rounded-2xl border border-red-500/40 bg-red-500/10 px-6 py-4 text-red-200">
           {loadError ?? "课程不存在"}
         </div>
@@ -647,222 +752,271 @@ export default function TrackingDesktopPage() {
   const progressPct = duration > 0 ? Math.min(100, (teacherPlayhead / duration) * 100) : 0;
 
   return (
-    <main ref={mainRef} className="relative flex h-screen w-screen flex-col overflow-hidden bg-black text-white">
-      {/* Header */}
-      <header className="flex items-center justify-between border-b border-white/6 px-6 py-3">
-        <div className="flex items-center gap-4">
-          <Link
-            href={`/lesson/${lessonId}`}
-            className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white/75 hover:bg-white/10"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            返回课程
-          </Link>
-          <div className="flex flex-col leading-tight">
-            <span className="text-xs uppercase tracking-[0.18em] text-white/45">Tracking · 整支挑战</span>
-            <span className="text-lg font-semibold">{lesson.title}</span>
-          </div>
-        </div>
-      </header>
+    <main
+      ref={mainRef}
+      className="relative flex h-screen w-screen flex-col overflow-hidden bg-[#050505] text-white selection:bg-[#ff0055] selection:text-white"
+    >
+      <DotFieldBackground mouseRef={mouseRef} />
 
-      {/* Stage: 普通模式左右各 50% / Cinema 模式右栏全屏左栏隐藏 */}
-      <section
-        className={`relative grid flex-1 overflow-hidden bg-black transition-[grid-template-columns] duration-300 ${
-          cinema ? "grid-cols-[0fr_1fr] gap-0" : "grid-cols-2 gap-[2px]"
-        }`}
-      >
-        {/* ─── 左栏 50%: 老师原视频 + 粒子叠加 ─── */}
-        <div className="relative h-full w-full overflow-hidden bg-black">
-          <video
-            ref={teacherRef}
-            src={teacherVideoSrc}
-            poster={lesson.thumbnail}
-            crossOrigin="anonymous"
-            playsInline
-            preload="auto"
-            className="absolute inset-0 h-full w-full object-contain"
-            onError={handleTeacherVideoError}
-            onEnded={handleTeacherEnded}
+      <style jsx global>{`
+        @import url("https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Michroma&family=Noto+Sans+SC:wght@500;700;900&display=swap");
+        body {
+          font-family: "Michroma", "Noto Sans SC", sans-serif;
+          background: #050505;
+          cursor: ${showCustomCursor ? "none" : "auto"};
+        }
+        .tracking-neon {
+          font-family: "Black Han Sans", "Noto Sans SC", sans-serif;
+          background: linear-gradient(90deg, #ff0055, #ffaa00, #ccff00, #00f3ff, #9d4edd, #ff0055);
+          background-size: 200% auto;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: tracking-shine 3s linear infinite;
+        }
+        @keyframes tracking-shine {
+          to {
+            background-position: 200% center;
+          }
+        }
+      `}</style>
+
+      {showCustomCursor ? (
+        <>
+          <div
+            className="pointer-events-none fixed left-0 top-0 z-[120] h-3 w-3 rounded-full bg-[#ccff00] mix-blend-difference"
+            style={{ transform: `translate(${mousePos.x - 6}px, ${mousePos.y - 6}px)` }}
           />
-          {/* 粒子引导视频 (跟随 teacherPlayhead - segStart, screen blend) */}
-          {currentSegment?.particle_url ? (
-            <SegmentParticleLayer
-              key={currentSegment.id}
-              src={currentSegment.particle_url}
-              segStart={currentSegment.start}
-              teacherTime={teacherPlayhead}
-              playing={playing}
-            />
-          ) : null}
+          <div
+            className="pointer-events-none fixed left-0 top-0 z-[119] h-10 w-10 rounded-full border border-[#00f3ff]/70"
+            style={{ transform: `translate(${mousePos.x - 20}px, ${mousePos.y - 20}px)` }}
+          />
+        </>
+      ) : null}
 
-          <div className="pointer-events-none absolute left-4 top-4 rounded-full bg-black/55 px-3 py-1 text-[11px] font-medium text-white/85 backdrop-blur">
-            老师示范 · {currentSegment?.section_label ?? ""}
+      <div className="relative z-10 flex h-full w-full flex-col">
+        <header className="mx-auto mt-3 flex w-[calc(100%-16px)] max-w-[1480px] items-center justify-between rounded-2xl border border-white/12 bg-black/30 px-3.5 py-2 backdrop-blur-md">
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/lesson/${lessonId}`}
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-black/40 px-2.5 py-1 text-[11px] text-white/85 transition hover:bg-black/60 hover:text-white"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              返回课程
+            </Link>
+            <div className="flex flex-col leading-tight">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-white/45">Tracking · 整支挑战</span>
+              <span className="tracking-neon text-[15px]">{lesson.title}</span>
+            </div>
           </div>
-        </div>
+        </header>
 
-        <div className="relative h-full w-full overflow-hidden bg-black">
-          {cameraReady ? (
+        <section
+          className={`relative mx-auto my-2 grid min-h-0 w-[calc(100%-16px)] max-w-[1480px] flex-1 overflow-hidden rounded-[22px] border border-white/10 bg-transparent p-1 shadow-none transition-[grid-template-columns] duration-300 ${
+            cinema ? "grid-cols-[0fr_1fr] gap-0" : "grid-cols-2 gap-1.5"
+          }`}
+        >
+          <div className="relative h-full w-full overflow-hidden rounded-[18px] border border-white/12 bg-transparent">
             <video
-              ref={cameraRef}
-              className="absolute inset-0 h-full w-full object-cover"
-              style={{ transform: userMirror ? "scaleX(-1)" : "none" }}
-              muted
+              ref={teacherRef}
+              src={teacherVideoSrc}
+              poster={lesson.thumbnail}
+              crossOrigin="anonymous"
               playsInline
+              preload="auto"
+              className="absolute inset-0 h-full w-full object-contain"
+              onError={handleTeacherVideoError}
+              onEnded={handleTeacherEnded}
             />
-          ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 px-6 text-center text-white/60">
-              <Camera className="h-14 w-14" />
-              <div className="max-w-[380px] text-[15px] leading-7">
-                开启摄像头,对照左侧老师,<br />
-                幽灵剪影会叠在你身上。
-              </div>
-              {cameraError ? (
-                <div className="max-w-[400px] rounded-xl bg-red-500/15 px-4 py-2 text-[13px] text-red-200">
-                  {cameraError}
-                </div>
-              ) : null}
-              <Button onClick={handleStart} className="rounded-full px-6 py-3 text-[15px]">
-                <Camera className="h-4 w-4" />
-                开启摄像头
-              </Button>
-            </div>
-          )}
-
-          {/* 幽灵剪影 (object-contain 和摄像头同容器,覆盖整个右栏) */}
-          {cameraReady && trackingOverlayLayer === "silhouette" && currentSegment?.matte_rgb_url && currentSegment?.matte_mask_url ? (
-            <MatteOverlay
-              rgbUrl={currentSegment.matte_rgb_url}
-              maskUrl={currentSegment.matte_mask_url}
-              userMirror={userMirror}
-              playing={playing}
-              playbackRate={1}
-              currentTimeSec={Math.max(0, teacherPlayhead - currentSegment.start)}
-              silhouetteScale={matteTuning.scale}
-              silhouetteOffsetX={matteTuning.offsetX}
-              silhouetteOffsetY={matteTuning.offsetY}
-              edgeBoost={3.4 * matteTuning.intensity}
-              detailBoost={2.6 * matteTuning.intensity}
-              overlayOpacity={matteTuning.opacity}
-              onStatus={setOverlayStatus}
-            />
-          ) : cameraReady && trackingOverlayLayer === "silhouette" ? (
-            <div className="pointer-events-none absolute bottom-20 left-1/2 -translate-x-1/2 rounded-full bg-black/55 px-3 py-1 text-[10px] text-white/60 backdrop-blur">
-              幽灵剪影加载中...
-            </div>
-          ) : null}
-
-          {cameraReady && trackingOverlayLayer === "skeleton" ? (
-            <AdaptiveSkeletonOverlay
-              framesRef={teacherFramesRef}
-              currentTimeSec={teacherPlayhead}
-              currentTimeRef={teacherPlayheadRef}
-              tuning={matteTuning}
-              mirror={userMirror}
-              active={cameraReady && trackingOverlayLayer === "skeleton"}
-              sourceAspect={teacherPoseAspect}
-            />
-          ) : null}
-          {cameraReady ? (
-            <MatteTuningPanel
-              value={matteTuning}
-              layer={trackingOverlayLayer}
-              onChange={setMatteTuning}
-              onLayerChange={setTrackingOverlayLayer}
-              onReset={resetMatteTuning}
-              className="absolute bottom-10 left-4"
-            />
-          ) : null}
-
-          {/* Cinema 模式: 右上角浮动老师小窗 (整支视频 + 当前 segment 粒子)
-              纵横比 9:16 锁定, 宽度按视口缩放但有上下限 */}
-          {cameraReady && cinema && currentSegment ? (
-            <div className="pointer-events-none absolute right-4 top-4 z-50 aspect-[9/16] w-[10vw] min-w-[110px] max-w-[180px] overflow-hidden rounded-xl border border-white/15 shadow-[0_18px_40px_rgba(0,0,0,0.6)]">
-              <TeacherMiniWindow
-                lessonVideoUrl={teacherVideoSrc}
-                particleUrl={currentSegment.particle_url}
+            {currentSegment?.particle_url ? (
+              <SegmentParticleLayer
+                key={currentSegment.id}
+                src={currentSegment.particle_url}
                 segStart={currentSegment.start}
-                lessonPlayhead={teacherPlayhead}
+                teacherTime={teacherPlayhead}
                 playing={playing}
               />
+            ) : null}
+
+            <div className="pointer-events-none absolute left-3 top-3 rounded-full border border-white/15 bg-black/45 px-2.5 py-0.5 text-[10px] font-medium text-white/90 backdrop-blur">
+              老师示范 · {currentSegment?.section_label ?? ""}
             </div>
-          ) : null}
-        </div>
+          </div>
 
-      </section>
+          <div className="relative h-full w-full overflow-hidden rounded-[18px] border border-white/12 bg-transparent">
+            {cameraReady ? (
+              <video
+                ref={cameraRef}
+                className="absolute inset-0 h-full w-full object-cover"
+                style={{ transform: userMirror ? "scaleX(-1)" : "none" }}
+                muted
+                playsInline
+              />
+            ) : (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-4 text-center text-white/70">
+                <Camera className="h-10 w-10 text-[#00f3ff]" />
+                <div className="max-w-[340px] text-[12px] leading-5">
+                  开启摄像头，对照左侧老师，
+                  <br />
+                  骨架或剪影会叠加在你身上。
+                </div>
+                {cameraError ? (
+                  <div className="max-w-[400px] rounded-xl bg-red-500/15 px-4 py-2 text-[13px] text-red-200">
+                    {cameraError}
+                  </div>
+                ) : null}
+                <Button
+                  onClick={handleStart}
+                  className="rounded-full bg-gradient-to-r from-[#ff0055] via-[#9d4edd] to-[#00f3ff] px-4 py-2 text-[12px] text-white hover:brightness-110"
+                >
+                  <Camera className="h-3.5 w-3.5" />
+                  开启摄像头
+                </Button>
+              </div>
+            )}
 
-      {/* Footer */}
-      <footer className="flex items-center gap-4 border-t border-white/6 bg-black/40 px-6 py-3 backdrop-blur">
-        <Button
-          onClick={() => {
-            if (playing) { setPlaying(false); return; }
-            if (cameraReady) { void startTeacherPlayback(false, teacherMuted); return; }
-            void handleStart();
-          }}
-          className="rounded-full"
-        >
-          {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-          {playing ? "暂停" : cameraReady ? "继续" : "开始挑战"}
-        </Button>
+            {cameraReady && trackingOverlayLayer === "silhouette" && currentSegment?.matte_rgb_url && currentSegment?.matte_mask_url ? (
+              <MatteOverlay
+                rgbUrl={currentSegment.matte_rgb_url}
+                maskUrl={currentSegment.matte_mask_url}
+                userMirror={userMirror}
+                playing={playing}
+                playbackRate={1}
+                currentTimeSec={Math.max(0, teacherPlayhead - currentSegment.start)}
+                silhouetteScale={matteTuning.scale}
+                silhouetteOffsetX={matteTuning.offsetX}
+                silhouetteOffsetY={matteTuning.offsetY}
+                edgeBoost={3.4 * matteTuning.intensity}
+                detailBoost={2.6 * matteTuning.intensity}
+                overlayOpacity={matteTuning.opacity}
+                onStatus={setOverlayStatus}
+              />
+            ) : cameraReady && trackingOverlayLayer === "silhouette" ? (
+              <div className="pointer-events-none absolute bottom-20 left-1/2 -translate-x-1/2 rounded-full bg-black/55 px-3 py-1 text-[10px] text-white/60 backdrop-blur">
+                剪影加载中...
+              </div>
+            ) : null}
 
-        <div className="flex min-w-0 flex-1 items-center gap-3">
-          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-amber-400 to-fuchsia-500 transition-[width] duration-100"
-              style={{ width: `${progressPct}%` }}
+            {cameraReady && trackingOverlayLayer === "skeleton" ? (
+              <AdaptiveSkeletonOverlay
+                framesRef={teacherFramesRef}
+                currentTimeSec={teacherPlayhead}
+                currentTimeRef={teacherPlayheadRef}
+                tuning={matteTuning}
+                mirror={userMirror}
+                active={cameraReady && trackingOverlayLayer === "skeleton"}
+                sourceAspect={teacherPoseAspect}
+              />
+            ) : null}
+
+            {cameraReady ? (
+              <MatteTuningPanel
+                value={matteTuning}
+                layer={trackingOverlayLayer}
+                onChange={setMatteTuning}
+                onLayerChange={setTrackingOverlayLayer}
+                onReset={resetMatteTuning}
+                className="absolute bottom-4 left-3 scale-90 origin-bottom-left"
+              />
+            ) : null}
+
+            {cameraReady && cinema && currentSegment ? (
+              <div className="pointer-events-none absolute right-3 top-3 z-50 aspect-[9/16] w-[9vw] min-w-[96px] max-w-[150px] overflow-hidden rounded-xl border border-white/15 shadow-[0_12px_30px_rgba(0,0,0,0.5)]">
+                <TeacherMiniWindow
+                  lessonVideoUrl={teacherVideoSrc}
+                  particleUrl={currentSegment.particle_url}
+                  segStart={currentSegment.start}
+                  lessonPlayhead={teacherPlayhead}
+                  playing={playing}
+                />
+              </div>
+            ) : null}
+          </div>
+        </section>
+
+        <footer className="mx-auto mb-3 flex w-[calc(100%-16px)] max-w-[1480px] items-center gap-2 rounded-2xl border border-white/12 bg-black/30 px-2.5 py-1.5 backdrop-blur-md">
+          <Button
+            onClick={() => {
+              if (playing) {
+                setPlaying(false);
+                return;
+              }
+              if (cameraReady) {
+                void startTeacherPlayback(false, teacherMuted);
+                return;
+              }
+              void handleStart();
+            }}
+            className="rounded-full bg-gradient-to-r from-[#ff0055] via-[#9d4edd] to-[#00f3ff] px-3.5 py-1.5 text-[12px] text-white hover:brightness-110"
+          >
+            {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+            {playing ? "暂停" : cameraReady ? "继续" : "开始挑战"}
+          </Button>
+
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-[#ff0055] via-[#9d4edd] to-[#00f3ff] transition-[width] duration-100"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+            <span className="w-24 text-right font-mono text-[10px] text-white/55">
+              {fmtTime(teacherPlayhead)} / {fmtTime(duration)}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => void toggleTeacherSound()}
+            className={`inline-flex items-center gap-1 rounded-full border border-white/15 px-2 py-0.5 text-[10px] font-medium backdrop-blur transition ${
+              teacherMuted ? "bg-white/8 text-white/85 hover:bg-white/16" : "bg-amber-400/25 text-amber-100"
+            }`}
+            title={teacherMuted ? "打开老师声音" : "关闭老师声音"}
+          >
+            {teacherMuted ? <VolumeX className="h-3 w-3" /> : <Volume2 className="h-3 w-3" />}
+            {teacherMuted ? "开声音" : "有声音"}
+          </button>
+
+          <div className="scale-[0.84] origin-center">
+            <CameraPicker currentDeviceId={selectedDeviceId} onChange={switchCamera} />
+          </div>
+          <div className="scale-[0.84] origin-center">
+            <CameraControls
+              stream={cameraStream}
+              mirror={userMirror}
+              onMirrorChange={setUserMirror}
+              onReopenWithFacing={reopenWithFacing}
             />
           </div>
-          <span className="w-24 text-right font-mono text-[12px] text-white/55">
-            {fmtTime(teacherPlayhead)} / {fmtTime(duration)}
+
+          <button
+            type="button"
+            onClick={toggleCinema}
+            className={`inline-flex items-center gap-1 rounded-full border border-white/15 px-2 py-0.5 text-[10px] font-medium backdrop-blur transition ${
+              cinema ? "bg-amber-400/25 text-amber-100" : "bg-white/8 text-white/85 hover:bg-white/16"
+            }`}
+            title={cinema ? "退出沉浸 (Esc)" : "沉浸模式 (摄像头全屏 + 老师小窗)"}
+          >
+            {cinema ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3" />}
+            {cinema ? "退出沉浸" : "沉浸全屏"}
+          </button>
+
+          {cameraReady ? (
+            <Button variant="ghost" onClick={stopCameraStream} className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] hover:bg-white/10">
+              关闭摄像头
+            </Button>
+          ) : null}
+
+          <span className="text-[10px] text-white/35">
+            {trackingOverlayLayer === "silhouette"
+              ? overlayStatus === "ready"
+                ? "剪影已就位"
+                : overlayStatus === "loading"
+                  ? "剪影加载中..."
+                  : ""
+              : ""}
           </span>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => void toggleTeacherSound()}
-          className={`inline-flex items-center gap-2 rounded-full border border-white/15 px-3 py-1.5 text-[12px] font-medium backdrop-blur transition ${
-            teacherMuted ? "bg-white/8 text-white/85 hover:bg-white/16" : "bg-amber-400/25 text-amber-100"
-          }`}
-          title={teacherMuted ? "打开老师视频声音" : "关闭老师视频声音"}
-        >
-          {teacherMuted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
-          {teacherMuted ? "开声音" : "有声音"}
-        </button>
-        <CameraPicker currentDeviceId={selectedDeviceId} onChange={switchCamera} />
-        <CameraControls
-          stream={cameraStream}
-          mirror={userMirror}
-          onMirrorChange={setUserMirror}
-          onReopenWithFacing={reopenWithFacing}
-        />
-
-        <button
-          type="button"
-          onClick={toggleCinema}
-          className={`inline-flex items-center gap-2 rounded-full border border-white/15 px-3 py-1.5 text-[12px] font-medium backdrop-blur transition ${
-            cinema ? "bg-amber-400/25 text-amber-100" : "bg-white/8 text-white/85 hover:bg-white/16"
-          }`}
-          title={cinema ? "退出沉浸 (Esc)" : "沉浸模式 (摄像头全屏 + 老师小窗)"}
-        >
-          {cinema ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
-          {cinema ? "退出沉浸" : "沉浸全屏"}
-        </button>
-
-        {cameraReady ? (
-          <Button variant="ghost" onClick={stopCameraStream} className="rounded-full">
-            关闭摄像头
-          </Button>
-        ) : null}
-
-        <span className="text-[11px] text-white/35">
-          {trackingOverlayLayer === "silhouette"
-            ? overlayStatus === "ready"
-              ? "剪影已就位"
-              : overlayStatus === "loading"
-                ? "剪影加载中..."
-                : ""
-            : ""}
-        </span>
-      </footer>
+        </footer>
+      </div>
     </main>
   );
 }

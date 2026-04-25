@@ -22,7 +22,7 @@ export function Toast({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 12, scale: 0.98 }}
           transition={{ duration: 0.18, ease: "easeOut" }}
-          className="fixed inset-x-5 bottom-[88px] z-50 mx-auto max-w-md"
+          className="fixed inset-x-5 bottom-[88px] z-50 mx-auto max-w-md md:bottom-6 md:max-w-lg"
         >
           <div className="flex items-center justify-between gap-4 rounded-[20px] border border-white/8 bg-bg-surface px-4 py-3 text-sm text-white shadow-[0_16px_32px_rgba(0,0,0,0.28)]">
             <span className="min-w-0 flex-1 leading-6 text-white/88">{toast.message}</span>

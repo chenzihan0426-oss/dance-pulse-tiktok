@@ -38,7 +38,7 @@ export default function CommunityPage() {
   }, []);
 
   return (
-    <main className="mx-auto min-h-screen max-w-md px-5 pb-10 pt-10 text-white">
+    <main className="mx-auto min-h-screen max-w-6xl px-5 pb-10 pt-10 text-white md:px-8 md:pb-14 md:pt-12">
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="inline-flex items-center gap-2 rounded-full bg-brand/12 px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-brand-light">
