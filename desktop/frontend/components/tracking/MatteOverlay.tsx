@@ -18,6 +18,8 @@ import * as THREE from "three";
 
 export type MatteOverlayStatus = "idle" | "loading" | "ready" | "error";
 
+const MATTE_TARGET_FPS = 24;
+
 interface Props {
   rgbUrl: string;                                    // 老师前景 RGB 视频 URL
   maskUrl: string;                                   // 老师 alpha mask 视频 URL
@@ -360,9 +362,17 @@ export default function MatteOverlay({
 
     let rafId: number | null = null;
     let disposed = false;
+    let lastRenderMs = 0;
 
     const animate = () => {
       if (disposed) return;
+      const now = performance.now();
+      if (now - lastRenderMs < 1000 / MATTE_TARGET_FPS) {
+        rafId = requestAnimationFrame(animate);
+        return;
+      }
+      lastRenderMs = now;
+
       material.uniforms.uShimmer.value = 0.0;
       material.uniforms.uShimmerSweep.value = -2.0;
       const visual = visualRef.current;

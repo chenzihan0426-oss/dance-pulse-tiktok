@@ -29,6 +29,8 @@ type GlowColor = {
 const DEFAULT_SOURCE_ASPECT = 9 / 16;
 const MIN_VIS = 0.06;
 const SMOOTHING = 0.42;
+const SKELETON_MAX_DPR = 1.25;
+const SKELETON_TARGET_FPS = 30;
 
 const EDGES: Array<[number, number]> = [
   [0, 11],
@@ -268,6 +270,7 @@ function drawJoint(
 export default function AdaptiveSkeletonOverlay({
   framesRef,
   currentTimeSec,
+  currentTimeRef,
   tuning,
   mirror = true,
   active = true,
@@ -275,7 +278,8 @@ export default function AdaptiveSkeletonOverlay({
   className,
 }: {
   framesRef: React.MutableRefObject<TeacherFrame[]>;
-  currentTimeSec: number;
+  currentTimeSec?: number;
+  currentTimeRef?: React.MutableRefObject<number>;
   tuning: SkeletonTuning;
   mirror?: boolean;
   active?: boolean;
@@ -283,13 +287,13 @@ export default function AdaptiveSkeletonOverlay({
   className?: string;
 }) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
-  const timeRef = React.useRef(currentTimeSec);
+  const timeRef = React.useRef(currentTimeSec ?? 0);
   const tuningRef = React.useRef(tuning);
   const sourceAspectRef = React.useRef(sourceAspect);
   const previousPointsRef = React.useRef<DrawPoint[]>([]);
 
   React.useEffect(() => {
-    timeRef.current = currentTimeSec;
+    if (typeof currentTimeSec === "number") timeRef.current = currentTimeSec;
   }, [currentTimeSec]);
 
   React.useEffect(() => {
@@ -305,17 +309,25 @@ export default function AdaptiveSkeletonOverlay({
     if (!active) return;
     let raf = 0;
     let disposed = false;
+    let lastDrawMs = 0;
 
     const tick = () => {
       if (disposed) return;
+      const now = performance.now();
       const canvas = canvasRef.current;
       if (!canvas) {
         raf = requestAnimationFrame(tick);
         return;
       }
 
+      if (now - lastDrawMs < 1000 / SKELETON_TARGET_FPS) {
+        raf = requestAnimationFrame(tick);
+        return;
+      }
+      lastDrawMs = now;
+
       const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = Math.min(window.devicePixelRatio || 1, SKELETON_MAX_DPR);
       const width = Math.max(1, Math.round(rect.width * dpr));
       const height = Math.max(1, Math.round(rect.height * dpr));
       if (canvas.width !== width || canvas.height !== height) {
@@ -331,7 +343,7 @@ export default function AdaptiveSkeletonOverlay({
       }
       ctx.clearRect(0, 0, width, height);
 
-      const frame = nearestFrame(framesRef.current, timeRef.current);
+      const frame = nearestFrame(framesRef.current, currentTimeRef?.current ?? timeRef.current);
       if (frame?.keypoints?.length) {
         const target = frame.keypoints.map((point) =>
           toCanvasPoint(point, width, height, tuningRef.current, sourceAspectRef.current)
@@ -356,7 +368,6 @@ export default function AdaptiveSkeletonOverlay({
           const b = points[to];
           if (a && b) drawDoubleRail(ctx, a, b, from, to, dpr, intensity);
         }
-        const now = performance.now();
         drawHeadRing(ctx, points, dpr, intensity);
         points.forEach((point, index) => drawJoint(ctx, point, index, now, dpr, intensity));
         ctx.restore();
@@ -370,7 +381,7 @@ export default function AdaptiveSkeletonOverlay({
       disposed = true;
       cancelAnimationFrame(raf);
     };
-  }, [active, framesRef]);
+  }, [active, currentTimeRef, framesRef]);
 
   return (
     <canvas

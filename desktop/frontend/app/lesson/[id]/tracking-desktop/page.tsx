@@ -53,6 +53,8 @@ const BP_RIGHT_HIP = 24;
 const DEFAULT_POSE_ASPECT = 9 / 16;
 const MATTE_TUNING_KEY = "dp_tracking_matte_tuning_v2";
 const TRACKING_OVERLAY_LAYER_KEY = "dp_tracking_overlay_layer_v1";
+const ENABLE_REALTIME_SCORING = process.env.NEXT_PUBLIC_ENABLE_TRACKING_SCORE === "true";
+const TEACHER_PLAYHEAD_UI_FPS = 8;
 const DEFAULT_MATTE_TUNING: MatteTuning = {
   scale: 1.5,
   offsetX: 0,
@@ -234,7 +236,10 @@ export default function TrackingDesktopPage() {
   const [teacherMuted, setTeacherMuted] = React.useState(true);
   const [teacherPlayhead, setTeacherPlayhead] = React.useState(0);
   const teacherPlayheadRef = React.useRef(0);
-  React.useEffect(() => { teacherPlayheadRef.current = teacherPlayhead; }, [teacherPlayhead]);
+  const setTeacherPlayheadNow = React.useCallback((next: number) => {
+    teacherPlayheadRef.current = next;
+    setTeacherPlayhead(next);
+  }, []);
 
   const [finished, setFinished] = React.useState(false);
 
@@ -475,9 +480,10 @@ export default function TrackingDesktopPage() {
 
   useLivePose({
     videoRef: cameraRef,
-    active: cameraReady,
+    active: cameraReady && ENABLE_REALTIME_SCORING,
     onPose: handleUserPose,
     mirror: true,
+    maxFps: 10,
   });
 
   // 老师视频播放/暂停/进度同步
@@ -496,10 +502,19 @@ export default function TrackingDesktopPage() {
   React.useEffect(() => {
     if (!playing) return;
     let rafId = 0;
+    let lastUiUpdateMs = 0;
     const tick = () => {
       const v = teacherRef.current;
       const source = teacherVideoSourcesRef.current[teacherVideoIndexRef.current];
-      if (v) setTeacherPlayhead((source?.start ?? 0) + v.currentTime);
+      if (v) {
+        const next = (source?.start ?? 0) + v.currentTime;
+        teacherPlayheadRef.current = next;
+        const now = performance.now();
+        if (now - lastUiUpdateMs >= 1000 / TEACHER_PLAYHEAD_UI_FPS) {
+          lastUiUpdateMs = now;
+          setTeacherPlayhead(next);
+        }
+      }
       rafId = window.requestAnimationFrame(tick);
     };
     rafId = window.requestAnimationFrame(tick);
@@ -562,7 +577,11 @@ export default function TrackingDesktopPage() {
       throw new Error("当前浏览器不支持摄像头，请使用 Chrome / Edge 重试。");
     }
 
-    const baseCon: MediaTrackConstraints = { width: { ideal: 1280 }, height: { ideal: 720 } };
+    const baseCon: MediaTrackConstraints = {
+      width: { ideal: 960 },
+      height: { ideal: 540 },
+      frameRate: { ideal: 30, max: 30 },
+    };
     const buildVideo = (nextDeviceId: string | null): MediaTrackConstraints => (
       nextDeviceId
         ? { ...baseCon, deviceId: { exact: nextDeviceId } }
@@ -691,7 +710,7 @@ export default function TrackingDesktopPage() {
         }
         teacherVideoIndexRef.current = index;
         setTeacherVideoIndex(index);
-        setTeacherPlayhead(source.start + video.currentTime);
+        setTeacherPlayheadNow(source.start + video.currentTime);
         await video.play();
         setTeacherMuted(muted);
         setPlaying(true);
@@ -703,7 +722,7 @@ export default function TrackingDesktopPage() {
     }
     setPlaying(false);
     throw new Error(teacherVideoErrorMessage());
-  }, [lesson?.duration, teacherMuted]);
+  }, [lesson?.duration, setTeacherPlayheadNow, teacherMuted]);
 
   const handleTeacherVideoError = React.useCallback(() => {
     const sources = teacherVideoSourcesRef.current;
@@ -715,7 +734,7 @@ export default function TrackingDesktopPage() {
     }
     teacherVideoIndexRef.current = nextIndex;
     setTeacherVideoIndex(nextIndex);
-    setTeacherPlayhead(sources[nextIndex].start);
+    setTeacherPlayheadNow(sources[nextIndex].start);
     if (playing) {
       window.setTimeout(() => {
         void startTeacherPlayback(false, teacherMuted).catch((err) => {
@@ -724,7 +743,7 @@ export default function TrackingDesktopPage() {
         });
       }, 0);
     }
-  }, [playing, startTeacherPlayback, teacherMuted]);
+  }, [playing, setTeacherPlayheadNow, startTeacherPlayback, teacherMuted]);
 
   const handleTeacherEnded = React.useCallback(() => {
     const sources = teacherVideoSourcesRef.current;
@@ -734,7 +753,7 @@ export default function TrackingDesktopPage() {
       const nextIndex = teacherVideoIndexRef.current + 1;
       teacherVideoIndexRef.current = nextIndex;
       setTeacherVideoIndex(nextIndex);
-      setTeacherPlayhead(nextSource.start);
+      setTeacherPlayheadNow(nextSource.start);
       window.setTimeout(() => {
         void startTeacherPlayback(false, teacherMuted).catch((err) => {
           setPlaying(false);
@@ -745,7 +764,7 @@ export default function TrackingDesktopPage() {
     }
     setPlaying(false);
     setFinished(true);
-  }, [startTeacherPlayback, teacherMuted]);
+  }, [setTeacherPlayheadNow, startTeacherPlayback, teacherMuted]);
 
   const toggleTeacherSound = React.useCallback(async () => {
     const nextMuted = !teacherMuted;
@@ -777,8 +796,8 @@ export default function TrackingDesktopPage() {
     smootherRef.current.reset();
     teacherVideoIndexRef.current = 0;
     setTeacherVideoIndex(0);
-    setTeacherPlayhead(0);
-  }, []);
+    setTeacherPlayheadNow(0);
+  }, [setTeacherPlayheadNow]);
 
   const handleStart = async () => {
     resetChallengeState();
@@ -916,6 +935,7 @@ export default function TrackingDesktopPage() {
             <AdaptiveSkeletonOverlay
               framesRef={teacherFramesRef}
               currentTimeSec={teacherPlayhead}
+              currentTimeRef={teacherPlayheadRef}
               tuning={matteTuning}
               mirror={userMirror}
               active={cameraReady && trackingOverlayLayer === "skeleton"}
