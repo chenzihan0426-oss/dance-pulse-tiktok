@@ -368,8 +368,7 @@ export default function AdaptiveSkeletonOverlay({
           const b = points[to];
           if (a && b) drawDoubleRail(ctx, a, b, from, to, dpr, intensity);
         }
-        drawHeadRing(ctx, points, dpr, intensity);
-        points.forEach((point, index) => drawJoint(ctx, point, index, now, dpr, intensity));
+        // 头环 + 关节光晕已砍 (drawHeadRing / drawJoint)，依赖 doubleRail 即可显示骨骼
         ctx.restore();
       }
 
