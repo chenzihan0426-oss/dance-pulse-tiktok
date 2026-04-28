@@ -1,12 +1,28 @@
-# 同时启动 mobile + desktop 两套 (4 个 PowerShell 窗口)
+# Start both DancePulse stacks. Child scripts skip ports that are already running.
+param(
+    [switch]$NoWait,
+    [switch]$NoBrowser,
+    [switch]$Lan
+)
+
 $ErrorActionPreference = "Stop"
 $ROOT = $PSScriptRoot
 
-& "$ROOT\start-mobile.ps1"
-Start-Sleep -Seconds 1
-& "$ROOT\start-desktop.ps1"
+$childArgs = @()
+if ($NoWait) {
+    $childArgs += "-NoWait"
+}
+if ($NoBrowser) {
+    $childArgs += "-NoBrowser"
+}
+if ($Lan) {
+    $childArgs += "-Lan"
+}
+
+& "$ROOT\start-mobile.ps1" @childArgs
+& "$ROOT\start-desktop.ps1" @childArgs
 
 Write-Host ""
-Write-Host "全部启动:" -ForegroundColor Green
+Write-Host "All stacks requested:" -ForegroundColor Green
 Write-Host "  Mobile:  http://127.0.0.1:3100"
 Write-Host "  Desktop: http://127.0.0.1:3200"

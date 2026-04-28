@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { RotateCcw } from "lucide-react";
+import { EyeOff, RotateCcw, SlidersHorizontal } from "lucide-react";
 
 export type MatteTuning = {
   scale: number;
@@ -92,20 +92,48 @@ export default function MatteTuningPanel({
   onReset,
   className,
 }: Props) {
+  const [collapsed, setCollapsed] = React.useState(false);
+
+  if (collapsed) {
+    return (
+      <button
+        type="button"
+        onClick={() => setCollapsed(false)}
+        className={`pointer-events-auto z-50 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/58 text-white/82 shadow-[0_10px_28px_rgba(0,0,0,0.36)] backdrop-blur-md transition hover:bg-white/14 ${className ?? ""}`}
+        title="显示画面调节"
+        aria-label="显示画面调节面板"
+      >
+        <SlidersHorizontal className="h-4 w-4" />
+      </button>
+    );
+  }
+
   return (
     <div
-      className={`pointer-events-auto z-50 w-[308px] rounded-lg border border-white/12 bg-black/58 px-3 py-2.5 shadow-[0_12px_32px_rgba(0,0,0,0.45)] backdrop-blur-md ${className ?? ""}`}
+      className={`pointer-events-auto z-50 w-[min(308px,calc(100vw-24px))] rounded-lg border border-white/12 bg-black/58 px-3 py-2.5 shadow-[0_12px_32px_rgba(0,0,0,0.45)] backdrop-blur-md ${className ?? ""}`}
     >
       <div className="mb-1.5 flex items-center justify-between">
         <span className="text-[11px] font-medium text-white/72">画面调节</span>
-        <button
-          type="button"
-          onClick={onReset}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/8 text-white/75 hover:bg-white/14"
-          title="重置"
-        >
-          <RotateCcw className="h-3.5 w-3.5" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={onReset}
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/8 text-white/75 hover:bg-white/14"
+            title="重置"
+            aria-label="重置画面调节"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setCollapsed(true)}
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/8 text-white/75 hover:bg-white/14"
+            title="隐藏面板"
+            aria-label="隐藏画面调节面板"
+          >
+            <EyeOff className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
 
       <div className="mb-2 grid grid-cols-2 gap-1 rounded-lg bg-white/8 p-1">

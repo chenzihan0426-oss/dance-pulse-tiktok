@@ -147,11 +147,8 @@ def follow_user(
 def _resolve_actor_id(authorization: str | None) -> str:
     if not authorization:
         return GUEST_USER_ID
-    try:
-        token = parse_auth_token(authorization)
-        return get_user_by_token(token).id
-    except HTTPException:
-        return GUEST_USER_ID
+    token = parse_auth_token(authorization)
+    return get_user_by_token(token).id
 
 
 def _safe_get_tracking_result(result_id: str):

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-import random
+import os
 import re
 import secrets
 from datetime import UTC, datetime, timedelta
@@ -28,6 +28,7 @@ USERS_FILE = AUTH_DIR / "users.json"
 SESSIONS_FILE = AUTH_DIR / "sessions.json"
 CODES_FILE = AUTH_DIR / "codes.json"
 SNAPSHOTS_FILE = AUTH_DIR / "snapshots.json"
+TRUTHY_ENV_VALUES = {"1", "true", "yes", "on"}
 
 
 def _ensure_auth_dir() -> None:
@@ -58,6 +59,10 @@ def _sanitize_phone(phone: str) -> str:
     if len(digits) < 6:
         raise HTTPException(status_code=400, detail="Phone number is invalid")
     return digits
+
+
+def should_expose_sms_code() -> bool:
+    return os.environ.get("DANCEPULSE_EXPOSE_DEV_SMS_CODE", "").lower() in TRUTHY_ENV_VALUES
 
 
 def _load_users() -> dict[str, dict]:
@@ -115,7 +120,7 @@ def _normalize_snapshot(raw: dict | None) -> LocalProgressSnapshot:
 
 def send_sms_code(phone: str) -> tuple[str, int]:
     normalized_phone = _sanitize_phone(phone)
-    code = f"{random.randint(0, 999999):06d}"
+    code = f"{secrets.randbelow(1_000_000):06d}"
     expires_at = (datetime.now(UTC) + timedelta(minutes=5)).isoformat()
     codes = _load_codes()
     codes[normalized_phone] = {

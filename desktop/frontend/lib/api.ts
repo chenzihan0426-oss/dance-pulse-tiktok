@@ -39,8 +39,47 @@ export const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
 const DEFAULT_API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
 const API_OVERRIDE_KEY = "dp_api_override";
 
+function normalizeApiBase(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  try {
+    const url = new URL(trimmed);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+    url.hash = "";
+    url.search = "";
+    return url.toString().replace(/\/$/, "");
+  } catch {
+    return null;
+  }
+}
+
+const DEFAULT_API_BASE_NORMALIZED = normalizeApiBase(DEFAULT_API_BASE) ?? DEFAULT_API_BASE;
+const CONFIGURED_API_ALLOWLIST = (process.env.NEXT_PUBLIC_ALLOWED_API_BASES || "")
+  .split(",")
+  .map(normalizeApiBase)
+  .filter((item): item is string => Boolean(item));
+
 function isLocalApiBase(value: string): boolean {
-  return /localhost|127\.0\.0\.1/i.test(value);
+  const normalized = normalizeApiBase(value);
+  if (!normalized) return false;
+  const { hostname } = new URL(normalized);
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+}
+
+function getAllowedApiOverride(value: string): string | null {
+  const normalized = normalizeApiBase(value);
+  if (!normalized) return null;
+  if (normalized === DEFAULT_API_BASE_NORMALIZED) return normalized;
+  if (CONFIGURED_API_ALLOWLIST.includes(normalized)) return normalized;
+  if (isLocalApiBase(normalized)) return normalized;
+
+  if (typeof window !== "undefined") {
+    const { hostname } = new URL(normalized);
+    if (hostname === window.location.hostname) return normalized;
+  }
+
+  return null;
 }
 
 function setApiOverride(value: string): void {
@@ -63,17 +102,21 @@ export function getApiBase(): string {
     const params = new URLSearchParams(window.location.search);
     const override = params.get("api")?.trim();
     if (override) {
-      setApiOverride(override);
-      return override;
+      const allowedOverride = getAllowedApiOverride(override);
+      if (allowedOverride) {
+        setApiOverride(allowedOverride);
+        return allowedOverride;
+      }
+      clearApiOverride();
     }
     const cached = getStoredApiOverride();
-    if (cached && cached === DEFAULT_API_BASE) return cached;
-    if (cached && isLocalApiBase(DEFAULT_API_BASE)) {
+    if (cached) {
+      const allowedCached = getAllowedApiOverride(cached);
+      if (allowedCached) return allowedCached;
       clearApiOverride();
-      return DEFAULT_API_BASE;
     }
   }
-  return DEFAULT_API_BASE;
+  return DEFAULT_API_BASE_NORMALIZED;
 }
 
 type MockJobRecord = JobStatus;
@@ -199,15 +242,15 @@ async function http<T>(
   } catch (error) {
     const canRetryWithDefault =
       typeof window !== "undefined" &&
-      apiBase !== DEFAULT_API_BASE &&
-      !isLocalApiBase(DEFAULT_API_BASE);
+      apiBase !== DEFAULT_API_BASE_NORMALIZED &&
+      !isLocalApiBase(DEFAULT_API_BASE_NORMALIZED);
 
     if (!canRetryWithDefault) {
       throw error;
     }
 
     clearApiOverride();
-    return runRequest(DEFAULT_API_BASE);
+    return runRequest(DEFAULT_API_BASE_NORMALIZED);
   }
 }
 
@@ -575,6 +618,9 @@ export async function submitTrackingVideo(
   });
   if (!res.ok) {
     const text = await res.text().catch(() => "");
+    if (res.status === 401 && authToken) {
+      clearAuthSession();
+    }
     throw new Error(`${res.status} ${res.statusText}: ${text}`);
   }
   return normalizeTrackingResult((await res.json()) as TrackingResult);

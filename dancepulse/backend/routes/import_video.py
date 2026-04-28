@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import asyncio
+import uuid
+from pathlib import Path
 from typing import Optional
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
@@ -9,8 +11,17 @@ from models import ImportRequest, ImportResponse, JobStatusResponse
 from services.import_runner import run_import_job, run_upload_job, save_import_cookies
 from services.douyin_fetch import FetchError, normalize_douyin_url
 from services.job_store import create_queued_job, find_active_job_by_url, load_job
+from services.upload_validation import (
+    MAX_COOKIES_UPLOAD_BYTES,
+    MAX_VIDEO_UPLOAD_BYTES,
+    guess_video_extension,
+    read_upload_with_limit,
+    save_upload_to_path,
+)
 
 router = APIRouter(prefix="/api", tags=["import"])
+BASE_DIR = Path(__file__).resolve().parent.parent
+IMPORT_UPLOADS_DIR = BASE_DIR / "data" / "uploads"
 
 
 @router.post("/import", response_model=ImportResponse)
@@ -59,7 +70,11 @@ async def import_from_url_with_cookies(
     cookies_path: str | None = None
 
     if cookies_file is not None:
-        content = await cookies_file.read()
+        content = await read_upload_with_limit(
+            cookies_file,
+            max_bytes=MAX_COOKIES_UPLOAD_BYTES,
+            empty_detail="Cookies file is empty",
+        )
         cookies_path = str(
             save_import_cookies(job.job_id, cookies_file.filename or "cookies.txt", content)
         )
@@ -74,10 +89,20 @@ async def import_from_url_with_cookies(
 
 @router.post("/import/upload", response_model=ImportResponse)
 async def import_upload(file: UploadFile = File(...)) -> ImportResponse:
+    suffix = guess_video_extension(file)
+    temp_path = IMPORT_UPLOADS_DIR / f"upload_{uuid.uuid4().hex}{suffix}"
+    await save_upload_to_path(
+        file,
+        temp_path,
+        max_bytes=MAX_VIDEO_UPLOAD_BYTES,
+        empty_detail="Upload video is empty",
+    )
+
     job = create_queued_job(url=None)
-    content = await file.read()
+    upload_path = IMPORT_UPLOADS_DIR / f"{job.job_id}{suffix}"
+    temp_path.replace(upload_path)
     asyncio.create_task(
-        run_upload_job(job.job_id, content, file.filename or "upload.mp4"),
+        run_upload_job(job.job_id, str(upload_path), file.filename or f"upload{suffix}"),
     )
     return ImportResponse(
         job_id=job.job_id,

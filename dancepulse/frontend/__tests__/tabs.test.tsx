@@ -14,11 +14,8 @@ vi.mock("next/link", () => ({
     children,
     href,
     ...props
-  }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  ),
+  }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) =>
+    React.createElement("a", { href, ...props }, children),
 }));
 
 describe("BottomTabBar", () => {

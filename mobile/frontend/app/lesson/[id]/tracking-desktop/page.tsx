@@ -359,6 +359,9 @@ export default function TrackingDesktopPage() {
   const [facingMode, setFacingMode] = React.useState<"user" | "environment">("user");
 
   const openStream = React.useCallback(async (deviceId: string | null, facing?: "user" | "environment") => {
+    if (typeof window !== "undefined" && !window.isSecureContext) {
+      throw new Error("手机浏览器需要 HTTPS 才能开启摄像头，请用 start-mobile-phone.bat 打开的 https 地址访问。");
+    }
     if (!navigator.mediaDevices?.getUserMedia) {
       throw new Error("当前浏览器不支持摄像头，请使用 Chrome / Edge 重试。");
     }
@@ -707,7 +710,7 @@ export default function TrackingDesktopPage() {
               onChange={setMatteTuning}
               onLayerChange={setTrackingOverlayLayer}
               onReset={resetMatteTuning}
-              className="absolute bottom-12 left-1/2 w-[min(280px,calc(100%-24px))] -translate-x-1/2"
+              className="absolute bottom-12 left-1/2 -translate-x-1/2"
             />
           ) : null}
         </div>

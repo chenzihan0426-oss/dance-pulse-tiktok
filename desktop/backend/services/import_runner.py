@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import shutil
 import sys
 import uuid
 from pathlib import Path
@@ -113,18 +114,19 @@ def _run_import_job_sync(
 
 def _run_upload_job_sync(
     job_id: str,
-    content: bytes,
+    upload_file: Path,
     filename: str,
 ) -> Lesson:
     safe_name = Path(filename).name.replace("..", "_") or "upload.mp4"
     title = Path(safe_name).stem or "本地上传"
-    if not safe_name.lower().endswith(".mp4"):
-        safe_name += ".mp4"
+    upload_suffix = upload_file.suffix.lower()
+    if upload_suffix not in {".mp4", ".webm", ".mov", ".m4v"}:
+        upload_suffix = ".mp4"
 
     lesson_id = "les_" + uuid.uuid4().hex[:12]
     VIDEOS_DIR.mkdir(parents=True, exist_ok=True)
-    dest = VIDEOS_DIR / f"{lesson_id}.mp4"
-    dest.write_bytes(content)
+    dest = VIDEOS_DIR / f"{lesson_id}{upload_suffix}"
+    shutil.copyfile(upload_file, dest)
 
     update_job(
         job_id,
@@ -210,7 +212,8 @@ def save_import_cookies(job_id: str, filename: str, content: bytes) -> Path:
     return dest
 
 
-async def run_upload_job(job_id: str, content: bytes, filename: str) -> None:
+async def run_upload_job(job_id: str, upload_file_path: str, filename: str) -> None:
+    upload_file = Path(upload_file_path)
     try:
         update_job(
             job_id,
@@ -222,7 +225,7 @@ async def run_upload_job(job_id: str, content: bytes, filename: str) -> None:
         lesson = await asyncio.to_thread(
             _run_upload_job_sync,
             job_id,
-            content,
+            upload_file,
             filename,
         )
         update_job(
@@ -238,3 +241,5 @@ async def run_upload_job(job_id: str, content: bytes, filename: str) -> None:
         await teaching_queue.enqueue(lesson.id, seg_ids)
     except Exception as exc:
         update_job(job_id, status="failed", error=str(exc))
+    finally:
+        upload_file.unlink(missing_ok=True)

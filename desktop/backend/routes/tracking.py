@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-from pathlib import Path
-
-from fastapi import APIRouter, File, Header, HTTPException, UploadFile
+from fastapi import APIRouter, File, Header, UploadFile
 
 from models import TrackingResult, TrackingResultsResponse
 from services.auth_store import get_user_by_token, parse_auth_token
@@ -15,6 +13,7 @@ from services.tracking_store import (
     list_tracking_results,
     save_tracking_result,
 )
+from services.upload_validation import MAX_VIDEO_UPLOAD_BYTES, guess_video_extension, save_upload_to_path
 
 
 router = APIRouter(prefix="/api/lessons", tags=["tracking"])
@@ -28,13 +27,15 @@ async def analyze_tracking_video(
 ) -> TrackingResult:
     lesson = load_lesson(lesson_id)
     result_id = create_tracking_result_id()
-    suffix = _guess_extension(file)
+    suffix = guess_video_extension(file)
     ensure_tracking_dirs()
     video_path = (TRACKING_VIDEOS_DIR / f"{result_id}{suffix}").resolve()
-    content = await file.read()
-    if not content:
-        raise HTTPException(status_code=400, detail="Tracking video is empty")
-    video_path.write_bytes(content)
+    await save_upload_to_path(
+        file,
+        video_path,
+        max_bytes=MAX_VIDEO_UPLOAD_BYTES,
+        empty_detail="Tracking video is empty",
+    )
 
     user_id = _resolve_user_id(authorization)
     video_url = f"/tracking-videos/{video_path.name}"
@@ -62,22 +63,5 @@ def get_tracking_results(
 def _resolve_user_id(authorization: str | None) -> str:
     if not authorization:
         return "guest_local"
-    try:
-        token = parse_auth_token(authorization)
-        return get_user_by_token(token).id
-    except HTTPException:
-        return "guest_local"
-
-
-def _guess_extension(file: UploadFile) -> str:
-    name = file.filename or "tracking.webm"
-    suffix = Path(name).suffix.lower()
-    if suffix in {".mp4", ".webm", ".mov", ".m4v"}:
-        return suffix
-
-    content_type = (file.content_type or "").lower()
-    if "mp4" in content_type:
-        return ".mp4"
-    if "quicktime" in content_type:
-        return ".mov"
-    return ".webm"
+    token = parse_auth_token(authorization)
+    return get_user_by_token(token).id

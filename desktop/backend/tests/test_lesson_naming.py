@@ -19,12 +19,23 @@ from services.lesson_naming import (  # noqa: E402
 )
 
 
-SAMPLE_LESSON_PATH = BACKEND_DIR / "data" / "lessons" / "les_2c9fab3e0b47.json"
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}(?: \d{2}:\d{2})?$")
 
 
 def _load_sample_lesson() -> Lesson:
-    return Lesson.model_validate_json(SAMPLE_LESSON_PATH.read_text(encoding="utf-8"))
+    return Lesson(
+        id="les_test",
+        title="upload",
+        source_url="",
+        duration=10.0,
+        bpm=120.0,
+        video_url="",
+        thumbnail="",
+        confirmed=False,
+        beats=[],
+        sections=[],
+        segments=[],
+    )
 
 
 class LessonNamingTests(unittest.TestCase):

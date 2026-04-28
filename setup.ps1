@@ -19,8 +19,13 @@ function New-JunctionSafe {
         New-Item -ItemType Directory -Path $linkParent | Out-Null
     }
 
-    if (Test-Path -LiteralPath $Link) {
-        Remove-Item -LiteralPath $Link -Recurse -Force
+    $existing = Get-Item -LiteralPath $Link -Force -ErrorAction SilentlyContinue
+    if ($existing) {
+        $isLink = ($existing.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0
+        if (-not $isLink) {
+            throw "Refusing to delete existing non-link path: $Link"
+        }
+        Remove-Item -LiteralPath $Link -Force
     }
 
     $resolvedTarget = [System.IO.Path]::GetFullPath($Target)
@@ -28,7 +33,7 @@ function New-JunctionSafe {
         New-Item -ItemType Directory -Path $resolvedTarget | Out-Null
     }
 
-    cmd /c mklink /J "$Link" "$resolvedTarget" | Out-Null
+    New-Item -ItemType Junction -Path $Link -Target $resolvedTarget | Out-Null
     Write-Host "  $Link -> $resolvedTarget" -ForegroundColor Green
 }
 

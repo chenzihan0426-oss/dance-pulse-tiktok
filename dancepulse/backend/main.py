@@ -118,22 +118,21 @@ app.include_router(community_router)
 app.include_router(me_router)
 app.include_router(tracking_router)
 
-app.mount("/videos", StaticFiles(directory=BASE_DIR / "data" / "videos"), name="videos")
-app.mount("/clips", StaticFiles(directory=BASE_DIR / "data" / "clips"), name="clips")
-app.mount("/thumbs", StaticFiles(directory=BASE_DIR / "data" / "thumbs"), name="thumbs")
-(BASE_DIR / "data" / "pose").mkdir(parents=True, exist_ok=True)
-app.mount("/pose", StaticFiles(directory=BASE_DIR / "data" / "pose"), name="pose")
-(BASE_DIR / "data" / "matte").mkdir(parents=True, exist_ok=True)
-app.mount("/matte", StaticFiles(directory=BASE_DIR / "data" / "matte"), name="matte")
-(BASE_DIR / "data" / "pose_full").mkdir(parents=True, exist_ok=True)
-app.mount("/pose_full", StaticFiles(directory=BASE_DIR / "data" / "pose_full"), name="pose_full")
-(BASE_DIR / "data" / "particles").mkdir(parents=True, exist_ok=True)
-app.mount("/particles", StaticFiles(directory=BASE_DIR / "data" / "particles"), name="particles")
-app.mount(
-    "/tracking-videos",
-    StaticFiles(directory=BASE_DIR / "data" / "tracking" / "videos"),
-    name="tracking-videos",
-)
+
+def _mount_data_static(route: str, name: str, *parts: str) -> None:
+    directory = BASE_DIR / "data" / Path(*parts)
+    directory.mkdir(parents=True, exist_ok=True)
+    app.mount(route, StaticFiles(directory=directory), name=name)
+
+
+_mount_data_static("/videos", "videos", "videos")
+_mount_data_static("/clips", "clips", "clips")
+_mount_data_static("/thumbs", "thumbs", "thumbs")
+_mount_data_static("/pose", "pose", "pose")
+_mount_data_static("/matte", "matte", "matte")
+_mount_data_static("/pose_full", "pose_full", "pose_full")
+_mount_data_static("/particles", "particles", "particles")
+_mount_data_static("/tracking-videos", "tracking-videos", "tracking", "videos")
 
 
 @app.get("/health")

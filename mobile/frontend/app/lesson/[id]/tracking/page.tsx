@@ -150,6 +150,9 @@ export default function TrackingChallengePage() {
 
   const ensureCameraReady = React.useCallback(async () => {
     if (streamRef.current) return;
+    if (typeof window !== "undefined" && !window.isSecureContext) {
+      throw new Error("手机浏览器需要 HTTPS 才能开启摄像头，请用 start-mobile-phone.bat 打开的 https 地址访问。");
+    }
     if (!navigator.mediaDevices?.getUserMedia) {
       throw new Error("当前浏览器不支持摄像头录制，请改用上传视频。");
     }
