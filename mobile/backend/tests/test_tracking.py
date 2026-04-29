@@ -16,7 +16,7 @@ import routes.tracking as tracking_route  # noqa: E402
 import services.tracking_store as tracking_store  # noqa: E402
 
 
-SAMPLE_UPLOAD = BACKEND_DIR / "data" / "clips" / "les_18ec2100c5f7_seg_000.mp4"
+SAMPLE_UPLOAD = BACKEND_DIR / "data" / "clips" / "les_122ea874306b_seg_000.mp4"
 
 
 def test_tracking_upload_and_history(tmp_path, monkeypatch) -> None:
@@ -36,18 +36,18 @@ def test_tracking_upload_and_history(tmp_path, monkeypatch) -> None:
 
     result = asyncio.run(
         tracking_route.analyze_tracking_video(
-            "les_18ec2100c5f7",
+            "les_122ea874306b",
             file=upload,
             authorization=None,
         )
     )
 
-    assert result.lessonId == "les_18ec2100c5f7"
+    assert result.lessonId == "les_122ea874306b"
     assert result.userId == "guest_local"
     assert result.score >= 0
     assert len(result.segmentScores) > 0
     assert results_file.exists()
 
-    history = tracking_route.get_tracking_results("les_18ec2100c5f7", authorization=None)
+    history = tracking_route.get_tracking_results("les_122ea874306b", authorization=None)
     assert len(history.results) == 1
     assert history.results[0].id == result.id

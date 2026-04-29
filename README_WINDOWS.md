@@ -52,9 +52,10 @@ setup.ps1 会:
 点 DEMO 标的卡片进 lesson → 点"跟拍整支" → 给摄像头权限 → 跟跳.
 
 可挑战的 demo lesson (matte + particle + pose_full 都齐):
-- `les_6763f0c1b7ce`
 - `les_122ea874306b`
-- `les_f3c105795a26` (打包时可能还在跑, 完整后会自动 demo_ready)
+
+保留的原始示例视频:
+- `antifragile_dp` / `backend\data\videos\antifragile.mp4`
 
 ## 4. 给新视频跑全套预处理
 

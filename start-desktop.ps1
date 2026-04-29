@@ -2,7 +2,8 @@
 param(
     [switch]$NoWait,
     [switch]$NoBrowser,
-    [switch]$Lan
+    [switch]$Lan,
+    [switch]$ExposeDevSmsCode
 )
 
 $ErrorActionPreference = "Stop"
@@ -158,8 +159,9 @@ $CorsOrigins = @(
     $LanWeb
 ) | Sort-Object -Unique
 $CorsOriginsValue = $CorsOrigins -join ","
+$ExposeDevSmsCodeValue = if ($ExposeDevSmsCode) { "true" } else { "false" }
 
-$BackendCommand = "`$env:DANCEPULSE_EXPOSE_DEV_SMS_CODE='true'; `$env:CORS_ORIGINS=$(ConvertTo-PSLiteral $CorsOriginsValue); Set-Location -LiteralPath $(ConvertTo-PSLiteral $BackendDir); & $(ConvertTo-PSLiteral $PythonExe) -m uvicorn main:app --host $ListenHost --port $BackendPort"
+$BackendCommand = "`$env:DANCEPULSE_EXPOSE_DEV_SMS_CODE=$(ConvertTo-PSLiteral $ExposeDevSmsCodeValue); `$env:CORS_ORIGINS=$(ConvertTo-PSLiteral $CorsOriginsValue); Set-Location -LiteralPath $(ConvertTo-PSLiteral $BackendDir); & $(ConvertTo-PSLiteral $PythonExe) -m uvicorn main:app --host $ListenHost --port $BackendPort"
 $FrontendCommand = "`$env:NEXT_PUBLIC_API_BASE=$(ConvertTo-PSLiteral $ApiBase); `$env:NEXT_PUBLIC_USE_MOCK='false'; Set-Location -LiteralPath $(ConvertTo-PSLiteral $FrontendDir); & npx.cmd next dev --hostname $ListenHost --port $FrontendPort"
 
 Start-DevWindow -Name "DancePulse Desktop API" -Port $BackendPort -Command $BackendCommand | Out-Null

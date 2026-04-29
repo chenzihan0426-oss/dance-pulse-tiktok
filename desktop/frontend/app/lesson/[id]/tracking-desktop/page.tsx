@@ -290,7 +290,7 @@ export default function TrackingDesktopPage() {
   const [mousePos, setMousePos] = React.useState({ x: -1000, y: -1000 });
   const mouseRef = React.useRef({ x: -1000, y: -1000 });
 
-  // lesson video 浣滀负鏁存敮鎸戞垬鐨?鑰佸笀鏃堕棿绾?
+  // Lesson video is the main timeline driver for the teacher playback.
   const teacherRef = React.useRef<HTMLVideoElement>(null);
   const [teacherVideoIndex, setTeacherVideoIndex] = React.useState(0);
   const teacherVideoIndexRef = React.useRef(0);
@@ -304,14 +304,14 @@ export default function TrackingDesktopPage() {
     setTeacherPlayhead(next);
   }, []);
 
-  // 璇勫垎
+  // Scoring and teacher pose frame caches.
   const teacherFramesRef = React.useRef<TeacherFrame[]>([]);
   const teacherFramesLoadedRef = React.useRef<Set<string>>(new Set());
   const teacherFramesCacheRef = React.useRef<Map<string, TeacherFrame[]>>(new Map());
   const teacherPoseAspectCacheRef = React.useRef<Map<string, number>>(new Map());
   const [teacherPoseAspect, setTeacherPoseAspect] = React.useState(DEFAULT_POSE_ASPECT);
 
-  // 棰勫姞杞藉壀褰辩礌鏉愬埌 HTTP 缂撳瓨 (lesson 涓€鍔犺浇灏卞紑濮?
+  // Preload matte and particle assets into the HTTP cache when a lesson loads.
   React.useEffect(() => {
     if (!lesson) return;
     const urls = lesson.segments
@@ -373,7 +373,7 @@ export default function TrackingDesktopPage() {
     setTeacherVideoIndex(0);
   }, [lesson?.id]);
 
-  // 褰撳墠鏃堕棿鎵€鍦?segment
+  // Segment under the current teacher playhead.
   const currentSegment = React.useMemo<Segment | null>(() => {
     if (!lesson) return null;
     for (const seg of lesson.segments) {
@@ -383,7 +383,7 @@ export default function TrackingDesktopPage() {
     return lesson.segments.find((s) => !s.deleted) ?? null;
   }, [lesson, teacherPlayhead]);
 
-  // 鎳掑姞杞藉綋鍓?segment 鐨?pose_full 鈫?TeacherFrame[]
+  // Load the current segment pose_full data into TeacherFrame[].
   React.useEffect(() => {
     if (!currentSegment?.pose_full_url) {
       teacherFramesRef.current = [];
@@ -403,7 +403,7 @@ export default function TrackingDesktopPage() {
     fetch(url)
       .then((res) => res.json())
       .then((doc: PoseJsonDoc) => {
-        // 杞垚 TeacherFrame[],鏃堕棿鍋忕Щ鍒?lesson 绾?
+        // Convert pose frames to absolute lesson time.
         const frames: TeacherFrame[] = (doc.frames ?? [])
           .filter((f) => f.detected !== false)
           .map((f) => ({
@@ -456,13 +456,13 @@ export default function TrackingDesktopPage() {
     return () => window.cancelAnimationFrame(rafId);
   }, [playing]);
 
-  // 鎽勫儚澶?(鏀寔閫夋嫨 deviceId, 澶栨帴 Insta / OBS 铏氭嫙鏈轰篃鑳界敤)
+  // Camera selection supports deviceId, including virtual cameras from Insta or OBS.
   const CAMERA_STORAGE_KEY = "dp_tracking_camera_device";
   const [selectedDeviceId, setSelectedDeviceId] = React.useState<string | null>(() => {
     if (typeof window === "undefined") return null;
     return window.localStorage.getItem(CAMERA_STORAGE_KEY);
   });
-  // 闀滃儚缈昏浆 state, 鍚屾椂浣滅敤浜庢憚鍍忓ご <video> 鐨?CSS transform 鍜?MatteOverlay 鐨?userMirror
+  // Mirror state drives both the camera video transform and the matte overlay.
   const [userMirror, setUserMirror] = React.useState(true);
   const [matteTuning, setMatteTuning] = React.useState<MatteTuning>(() => readMatteTuning());
   const [trackingOverlayLayer, setTrackingOverlayLayer] = React.useState<TrackingOverlayLayer>(() => readTrackingOverlayLayer());
@@ -477,10 +477,10 @@ export default function TrackingDesktopPage() {
   const resetMatteTuning = React.useCallback(() => {
     setMatteTuning(DEFAULT_MATTE_TUNING);
   }, []);
-  // facingMode (鍓?鍚庢憚鍍忓ご), 鐢ㄤ簬 openStream fallback
+  // facingMode is used as an openStream fallback when no deviceId is selected.
   const [facingMode, setFacingMode] = React.useState<"user" | "environment">("user");
 
-  // 娌夋蹈妯″紡: 鎽勫儚澶村叏灞?+ 鑰佸笀瑙嗛缂╁皬鍒板彸涓婅灏忕獥
+  // Cinema mode: full-screen camera with a smaller teacher preview window.
   const mainRef = React.useRef<HTMLElement>(null);
   const [cinema, setCinema] = React.useState(false);
   const toggleCinema = React.useCallback(() => {
@@ -561,7 +561,7 @@ export default function TrackingDesktopPage() {
 
   React.useEffect(() => () => { stopCameraStream(); }, [stopCameraStream]);
 
-  // 鍒囨崲鎽勫儚澶? 鍋滄帀褰撳墠娴?-> 鎹?deviceId -> 璧锋柊娴?(鍙湪宸插紑鍚椂绔嬪嵆鍒? 鍚﹀垯鍙浣忛€夋嫨)
+  // Switch front/back cameras by clearing deviceId and reopening the stream if active.
   const reopenWithFacing = React.useCallback(async (facing: "user" | "environment") => {
     setFacingMode(facing);
     setSelectedDeviceId(null);
@@ -570,7 +570,7 @@ export default function TrackingDesktopPage() {
     try {
       streamRef.current.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
-      // 鍒囧墠鍚庢憚鍍忓ご鏃? 涓嶅啀鐢?deviceId 绾︽潫
+      // Do not constrain by deviceId when switching front/back cameras.
       const stream = await openStream(null, facing);
       streamRef.current = stream;
       setCameraStream(stream);

@@ -23,6 +23,7 @@ coverage/
 
 # Local runtime data, generated media, and temporary workspaces
 logs/
+.codex-run-logs/
 .media-work/
 .media-backups/
 .chrome-codex/
@@ -49,8 +50,31 @@ desktop.ini
 *.tflite
 
 # Project seed assets that should travel with the repository.
+# Keep this list intentionally tiny; imported/generated lesson media stays local.
 !dancepulse/backend/data/
-!dancepulse/backend/data/**
+!dancepulse/backend/data/clips/
+!dancepulse/backend/data/clips/.gitkeep
+!dancepulse/backend/data/clips/les_122ea874306b_*.mp4
+!dancepulse/backend/data/lessons/
+!dancepulse/backend/data/lessons/.gitkeep
+!dancepulse/backend/data/lessons/antifragile_dp.json
+!dancepulse/backend/data/lessons/les_122ea874306b.json
+!dancepulse/backend/data/matte/
+!dancepulse/backend/data/matte/les_122ea874306b/
+!dancepulse/backend/data/matte/les_122ea874306b/**
+!dancepulse/backend/data/particles/
+!dancepulse/backend/data/particles/les_122ea874306b/
+!dancepulse/backend/data/particles/les_122ea874306b/**
+!dancepulse/backend/data/pose_full/
+!dancepulse/backend/data/pose_full/les_122ea874306b/
+!dancepulse/backend/data/pose_full/les_122ea874306b/**
+!dancepulse/backend/data/thumbs/
+!dancepulse/backend/data/thumbs/.gitkeep
+!dancepulse/backend/data/thumbs/les_122ea874306b_*.jpg
+!dancepulse/backend/data/videos/
+!dancepulse/backend/data/videos/.gitkeep
+!dancepulse/backend/data/videos/antifragile.mp4
+!dancepulse/backend/data/videos/les_122ea874306b.mp4
 !dancepulse/pipeline/models/
 !dancepulse/pipeline/models/**
 !dancepulse/pipeline/rvm_weights/

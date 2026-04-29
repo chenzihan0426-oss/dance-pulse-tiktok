@@ -38,7 +38,7 @@ class CreateCommentRequest(BaseModel):
 
 @router.get("/feed", response_model=CommunityFeedResponse)
 def get_community_feed(authorization: str | None = Header(default=None)) -> CommunityFeedResponse:
-    viewer_id = _resolve_actor_id(authorization)
+    viewer_id = _resolve_viewer_id(authorization)
     return CommunityFeedResponse(items=build_feed_items(viewer_id=viewer_id))
 
 
@@ -47,7 +47,7 @@ def get_community_tracking_detail(
     result_id: str,
     authorization: str | None = Header(default=None),
 ) -> CommunityTrackingDetailResponse:
-    viewer_id = _resolve_actor_id(authorization)
+    viewer_id = _resolve_viewer_id(authorization)
     result = _safe_get_tracking_result(result_id)
     if not result.isPublic:
         raise HTTPException(status_code=404, detail="Tracking result not found")
@@ -62,7 +62,7 @@ def publish_tracking(
     result_id: str,
     authorization: str | None = Header(default=None),
 ) -> TrackingResult:
-    actor_id = _resolve_actor_id(authorization)
+    actor_id = _require_actor_id(authorization)
     try:
         return publish_tracking_result(result_id, actor_id=actor_id)
     except LookupError:
@@ -74,7 +74,7 @@ def unpublish_tracking(
     result_id: str,
     authorization: str | None = Header(default=None),
 ) -> TrackingResult:
-    actor_id = _resolve_actor_id(authorization)
+    actor_id = _require_actor_id(authorization)
     try:
         return unpublish_tracking_result(result_id, actor_id=actor_id)
     except LookupError:
@@ -86,7 +86,7 @@ def delete_tracking(
     result_id: str,
     authorization: str | None = Header(default=None),
 ):
-    actor_id = _resolve_actor_id(authorization)
+    actor_id = _require_actor_id(authorization)
     try:
         remove_tracking_result(result_id, actor_id=actor_id)
     except LookupError:
@@ -99,14 +99,18 @@ def like_tracking_result(
     result_id: str,
     authorization: str | None = Header(default=None),
 ) -> ToggleLikeResponse:
-    _safe_get_tracking_result(result_id)
-    actor_id = _resolve_actor_id(authorization)
+    result = _safe_get_tracking_result(result_id)
+    if not result.isPublic:
+        raise HTTPException(status_code=404, detail="Tracking result not found")
+    actor_id = _require_actor_id(authorization)
     return toggle_like(result_id, actor_id=actor_id)
 
 
 @router.get("/tracking-results/{result_id}/comments")
 def get_comments(result_id: str):
-    _safe_get_tracking_result(result_id)
+    result = _safe_get_tracking_result(result_id)
+    if not result.isPublic:
+        raise HTTPException(status_code=404, detail="Tracking result not found")
     return {"comments": list_comments(result_id)}
 
 
@@ -116,8 +120,10 @@ def create_comment(
     payload: CreateCommentRequest,
     authorization: str | None = Header(default=None),
 ):
-    _safe_get_tracking_result(result_id)
-    actor_id = _resolve_actor_id(authorization)
+    result = _safe_get_tracking_result(result_id)
+    if not result.isPublic:
+        raise HTTPException(status_code=404, detail="Tracking result not found")
+    actor_id = _require_actor_id(authorization)
     comment = add_comment(result_id, actor_id=actor_id, content=payload.content)
     return {"comment": comment, "comments": list_comments(result_id)}
 
@@ -127,7 +133,7 @@ def get_public_profile(
     username: str,
     authorization: str | None = Header(default=None),
 ) -> CommunityUserProfileResponse:
-    viewer_id = _resolve_actor_id(authorization)
+    viewer_id = _resolve_viewer_id(authorization)
     user_id = find_user_id_by_username(username)
     return CommunityUserProfileResponse(
         user=build_public_user_profile(user_id, viewer_id=viewer_id),
@@ -140,13 +146,17 @@ def follow_user(
     username: str,
     authorization: str | None = Header(default=None),
 ) -> ToggleFollowResponse:
-    actor_id = _resolve_actor_id(authorization)
+    actor_id = _require_actor_id(authorization)
     return toggle_follow(username, actor_id=actor_id)
 
 
-def _resolve_actor_id(authorization: str | None) -> str:
+def _resolve_viewer_id(authorization: str | None) -> str:
     if not authorization:
         return GUEST_USER_ID
+    return _require_actor_id(authorization)
+
+
+def _require_actor_id(authorization: str | None) -> str:
     token = parse_auth_token(authorization)
     return get_user_by_token(token).id
 

@@ -1,46 +1,11 @@
 Package note:
 
-The current source machine stores part of the media library in OneDrive cloud-only state.
-During packaging, 36 files were not locally readable and therefore were skipped from the zip.
+The repository intentionally keeps only a small demo media seed in Git:
 
-The codebase, docs, scripts, lessons, most clips, and most media are included.
-If you need a fully complete media archive, re-download the files below on the source machine and build the package again.
+- backend/data/lessons/les_122ea874306b.json
+- backend/data/videos/les_122ea874306b.mp4
+- backend/data/videos/antifragile.mp4
+- generated clips, matte, particles, pose_full, and thumbs for les_122ea874306b
 
-Skipped files:
-
-backend/data/thumbs/les_f3c105795a26_seg_003.jpg
-backend/data/thumbs/les_f3c105795a26_seg_004.jpg
-backend/data/thumbs/les_f3c105795a26_seg_005.jpg
-backend/data/thumbs/les_f3c105795a26_seg_006.jpg
-backend/data/thumbs/les_f3c105795a26_seg_007.jpg
-backend/data/thumbs/seg_000.jpg
-backend/data/thumbs/seg_001.jpg
-backend/data/thumbs/seg_002.jpg
-backend/data/thumbs/seg_003.jpg
-backend/data/thumbs/seg_004.jpg
-backend/data/thumbs/seg_005.jpg
-backend/data/thumbs/seg_006.jpg
-backend/data/thumbs/seg_007.jpg
-backend/data/thumbs/seg_008.jpg
-backend/data/thumbs/seg_009.jpg
-backend/data/thumbs/seg_010.jpg
-backend/data/thumbs/seg_011.jpg
-backend/data/thumbs/seg_012.jpg
-backend/data/thumbs/seg_013.jpg
-backend/data/thumbs/seg_014.jpg
-backend/data/thumbs/seg_015.jpg
-backend/data/thumbs/seg_016.jpg
-backend/data/videos/les_6a7758803979.mp4
-backend/data/videos/les_795d6ee9f8e6.mp4
-backend/data/videos/les_797715f0e903.mp4
-backend/data/videos/les_8b103249be5b.mp4
-backend/data/videos/les_960ec6d541b6.mp4
-backend/data/videos/les_a05135374235.mp4
-backend/data/videos/les_beebb4927fff.mp4
-backend/data/videos/les_c6b59f1f8a1a.mp4
-backend/data/videos/les_c8880fcc8707.mp4
-backend/data/videos/les_cfa169b1939e.mp4
-backend/data/videos/les_dc3bfa3561f9.mp4
-backend/data/videos/les_deb21e180aa6.mp4
-backend/data/videos/les_deb9d746578c.mp4
-backend/data/videos/les_e36b4876da15.mp4
+All other imported or generated media is local runtime data and is ignored by Git.
+Re-run preprocessing from source videos when you need a full media archive.

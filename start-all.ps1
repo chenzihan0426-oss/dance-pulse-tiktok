@@ -2,7 +2,8 @@
 param(
     [switch]$NoWait,
     [switch]$NoBrowser,
-    [switch]$Lan
+    [switch]$Lan,
+    [switch]$ExposeDevSmsCode
 )
 
 $ErrorActionPreference = "Stop"
@@ -17,6 +18,9 @@ if ($NoBrowser) {
 }
 if ($Lan) {
     $childArgs += "-Lan"
+}
+if ($ExposeDevSmsCode) {
+    $childArgs += "-ExposeDevSmsCode"
 }
 
 & "$ROOT\start-mobile.ps1" @childArgs

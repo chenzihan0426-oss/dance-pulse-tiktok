@@ -2,16 +2,42 @@ from __future__ import annotations
 
 import json
 import sys
+from types import SimpleNamespace
 from pathlib import Path
+
+import pytest
+from fastapi import HTTPException
 
 
 ROOT = Path(__file__).resolve().parents[2]
 BACKEND_DIR = ROOT / "backend"
 sys.path.insert(0, str(BACKEND_DIR))
 
+import routes.community as community_route  # noqa: E402
 import services.social_store as social_store  # noqa: E402
 import services.tracking_store as tracking_store  # noqa: E402
 from models import TrackingResult, TrackingSegmentScore  # noqa: E402
+
+
+def test_community_auth_helpers_keep_anonymous_and_invalid_auth_separate(monkeypatch) -> None:
+    def fake_get_user_by_token(token: str):
+        if token == "good":
+            return SimpleNamespace(id="usr_good")
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    monkeypatch.setattr(community_route, "get_user_by_token", fake_get_user_by_token)
+
+    assert community_route._resolve_viewer_id(None) == social_store.GUEST_USER_ID
+
+    with pytest.raises(HTTPException) as missing_auth:
+        community_route._require_actor_id(None)
+    assert missing_auth.value.status_code == 401
+
+    with pytest.raises(HTTPException) as invalid_auth:
+        community_route._resolve_viewer_id("Bearer bad")
+    assert invalid_auth.value.status_code == 401
+
+    assert community_route._require_actor_id("Bearer good") == "usr_good"
 
 
 def test_publish_like_comment_follow_flow(tmp_path, monkeypatch) -> None:
@@ -66,7 +92,7 @@ def test_publish_like_comment_follow_flow(tmp_path, monkeypatch) -> None:
 
     result = TrackingResult(
         id="trk_test",
-        lessonId="les_18ec2100c5f7",
+        lessonId="les_122ea874306b",
         userId="usr_a",
         createdAt="2026-04-19T00:00:00+00:00",
         score=88,
