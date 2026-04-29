@@ -1,19 +1,23 @@
 import { LessonCard } from "@/components/LessonCard";
 import type { LessonListItem } from "@/lib/types";
 
+type RecommendedListProps = {
+  lessons: LessonListItem[];
+  progressMap?: Record<string, { learned: number; total: number }>;
+  resumeMap?: Record<string, { index: number; sectionLabel: string } | null>;
+  loading: boolean;
+  error: string | null;
+  emptyMessage?: string;
+};
+
 export function RecommendedList({
   lessons,
   progressMap,
   resumeMap,
   loading,
   error,
-}: {
-  lessons: LessonListItem[];
-  progressMap?: Record<string, { learned: number; total: number }>;
-  resumeMap?: Record<string, { index: number; sectionLabel: string } | null>;
-  loading: boolean;
-  error: string | null;
-}) {
+  emptyMessage = "暂时没有推荐课程，先去学习页看看全部内容吧。",
+}: RecommendedListProps) {
   if (loading) {
     return (
       <div className="space-y-4">
@@ -38,7 +42,7 @@ export function RecommendedList({
   if (lessons.length === 0) {
     return (
       <div className="rounded-[24px] bg-bg-surface px-4 py-5 text-sm text-white/45">
-        暂时没有推荐课程，先去学习页看看全部内容吧。
+        {emptyMessage}
       </div>
     );
   }

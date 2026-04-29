@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException, Response, status
 
-from models import TeachingRegenerateResponse, TeachingStatus
+from models import SegmentContextResponse, TeachingRegenerateResponse, TeachingStatus
 from services.lesson_store import list_lesson_files, load_lesson, save_lesson
 from services.teaching_queue import teaching_queue
 
@@ -25,6 +25,15 @@ def _find_segment_in_lesson(lesson_id: str, segment_id: str):
         if segment.id == segment_id:
             return lesson, segment
     raise HTTPException(status_code=404, detail="Segment not found in lesson")
+
+
+@router.get(
+    "/segments/{segment_id}/context",
+    response_model=SegmentContextResponse,
+)
+def get_segment_context(segment_id: str) -> SegmentContextResponse:
+    lesson, segment = _find_lesson_by_segment_id(segment_id)
+    return SegmentContextResponse(lesson=lesson, segment=segment)
 
 
 async def _regenerate_lesson_segment(

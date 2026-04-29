@@ -143,6 +143,26 @@ function teacherVideoErrorMessage(): string {
   return "老师视频源无法播放，已尝试整课视频和分段视频。请换一节课或重新导入视频。";
 }
 
+function cameraErrorMessage(error: unknown): string {
+  if (error instanceof DOMException) {
+    if (error.name === "NotAllowedError" || error.name === "SecurityError") {
+      return "浏览器拒绝了摄像头权限。请点地址栏的摄像头图标，允许此网站使用摄像头后再试。";
+    }
+    if (error.name === "NotFoundError" || error.name === "OverconstrainedError") {
+      return "没有找到可用摄像头，或当前选择的摄像头不可用。请换一个摄像头再试。";
+    }
+    if (error.name === "NotReadableError") {
+      return "摄像头正被其他应用占用。请关闭占用摄像头的软件后再试。";
+    }
+  }
+
+  const message = error instanceof Error ? error.message : String(error);
+  if (/permission denied|notallowederror/i.test(message)) {
+    return "浏览器拒绝了摄像头权限。请点地址栏的摄像头图标，允许此网站使用摄像头后再试。";
+  }
+  return message;
+}
+
 function waitForVideoMetadata(video: HTMLVideoElement): Promise<void> {
   if (video.readyState >= 1) return Promise.resolve();
   return new Promise((resolve, reject) => {
@@ -429,7 +449,7 @@ export default function TrackingDesktopPage() {
       }
       setCameraError(null);
     } catch (err) {
-      setCameraError(err instanceof Error ? err.message : String(err));
+      setCameraError(cameraErrorMessage(err));
       setCameraStream(null);
       setCameraReady(false);
     }
@@ -454,7 +474,7 @@ export default function TrackingDesktopPage() {
       }
       setCameraError(null);
     } catch (err) {
-      setCameraError(err instanceof Error ? err.message : String(err));
+      setCameraError(cameraErrorMessage(err));
       setCameraStream(null);
       setCameraReady(false);
     }
@@ -562,7 +582,7 @@ export default function TrackingDesktopPage() {
       } catch (err) {
         video.muted = true;
         setTeacherMuted(true);
-        setCameraError(err instanceof Error ? err.message : String(err));
+        setCameraError(cameraErrorMessage(err));
       }
     }
   }, [playing, teacherMuted]);
@@ -580,7 +600,7 @@ export default function TrackingDesktopPage() {
       await ensureCameraReady();
       setCameraError(null);
     } catch (err) {
-      setCameraError(err instanceof Error ? err.message : String(err));
+      setCameraError(cameraErrorMessage(err));
     }
   };
   if (loading) {

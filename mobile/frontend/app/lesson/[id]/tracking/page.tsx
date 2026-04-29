@@ -32,6 +32,26 @@ const MIME_CANDIDATES = [
   "video/webm",
 ];
 
+function cameraErrorMessage(error: unknown): string {
+  if (error instanceof DOMException) {
+    if (error.name === "NotAllowedError" || error.name === "SecurityError") {
+      return "浏览器拒绝了摄像头权限。请点地址栏的摄像头图标，允许此网站使用摄像头后再试。";
+    }
+    if (error.name === "NotFoundError" || error.name === "OverconstrainedError") {
+      return "没有找到可用摄像头，或当前选择的摄像头不可用。请换一个摄像头再试。";
+    }
+    if (error.name === "NotReadableError") {
+      return "摄像头正被其他应用占用。请关闭占用摄像头的软件后再试。";
+    }
+  }
+
+  const message = error instanceof Error ? error.message : String(error);
+  if (/permission denied|notallowederror/i.test(message)) {
+    return "浏览器拒绝了摄像头权限。请点地址栏的摄像头图标，允许此网站使用摄像头后再试。";
+  }
+  return message;
+}
+
 export default function TrackingChallengePage() {
   const params = useParams<{ id: string }>();
   const lessonId = params?.id ?? "";
@@ -58,6 +78,7 @@ export default function TrackingChallengePage() {
   const chunksRef = React.useRef<Blob[]>([]);
   const timerRef = React.useRef<number | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const captureSectionRef = React.useRef<HTMLDivElement>(null);
   const beginRecordingRef = React.useRef<(() => Promise<void>) | null>(null);
   const [overlayEnabled, setOverlayEnabled] = React.useState(true);
   const [overlayStatus, setOverlayStatus] = React.useState<OverlayStatus>("loading-model");
@@ -206,7 +227,7 @@ export default function TrackingChallengePage() {
       setRecording(true);
       recorder.start(250);
     } catch (err) {
-      setCameraError(err instanceof Error ? err.message : String(err));
+      setCameraError(cameraErrorMessage(err));
     }
   }, [ensureCameraReady]);
 
@@ -274,6 +295,19 @@ export default function TrackingChallengePage() {
     }
   }
 
+  function jumpToCapture(nextMode?: CaptureMode) {
+    if (nextMode) {
+      setMode(nextMode);
+    }
+
+    window.requestAnimationFrame(() => {
+      captureSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  }
+
   if (loading) {
     return (
       <main className="mx-auto min-h-screen max-w-md px-5 py-8 text-white">
@@ -314,6 +348,24 @@ export default function TrackingChallengePage() {
           <p className="mt-3 text-[14px] leading-6 text-white/55">
             看老师整段示范，录一遍你的版本；满意的话可以一键发布到社区。
           </p>
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => jumpToCapture("record")}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-[16px] bg-brand text-[14px] font-semibold text-white transition hover:brightness-110"
+            >
+              <Camera className="h-4 w-4" />
+              开始跟拍
+            </button>
+            <button
+              type="button"
+              onClick={() => jumpToCapture("upload")}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-[16px] border border-white/10 bg-white/5 text-[14px] font-semibold text-white/80 transition hover:bg-white/10 hover:text-white"
+            >
+              <Upload className="h-4 w-4" />
+              上传视频
+            </button>
+          </div>
         </div>
 
         <div className="space-y-5 px-5 py-5">
@@ -333,7 +385,7 @@ export default function TrackingChallengePage() {
             </div>
           </section>
 
-          <div className="grid grid-cols-2 gap-3 rounded-[22px] bg-white/[0.04] p-1">
+          <div ref={captureSectionRef} className="grid scroll-mt-6 grid-cols-2 gap-3 rounded-[22px] bg-white/[0.04] p-1">
             <button
               type="button"
               onClick={() => setMode("record")}
@@ -420,7 +472,7 @@ export default function TrackingChallengePage() {
                     try {
                       await ensureCameraReady();
                     } catch (err) {
-                      setCameraError(err instanceof Error ? err.message : String(err));
+                      setCameraError(cameraErrorMessage(err));
                     }
                   }} className="rounded-[16px]">
                     <Camera className="h-4 w-4" />

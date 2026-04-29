@@ -567,6 +567,21 @@ export async function getSegmentContext(
     if (segment) return { lesson, segment };
   }
 
+  if (!USE_MOCK) {
+    try {
+      const data = await http<{ lesson: Lesson; segment: Segment }>(
+        `/api/segments/${encodeURIComponent(segmentId)}/context`
+      );
+      const lesson = normalizeLesson(data.lesson);
+      const segment =
+        lesson.segments.find((item) => item.id === segmentId) ??
+        normalizeSegment(data.segment);
+      return { lesson, segment };
+    } catch {
+      // Older backends do not expose the context endpoint; keep the legacy lookup working.
+    }
+  }
+
   const lessons = await getLessons();
   for (const lessonItem of lessons) {
     const lesson = await getLesson(lessonItem.id);

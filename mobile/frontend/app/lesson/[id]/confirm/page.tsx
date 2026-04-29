@@ -361,6 +361,33 @@ function ConfirmPageInner({
             onCreate={editor.createSegment}
           />
 
+          <div className="rounded-lg border border-neutral-200 bg-white p-3 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 lg:hidden">
+            {editor.selectedSegment ? (
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-50">
+                    {editor.selectedSegment.section_label} · #{editor.selectedSegment.index + 1}
+                  </div>
+                  <div className="mt-1 text-xs tabular-nums text-neutral-500">
+                    {editor.selectedSegment.start.toFixed(2)}s - {editor.selectedSegment.end.toFixed(2)}s
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="shrink-0"
+                  onClick={() => setMobileEditorOpen(true)}
+                >
+                  编辑切片
+                </Button>
+              </div>
+            ) : (
+              <div className="text-sm text-neutral-500">
+                点按时间轴或下方列表，选择一个切片后再编辑。
+              </div>
+            )}
+          </div>
+
           <div className="hidden lg:block">
             <SegmentList
               segments={editor.workingSegments}
@@ -403,19 +430,20 @@ function ConfirmPageInner({
 
       {/* bottom action bar */}
       <footer className="sticky bottom-0 z-20 border-t border-neutral-200 bg-white/95 backdrop-blur dark:border-neutral-800 dark:bg-neutral-900/95">
-        <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-3 px-4 py-3">
+        <div className="mx-auto flex max-w-[1400px] flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <Button
             variant="outline"
             onClick={() => setRegenOpen(true)}
             disabled={editor.commitState === "committing"}
+            className="w-full sm:w-auto"
           >
             <RefreshCw className="h-4 w-4" />
             重新切分
           </Button>
 
-          <div className="flex items-center gap-3">
+          <div className="flex w-full items-center gap-3 sm:w-auto">
             {editor.commitState === "error" && (
-              <span className="text-xs text-red-600">
+              <span className="min-w-0 flex-1 text-xs text-red-600 sm:flex-none">
                 提交失败：{editor.commitError}
               </span>
             )}
@@ -429,6 +457,7 @@ function ConfirmPageInner({
               size="lg"
               onClick={editor.commit}
               disabled={editor.commitState === "committing"}
+              className="min-w-0 flex-1 px-4 text-sm sm:flex-none sm:px-6 sm:text-base"
             >
               {editor.commitState === "committing" ? (
                 <>

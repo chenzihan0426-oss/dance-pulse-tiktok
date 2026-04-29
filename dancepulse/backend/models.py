@@ -169,6 +169,11 @@ class TeachingRegenerateResponse(BaseModel):
     status: str
 
 
+class SegmentContextResponse(BaseModel):
+    lesson: Lesson
+    segment: Segment
+
+
 class User(BaseModel):
     id: str
     phone: str

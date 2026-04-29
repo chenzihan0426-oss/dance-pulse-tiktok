@@ -72,10 +72,16 @@ def list_lessons() -> list[LessonListItem]:
 
 
 def _sync_lesson_thumbnail(lesson: Lesson) -> Lesson:
+    if _local_media_exists(lesson.thumbnail):
+        return lesson
+
     for segment in lesson.segments:
-        if segment.thumbnail:
+        if segment.deleted:
+            continue
+        if _local_media_exists(segment.thumbnail):
             return lesson.model_copy(update={"thumbnail": segment.thumbnail})
-    return lesson
+
+    return lesson.model_copy(update={"thumbnail": ""})
 
 
 def _local_media_exists(url: str) -> bool:

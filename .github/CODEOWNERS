@@ -1,0 +1,11 @@
+# Default owner for all changes in this repository.
+* @keyzzzoe
+
+# App surfaces.
+/dancepulse/ @keyzzzoe
+/mobile/ @keyzzzoe
+/desktop/ @keyzzzoe
+
+# Documentation and repo-level automation.
+*.md @keyzzzoe
+/.github/ @keyzzzoe
