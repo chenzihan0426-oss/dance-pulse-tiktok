@@ -1,0 +1,83 @@
+# ===== macOS =====
+.DS_Store
+**/.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# ===== Editors / IDE =====
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ===== Environment / secrets =====
+.env
+.env.local
+.env.development
+.env.production
+.env.*.local
+*.pem
+*.key
+
+# ===== Node / Next.js =====
+node_modules/
+.next/
+.next-dev/
+.next/**
+out/
+build/
+dist/
+.cache/
+*.tsbuildinfo
+next-env.d.ts
+.npm/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.eslintcache
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+.coverage.*
+
+# ===== Runtime / data (kept out of public repo) =====
+backend/data/auth/
+backend/data/clips/
+backend/data/jobs/
+backend/data/lessons/
+backend/data/matte/
+backend/data/particles/
+backend/data/pose/
+backend/data/pose_full/
+backend/data/social/
+backend/data/thumbs/
+backend/data/tracking/
+backend/data/videos/
+backend/data/**/*.json
+backend/data/**/*.mp4
+backend/data/**/*.webm
+backend/data/**/*.png
+backend/data/**/*.jpg
+!backend/data/.gitkeep
+
+# ===== Logs =====
+*.log
+logs/
+
+# ===== Misc =====
+*.zip
+*.rar
+*.tar.gz
+.cloudflared/

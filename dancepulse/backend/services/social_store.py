@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import json
 import secrets
 from pathlib import Path
 
 from fastapi import HTTPException
+from sqlmodel import select
 
 from models import (
     CommunityComment,
@@ -15,6 +15,8 @@ from models import (
     TrackingResult,
     UserStats,
 )
+from services.db import session_scope
+from services.db_models import CommentRow, FollowRow, LikeRow, UserRow
 from services.lesson_store import load_lesson
 from services.tracking_store import (
     delete_tracking_result,
@@ -27,64 +29,57 @@ from services.tracking_store import (
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SOCIAL_DIR = BASE_DIR / "data" / "social"
-AUTH_USERS_FILE = BASE_DIR / "data" / "auth" / "users.json"
-FOLLOWS_FILE = SOCIAL_DIR / "follows.json"
-LIKES_FILE = SOCIAL_DIR / "likes.json"
-COMMENTS_FILE = SOCIAL_DIR / "comments.json"
 GUEST_USER_ID = "guest_local"
 GUEST_USERNAME = "local_guest"
 
 
 def ensure_social_dir() -> None:
+    # 社交数据已迁移到数据库；保留目录创建以兼容历史调用。
     SOCIAL_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def _read_json(path: Path, fallback):
-    ensure_social_dir()
-    if not path.exists():
-        return fallback
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return fallback
-
-
-def _write_json(path: Path, payload) -> None:
-    ensure_social_dir()
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+def _replace_all(session, model, rows) -> None:
+    """全量重写一张表：清空后插入（保持旧 JSON 实现的整体读写语义）。"""
+    for existing in session.exec(select(model)).all():
+        session.delete(existing)
+    session.flush()
+    for row in rows:
+        session.add(row)
 
 
 def _load_users() -> dict[str, dict]:
-    if not AUTH_USERS_FILE.exists():
-        return {}
-    try:
-        return json.loads(AUTH_USERS_FILE.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return {}
+    with session_scope() as s:
+        return {row.id: row.to_api_dict() for row in s.exec(select(UserRow)).all()}
 
 
 def _load_follows() -> list[dict]:
-    return _read_json(FOLLOWS_FILE, [])
+    with session_scope() as s:
+        return [row.to_api_dict() for row in s.exec(select(FollowRow)).all()]
 
 
 def _save_follows(records: list[dict]) -> None:
-    _write_json(FOLLOWS_FILE, records)
+    with session_scope() as s:
+        _replace_all(s, FollowRow, [FollowRow.from_api_dict(r) for r in records])
 
 
 def _load_likes() -> list[dict]:
-    return _read_json(LIKES_FILE, [])
+    with session_scope() as s:
+        return [row.to_api_dict() for row in s.exec(select(LikeRow)).all()]
 
 
 def _save_likes(records: list[dict]) -> None:
-    _write_json(LIKES_FILE, records)
+    with session_scope() as s:
+        _replace_all(s, LikeRow, [LikeRow.from_api_dict(r) for r in records])
 
 
 def _load_comments() -> list[dict]:
-    return _read_json(COMMENTS_FILE, [])
+    with session_scope() as s:
+        return [row.to_api_dict() for row in s.exec(select(CommentRow)).all()]
 
 
 def _save_comments(records: list[dict]) -> None:
-    _write_json(COMMENTS_FILE, records)
+    with session_scope() as s:
+        _replace_all(s, CommentRow, [CommentRow.from_api_dict(r) for r in records])
 
 
 def build_feed_items(*, viewer_id: str | None = None, username: str | None = None) -> list[CommunityFeedItem]:

@@ -176,7 +176,7 @@ async def run_import_job(
             status="downloading",
             progress=15,
             phase="download",
-            fallback_hint="正在下载抖音视频资源...",
+            fallback_hint="正在下载视频资源...",
         )
         lesson = await asyncio.to_thread(
             _run_import_job_sync,

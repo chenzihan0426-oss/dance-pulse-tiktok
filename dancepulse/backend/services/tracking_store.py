@@ -1,40 +1,25 @@
 from __future__ import annotations
 
-import json
 import secrets
 from datetime import UTC, datetime
 from pathlib import Path
 
+from sqlmodel import select
+
 from models import TrackingResult
+from services.db import session_scope
+from services.db_models import TrackingResultRow
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 TRACKING_DIR = BASE_DIR / "data" / "tracking"
-TRACKING_RESULTS_FILE = TRACKING_DIR / "results.json"
 TRACKING_VIDEOS_DIR = TRACKING_DIR / "videos"
 
 
 def ensure_tracking_dirs() -> None:
+    # 跟练录制视频仍存文件系统，保留视频目录的创建。
     TRACKING_DIR.mkdir(parents=True, exist_ok=True)
     TRACKING_VIDEOS_DIR.mkdir(parents=True, exist_ok=True)
-
-
-def _read_results() -> list[dict]:
-    ensure_tracking_dirs()
-    if not TRACKING_RESULTS_FILE.exists():
-        return []
-    try:
-      return json.loads(TRACKING_RESULTS_FILE.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return []
-
-
-def _write_results(results: list[dict]) -> None:
-    ensure_tracking_dirs()
-    TRACKING_RESULTS_FILE.write_text(
-        json.dumps(results, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
 
 
 def create_tracking_result_id() -> str:
@@ -46,48 +31,41 @@ def now_iso() -> str:
 
 
 def save_tracking_result(result: TrackingResult) -> TrackingResult:
-    raw_results = _read_results()
-    raw_results.append(result.model_dump(mode="json"))
-    _write_results(raw_results)
+    with session_scope() as s:
+        s.add(TrackingResultRow.from_model(result))
     return result
 
 
 def get_tracking_result(result_id: str) -> TrackingResult:
-    for item in _read_results():
-        if item.get("id") == result_id:
-            return TrackingResult.model_validate(item)
-    raise LookupError(result_id)
+    with session_scope() as s:
+        row = s.get(TrackingResultRow, result_id)
+        if row is None:
+            raise LookupError(result_id)
+        return row.to_model()
 
 
 def update_tracking_result(result: TrackingResult) -> TrackingResult:
-    raw_results = _read_results()
-    updated = False
-    next_results: list[dict] = []
-    for item in raw_results:
-        if item.get("id") == result.id:
-            next_results.append(result.model_dump(mode="json"))
-            updated = True
-        else:
-            next_results.append(item)
-    if not updated:
-        raise LookupError(result.id)
-    _write_results(next_results)
+    with session_scope() as s:
+        if s.get(TrackingResultRow, result.id) is None:
+            raise LookupError(result.id)
+        s.merge(TrackingResultRow.from_model(result))
     return result
 
 
 def delete_tracking_result(result_id: str) -> None:
-    raw_results = _read_results()
-    next_results = [item for item in raw_results if item.get("id") != result_id]
-    if len(next_results) == len(raw_results):
-        raise LookupError(result_id)
-    _write_results(next_results)
+    with session_scope() as s:
+        row = s.get(TrackingResultRow, result_id)
+        if row is None:
+            raise LookupError(result_id)
+        s.delete(row)
 
 
 def list_tracking_results(*, lesson_id: str | None = None, user_id: str | None = None) -> list[TrackingResult]:
-    raw_results = [TrackingResult.model_validate(item) for item in _read_results()]
-    filtered = raw_results
-    if lesson_id:
-        filtered = [item for item in filtered if item.lessonId == lesson_id]
-    if user_id:
-        filtered = [item for item in filtered if item.userId == user_id]
-    return sorted(filtered, key=lambda item: item.createdAt, reverse=True)
+    with session_scope() as s:
+        stmt = select(TrackingResultRow)
+        if lesson_id:
+            stmt = stmt.where(TrackingResultRow.lesson_id == lesson_id)
+        if user_id:
+            stmt = stmt.where(TrackingResultRow.user_id == user_id)
+        results = [row.to_model() for row in s.exec(stmt).all()]
+    return sorted(results, key=lambda item: item.createdAt, reverse=True)

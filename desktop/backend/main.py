@@ -18,6 +18,7 @@ from routes.me import router as me_router
 from routes.segments import router as segments_router
 from routes.teaching import router as teaching_router
 from routes.tracking import router as tracking_router
+from services.db import init_db
 from services.job_store import recover_interrupted_jobs
 from services.social_store import ensure_social_dir
 from services.teaching_queue import teaching_queue
@@ -32,6 +33,24 @@ def _ensure_ffmpeg_on_path() -> str | None:
     existing = shutil.which("ffmpeg")
     if existing:
         return str(Path(existing).parent)
+
+    # macOS / Linux：没有系统 ffmpeg 时，用 pip 安装的 imageio-ffmpeg 自带二进制
+    try:
+        import imageio_ffmpeg
+
+        exe = Path(imageio_ffmpeg.get_ffmpeg_exe())
+        if exe.exists():
+            link = exe.parent / "ffmpeg"
+            if not link.exists():
+                try:
+                    link.symlink_to(exe)
+                except OSError:
+                    pass
+            os.environ["PATH"] = f"{exe.parent}{os.pathsep}{os.environ.get('PATH', '')}"
+            if shutil.which("ffmpeg"):
+                return str(exe.parent)
+    except Exception:
+        pass
 
     local_appdata = Path(os.environ.get("LOCALAPPDATA", ""))
     if not local_appdata:
@@ -82,6 +101,7 @@ def _parse_cors_origins() -> list[str]:
 
 
 _ensure_ffmpeg_on_path()
+init_db()
 ensure_tracking_dirs()
 ensure_social_dir()
 

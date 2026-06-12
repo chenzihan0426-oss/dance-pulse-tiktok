@@ -8,7 +8,8 @@ export function segmentIsReady(seg: Segment): boolean {
 }
 
 export function lessonIsDemoReady(lesson: Pick<Lesson, "segments">): boolean {
-  const segs = lesson.segments.filter((s) => !s.deleted);
+  // 与 allLearned / practiceSegments 口径一致：排除静止段(is_still)
+  const segs = lesson.segments.filter((s) => !s.deleted && !s.is_still);
   if (!segs.length) return false;
   return segs.every(segmentIsReady);
 }

@@ -84,3 +84,9 @@ desktop.ini
 # Keep local users, sessions, and run results off GitHub.
 dancepulse/backend/data/auth/*.json
 dancepulse/backend/data/tracking/results.json
+dancepulse/backend/data/social/*.json
+
+# SQLite 数据库（本地运行时数据，含用户/社交/跟练数据，勿入库）
+dancepulse/backend/data/app.db
+dancepulse/backend/data/app.db-wal
+dancepulse/backend/data/app.db-shm

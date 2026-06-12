@@ -13,16 +13,70 @@ import {
   Minimize2,
   ChevronLeft,
   ChevronRight,
+  Check,
+  Crosshair,
+  Search,
   Sparkles,
 } from "lucide-react";
 import type { Lesson, Segment } from "@/lib/types";
 import { XuangeGuideOverlay } from "@/components/player/XuangeGuideOverlay";
 import { BeatCounterBadge } from "@/components/player/BeatCounterBadge";
 import { TeachingPanelKpop, parseBeatsRange } from "@/components/TeachingPanelKpop";
+import { useLearningProgress } from "@/hooks/useLearningProgress";
+import { lessonIsDemoReady } from "@/lib/demoReady";
 import { cn } from "@/lib/utils";
 
-// 排序：1x 起步，先降速 (0.75 → 0.5)，再升速 (1.25 → 1.5)，循环回 1x
-const SPEEDS = [1, 0.75, 0.5, 1.25, 1.5] as const;
+// 排序：1x 起步，先逐级降速到 0.1x（最慢），再升速 (1.25 → 1.5)，循环回 1x
+const SPEEDS = [1, 0.75, 0.5, 0.25, 0.1, 1.25, 1.5] as const;
+// 放大镜倍数档位（点击循环切换）
+const MAG_ZOOM_MIN = 1.2;
+const MAG_ZOOM_MAX = 4;
+// 放大镜可跟随的身体部位(BlazePose 33 点索引)。
+// 注意：手必须分左右各自跟随——双手合并取中心会落到身体中线。
+const BODY_PARTS = [
+  { label: "全身", idxs: [11, 12, 23, 24], zoom: 1.6 },
+  { label: "头部", idxs: [0, 7, 8], zoom: 2.4 },
+  // 手/腿移动快且幅度大，倍数不能太高，否则采样范围太小、一动就出框
+  { label: "左手", idxs: [15, 17, 19, 21], zoom: 2 },
+  { label: "右手", idxs: [16, 18, 20, 22], zoom: 2 },
+  { label: "腿部", idxs: [25, 26, 27, 28], zoom: 1.8 },
+];
+
+// One Euro 滤波器：自适应低通——慢动作强平滑(去抖)、快动作弱平滑(不滞后)
+class OneEuroFilter {
+  private xHat: number | null = null;
+  private dxHat = 0;
+  private tPrev = 0;
+  constructor(
+    private minCutoff = 1.5,
+    private beta = 0.02,
+    private dCutoff = 1.0
+  ) {}
+  private alpha(cutoff: number, dt: number): number {
+    const tau = 1 / (2 * Math.PI * cutoff);
+    return 1 / (1 + tau / dt);
+  }
+  reset(): void {
+    this.xHat = null;
+    this.dxHat = 0;
+  }
+  filter(x: number, tSec: number): number {
+    if (this.xHat === null) {
+      this.xHat = x;
+      this.tPrev = tSec;
+      return x;
+    }
+    const dt = Math.max(1e-3, tSec - this.tPrev);
+    this.tPrev = tSec;
+    const dx = (x - this.xHat) / dt;
+    const aD = this.alpha(this.dCutoff, dt);
+    this.dxHat = this.dxHat + aD * (dx - this.dxHat);
+    const cutoff = this.minCutoff + this.beta * Math.abs(this.dxHat);
+    const a = this.alpha(cutoff, dt);
+    this.xHat = this.xHat + a * (x - this.xHat);
+    return this.xHat;
+  }
+}
 
 function clampDifficulty(value: number): number {
   if (!Number.isFinite(value)) return 1;
@@ -131,6 +185,219 @@ function DotFieldBackground({ mouseRef }: { mouseRef: React.MutableRefObject<{ x
   return <canvas ref={canvasRef} className="pointer-events-none fixed inset-0 z-0" aria-hidden />;
 }
 
+// 动作放大镜：跟随鼠标的圆形透镜，逐帧把视频局部放大绘制到 canvas。
+// 正确处理 object-cover 的坐标映射，以及镜像(scaleX(-1))下的采样方向。
+// 兼容两种姿态数据格式：
+//  - pose_full：frame.keypoints = [{x,y,visibility}]
+//  - 基础 pose：frame.kp = [[x,y,visibility]] 或 null（未检出）
+type PoseKp = { x: number; y: number; visibility: number };
+type PoseFullFrame = { t: number; points: PoseKp[] | null };
+type PoseFullDoc = { frames: PoseFullFrame[] };
+
+async function loadPoseFull(url: string): Promise<PoseFullDoc | null> {
+  const res = await fetch(url);
+  if (!res.ok) return null;
+  const raw = (await res.json()) as { frames?: unknown[] };
+  const frames: PoseFullFrame[] = (raw.frames ?? []).map((f) => {
+    const fr = f as { t: number; keypoints?: PoseKp[]; kp?: number[][] | null };
+    let points: PoseKp[] | null = null;
+    if (Array.isArray(fr.keypoints)) {
+      points = fr.keypoints.map((k) => ({ x: k.x, y: k.y, visibility: k.visibility }));
+    } else if (Array.isArray(fr.kp)) {
+      points = fr.kp.map((p) =>
+        Array.isArray(p) ? { x: p[0], y: p[1], visibility: p[2] ?? 0 } : { x: 0, y: 0, visibility: 0 }
+      );
+    }
+    return { t: fr.t, points };
+  });
+  return { frames };
+}
+
+// 按 clip 内秒数在相邻两帧之间线性插值出某部位的归一化中心
+// (比"吸附最近帧"更顺，30fps 数据也能平滑跟随、减少滞后与阶梯感)
+function interpCenter(
+  frames: PoseFullFrame[],
+  tSec: number,
+  idxs: number[]
+): { x: number; y: number } | null {
+  if (!frames.length) return null;
+  let lo = 0;
+  let hi = frames.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (frames[mid].t < tSec) lo = mid + 1;
+    else hi = mid;
+  }
+  const next = frames[lo];
+  const prev = lo > 0 ? frames[lo - 1] : next;
+  const c0 = prev.points ? partCenter(prev.points, idxs) : null;
+  const c1 = next.points ? partCenter(next.points, idxs) : null;
+  if (c0 && c1) {
+    const span = next.t - prev.t;
+    const a = span > 0 ? Math.max(0, Math.min(1, (tSec - prev.t) / span)) : 0;
+    return { x: c0.x + (c1.x - c0.x) * a, y: c0.y + (c1.y - c0.y) * a };
+  }
+  return c1 ?? c0;
+}
+
+// 给定关键点索引集合，求可见点的归一化中心(用于放大镜跟随某个部位)
+function partCenter(kps: PoseKp[], idxs: number[]): { x: number; y: number } | null {
+  let sx = 0;
+  let sy = 0;
+  let n = 0;
+  for (const i of idxs) {
+    const p = kps[i];
+    if (p && p.visibility > 0.3) {
+      sx += p.x;
+      sy += p.y;
+      n += 1;
+    }
+  }
+  if (n === 0) return null;
+  return { x: sx / n, y: sy / n };
+}
+
+function MagnifierLens({
+  videoRef,
+  mirror,
+  pos,
+  zoom,
+  follow,
+  poseDoc,
+  partIdxs,
+}: {
+  videoRef: React.RefObject<HTMLVideoElement>;
+  mirror: boolean;
+  pos: { x: number; y: number; w: number; h: number; visible: boolean };
+  zoom: number;
+  follow: boolean;
+  poseDoc: PoseFullDoc | null;
+  partIdxs: number[];
+}) {
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const posRef = React.useRef(pos);
+  posRef.current = pos;
+  const zoomRef = React.useRef(zoom);
+  zoomRef.current = zoom;
+  const followRef = React.useRef(follow);
+  followRef.current = follow;
+  const poseRef = React.useRef(poseDoc);
+  poseRef.current = poseDoc;
+  const partRef = React.useRef(partIdxs);
+  partRef.current = partIdxs;
+  const fxRef = React.useRef(new OneEuroFilter());
+  const fyRef = React.useRef(new OneEuroFilter());
+  const lastRef = React.useRef<{ x: number; y: number } | null>(null);
+  const lastModeRef = React.useRef({ mirror, part: partIdxs.join(",") });
+
+  const LENS = 220; // 透镜直径(px)：加大后采样范围更大，手脚移动不易飞出透镜
+
+  React.useEffect(() => {
+    let raf = 0;
+    const draw = () => {
+      const canvas = canvasRef.current;
+      const video = videoRef.current;
+      if (canvas && video && video.videoWidth > 0) {
+        const rect = video.getBoundingClientRect();
+        const cw = rect.width;
+        const ch = rect.height;
+        const vw = video.videoWidth;
+        const vh = video.videoHeight;
+        const scale = Math.max(cw / vw, ch / vh);
+        const offX = (cw - vw * scale) / 2;
+        const offY = (ch - vh * scale) / 2;
+
+        // 切镜像 / 切部位时重置滤波器，避免透镜从旧位置滑过去
+        const partKey = partRef.current.join(",");
+        if (lastModeRef.current.mirror !== mirror || lastModeRef.current.part !== partKey) {
+          fxRef.current.reset();
+          fyRef.current.reset();
+          lastRef.current = null;
+          lastModeRef.current = { mirror, part: partKey };
+        }
+
+        // 透镜中心(容器坐标)：跟随舞者躯干中心，或回退鼠标
+        let targetX: number | null = null;
+        let targetY: number | null = null;
+        const doc = poseRef.current;
+        if (followRef.current && doc) {
+          const c = interpCenter(doc.frames, video.currentTime, partRef.current);
+          if (c) {
+            const baseX = c.x * vw * scale + offX;
+            targetX = mirror ? cw - baseX : baseX;
+            targetY = c.y * vh * scale + offY;
+            lastRef.current = { x: targetX, y: targetY };
+          } else if (lastRef.current) {
+            targetX = lastRef.current.x; // 偶尔丢帧：沿用上次位置
+            targetY = lastRef.current.y;
+          }
+        } else {
+          const p = posRef.current;
+          if (p.visible) {
+            targetX = p.x;
+            targetY = p.y;
+          }
+        }
+
+        const ctx = canvas.getContext("2d");
+        if (targetX === null || targetY === null || !ctx) {
+          canvas.style.display = "none";
+          fxRef.current.reset();
+          fyRef.current.reset();
+          lastRef.current = null;
+        } else {
+          // One Euro 自适应平滑：同时抑制抖动与滞后
+          const now = performance.now() / 1000;
+          const sx = fxRef.current.filter(targetX, now);
+          const sy = fyRef.current.filter(targetY, now);
+
+          const r = LENS / 2;
+          canvas.style.display = "block";
+          canvas.style.left = `${Math.max(r, Math.min(cw - r, sx)) - r}px`;
+          canvas.style.top = `${Math.max(r, Math.min(ch - r, sy)) - r}px`;
+
+          // 反推采样点(帧坐标)
+          const dispX = (sx - offX) / scale;
+          const dispY = (sy - offY) / scale;
+          const sampleX = mirror ? vw - dispX : dispX;
+          const srcSize = LENS / zoomRef.current;
+          ctx.clearRect(0, 0, LENS, LENS);
+          ctx.save();
+          if (mirror) {
+            ctx.translate(LENS, 0);
+            ctx.scale(-1, 1);
+          }
+          ctx.drawImage(
+            video,
+            sampleX - srcSize / 2,
+            dispY - srcSize / 2,
+            srcSize,
+            srcSize,
+            0,
+            0,
+            LENS,
+            LENS
+          );
+          ctx.restore();
+        }
+      }
+      raf = requestAnimationFrame(draw);
+    };
+    raf = requestAnimationFrame(draw);
+    return () => cancelAnimationFrame(raf);
+  }, [videoRef, mirror]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={LENS}
+      height={LENS}
+      className="pointer-events-none absolute z-30 rounded-full border-2 border-white/80 shadow-[0_8px_30px_rgba(0,0,0,0.6)]"
+      style={{ width: `${LENS}px`, height: `${LENS}px`, display: "none" }}
+    />
+  );
+}
+
 export function DesktopPlayer({
   lesson,
   initialSegmentId,
@@ -164,6 +431,36 @@ export function DesktopPlayer({
   const [playing, setPlaying] = React.useState(false);
   const [immersive, setImmersive] = React.useState(false);
   const [currentBeat, setCurrentBeat] = React.useState(1);
+  const [magnifier, setMagnifier] = React.useState(false);
+  const [lensPos, setLensPos] = React.useState({ x: 0, y: 0, w: 1, h: 1, visible: false });
+  const [magnifierZoom, setMagnifierZoom] = React.useState(1.6);
+  const [magnifierFollow, setMagnifierFollow] = React.useState(true);
+  const [magnifierPart, setMagnifierPart] = React.useState(0);
+  const [poseDoc, setPoseDoc] = React.useState<PoseFullDoc | null>(null);
+
+  const { learnedCount, total, setTotal, isLearned, toggleLearned, markLearned } =
+    useLearningProgress(lesson.id);
+  React.useEffect(() => {
+    setTotal(practiceSegments.length);
+  }, [practiceSegments.length, setTotal]);
+
+  // 加载当前段的姿态数据(放大镜跟随用)
+  React.useEffect(() => {
+    setPoseDoc(null);
+    const url = segment.pose_full_url || segment.pose_url;
+    if (!url) return;
+    let cancelled = false;
+    loadPoseFull(url)
+      .then((doc) => {
+        if (!cancelled) setPoseDoc(doc);
+      })
+      .catch(() => {
+        if (!cancelled) setPoseDoc(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [segment.pose_full_url, segment.pose_url]);
 
   const [showCustomCursor, setShowCustomCursor] = React.useState(false);
   const [mousePos, setMousePos] = React.useState({ x: -1000, y: -1000 });
@@ -237,6 +534,24 @@ export function DesktopPlayer({
     }
   }, [playing, segment.id]);
 
+  // 整段播放过 85% 自动标记学会(视频是 loop，用进度而非 ended 事件)
+  React.useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    let marked = false;
+    const onTime = () => {
+      if (marked) return;
+      const d = v.duration;
+      // 只对练习段(非静止/非删除)自动标记，避免脏数据使 learnedCount 虚高
+      if (d > 0 && v.currentTime / d >= 0.85 && practiceSegments.some((s) => s.id === segment.id)) {
+        marked = true;
+        markLearned(segment.id);
+      }
+    };
+    v.addEventListener("timeupdate", onTime);
+    return () => v.removeEventListener("timeupdate", onTime);
+  }, [segment.id, markLearned]);
+
   const idx = practiceSegments.findIndex((s) => s.id === segment.id);
   const prevSeg = idx > 0 ? practiceSegments[idx - 1] : null;
   const nextSeg = idx >= 0 && idx < practiceSegments.length - 1 ? practiceSegments[idx + 1] : null;
@@ -305,6 +620,11 @@ export function DesktopPlayer({
   }, []);
 
   const difficulty = clampDifficulty(segment.difficulty);
+  const isPracticeSeg = practiceSegments.some((s) => s.id === segment.id);
+  const segLearned = isLearned(segment.id);
+  const allLearned =
+    practiceSegments.length > 0 && practiceSegments.every((s) => isLearned(s.id));
+  const demoReady = lessonIsDemoReady(lesson);
   const segmentTotal = Math.max(practiceSegments.length, 1);
   const currentOrder = idx >= 0 ? idx + 1 : 1;
   const headingText = `${practiceSegments.length} 段 • ${currentOrder}/${segmentTotal}`;
@@ -386,6 +706,25 @@ export function DesktopPlayer({
               maxHeight: immersive ? "100vh" : "calc(100vh - 130px)",
               borderRadius: immersive ? "0px" : "26px",
               boxShadow: immersive ? "none" : "0 22px 60px rgba(0,0,0,0.66)",
+              cursor: magnifier ? "none" : undefined,
+            }}
+            onMouseMove={(e) => {
+              if (!magnifier) return;
+              const rect = e.currentTarget.getBoundingClientRect();
+              setLensPos({
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top,
+                w: rect.width,
+                h: rect.height,
+                visible: true,
+              });
+            }}
+            onMouseLeave={() => setLensPos((p) => ({ ...p, visible: false }))}
+            onWheel={(e) => {
+              if (!magnifier) return;
+              setMagnifierZoom((z) =>
+                Math.min(MAG_ZOOM_MAX, Math.max(MAG_ZOOM_MIN, +(z - e.deltaY * 0.003).toFixed(1)))
+              );
             }}
           >
             <video
@@ -401,6 +740,18 @@ export function DesktopPlayer({
             />
 
             <XuangeGuideOverlay videoRef={videoRef} particleUrl={segment.particle_url} mirror={mirror} />
+
+            {magnifier ? (
+              <MagnifierLens
+                videoRef={videoRef}
+                mirror={mirror}
+                pos={lensPos}
+                zoom={magnifierZoom}
+                follow={magnifierFollow}
+                poseDoc={poseDoc}
+                partIdxs={BODY_PARTS[magnifierPart].idxs}
+              />
+            ) : null}
 
             <div className="pointer-events-none absolute left-3 top-3 rounded-full border border-white/15 bg-black/60 px-3 py-1 text-[11px] font-semibold text-white/95">
               {`${segment.section_label} · 第 ${segment.index + 1}`}
@@ -479,6 +830,76 @@ export function DesktopPlayer({
             >
               <FlipHorizontal2 className="h-3.5 w-3.5" />
             </button>
+
+            <button
+              type="button"
+              onClick={() => setMagnifier((v) => !v)}
+              className={`flex h-8 w-8 items-center justify-center rounded-full transition ${
+                magnifier ? "bg-[#00f3ff]/30 text-[#00f3ff]" : "bg-white/8 text-white/70 hover:bg-white/16"
+              }`}
+              aria-label="放大镜"
+              title="动作放大镜"
+            >
+              <Search className="h-3.5 w-3.5" />
+            </button>
+
+            {magnifier ? (
+              <div className="flex items-center gap-0.5 rounded-full bg-[#00f3ff]/15 px-1 py-0.5">
+                <button
+                  type="button"
+                  onClick={() => setMagnifierZoom((z) => Math.max(MAG_ZOOM_MIN, +(z - 0.2).toFixed(1)))}
+                  className="flex h-6 w-6 items-center justify-center rounded-full text-[15px] leading-none text-[#00f3ff] transition hover:bg-[#00f3ff]/25"
+                  aria-label="缩小"
+                >
+                  −
+                </button>
+                <span
+                  className="min-w-[36px] text-center text-[12px] font-semibold text-[#00f3ff]"
+                  title="也可在画面上滚动鼠标滚轮调节"
+                >
+                  {magnifierZoom.toFixed(1)}×
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setMagnifierZoom((z) => Math.min(MAG_ZOOM_MAX, +(z + 0.2).toFixed(1)))}
+                  className="flex h-6 w-6 items-center justify-center rounded-full text-[15px] leading-none text-[#00f3ff] transition hover:bg-[#00f3ff]/25"
+                  aria-label="放大"
+                >
+                  +
+                </button>
+              </div>
+            ) : null}
+
+            {magnifier ? (
+              <button
+                type="button"
+                onClick={() => setMagnifierFollow((v) => !v)}
+                className={`flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold transition ${
+                  magnifierFollow
+                    ? "bg-[#ccff00]/20 text-[#ccff00] hover:bg-[#ccff00]/30"
+                    : "bg-white/8 text-white/70 hover:bg-white/16"
+                }`}
+                title={magnifierFollow ? "自动跟随舞者(点击切手动)" : "手动跟随鼠标(点击切自动)"}
+              >
+                <Crosshair className="h-3 w-3" />
+                {magnifierFollow ? "跟随" : "手动"}
+              </button>
+            ) : null}
+
+            {magnifier && magnifierFollow ? (
+              <button
+                type="button"
+                onClick={() => {
+                  const next = (magnifierPart + 1) % BODY_PARTS.length;
+                  setMagnifierPart(next);
+                  setMagnifierZoom(BODY_PARTS[next].zoom);
+                }}
+                className="rounded-full bg-white/8 px-3 py-1 text-[11px] font-semibold text-white/85 transition hover:bg-white/16"
+                title="切换跟随部位"
+              >
+                {BODY_PARTS[magnifierPart].label}
+              </button>
+            ) : null}
           </div>
         </section>
 
@@ -491,7 +912,12 @@ export function DesktopPlayer({
 
           <div className="relative z-10 flex h-full flex-col">
             <div className="px-6 pb-3 pt-8">
-              <div className="text-[11px] font-medium tracking-[0.22em] text-white/42">动作段落</div>
+              <div className="flex items-center justify-between">
+                <div className="text-[11px] font-medium tracking-[0.22em] text-white/42">动作段落</div>
+                <div className="text-[11px] font-semibold tracking-[0.16em] text-emerald-300/80">
+                  已学 {learnedCount}/{total || practiceSegments.length}
+                </div>
+              </div>
               <div className="mt-1 text-[28px] font-black leading-none text-white">{headingText}</div>
             </div>
 
@@ -560,6 +986,22 @@ export function DesktopPlayer({
               </button>
             </div>
 
+            <div className="px-6 pb-3">
+              <button
+                type="button"
+                onClick={() => isPracticeSeg && toggleLearned(segment.id)}
+                disabled={!isPracticeSeg}
+                className={`flex h-10 w-full items-center justify-center gap-2 rounded-xl border text-[13px] font-semibold transition disabled:opacity-40 ${
+                  segLearned
+                    ? "border-emerald-400/50 bg-emerald-400/15 text-emerald-200"
+                    : "border-white/12 bg-white/5 text-white/80 hover:bg-white/10"
+                }`}
+              >
+                <Check className="h-4 w-4" />
+                {segLearned ? "已学会" : "标记这段学会"}
+              </button>
+            </div>
+
             <div className="min-h-0 flex-1 space-y-2 overflow-y-auto px-4 pb-5">
               {practiceSegments.map((s) => {
                 const active = s.id === segment.id;
@@ -595,13 +1037,27 @@ export function DesktopPlayer({
             </div>
 
             <div className="border-t border-white/10 p-5">
-              <Link
-                href={`/lesson/${lesson.id}/tracking-desktop`}
-                className="group flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#ff0055] via-[#9d4edd] to-[#00f3ff] px-6 py-3 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(157,78,221,0.32)] transition hover:brightness-110"
-              >
-                <Sparkles className="h-4 w-4 transition group-hover:rotate-12" />
-                <span className="font-semibold text-white">整支跟拍挑战</span>
-              </Link>
+              {demoReady && allLearned ? (
+                <Link
+                  href={`/lesson/${lesson.id}/tracking-desktop`}
+                  className="group flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#ff0055] via-[#9d4edd] to-[#00f3ff] px-6 py-3 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(157,78,221,0.32)] transition hover:brightness-110"
+                >
+                  <Sparkles className="h-4 w-4 transition group-hover:rotate-12" />
+                  <span className="font-semibold text-white">整支跟拍挑战</span>
+                </Link>
+              ) : (
+                <div
+                  className="flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-medium text-white/45"
+                  title={!demoReady ? "课程数据未处理完整" : "先学完所有动作卡再来挑战"}
+                >
+                  <Sparkles className="h-4 w-4" />
+                  <span>
+                    {!demoReady
+                      ? "整支跟拍挑战未就绪"
+                      : `先学完所有动作卡 (${learnedCount}/${total || practiceSegments.length})`}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </aside>

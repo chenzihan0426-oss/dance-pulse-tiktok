@@ -8,20 +8,37 @@ import { importFromUrl, uploadVideo } from "@/lib/api";
 
 const URL_PATTERN = /https?:\/\/[^\s]+/gi;
 const TRAILING_PUNCTUATION = /["'“”‘’，。！？!?、,;；）)\]}>]+$/g;
-function extractDouyinUrl(input: string): string | null {
+// 支持的视频平台域名：抖音 / B站 / 快手 / 小红书
+const VIDEO_HOST_PATTERNS = [
+  "douyin.com",
+  "iesdouyin.com",
+  "bilibili.com",
+  "b23.tv",
+  "kuaishou.com",
+  "v.kuaishou.com",
+  "chenzhongtech.com",
+  "xiaohongshu.com",
+  "xhslink.com",
+];
+
+function matchesSupportedHost(url: string): boolean {
+  return VIDEO_HOST_PATTERNS.some((host) => url.includes(host));
+}
+
+function extractVideoUrl(input: string): string | null {
   const raw = input.trim();
   if (!raw) return null;
 
   const matches = raw.match(URL_PATTERN) ?? [];
   for (const match of matches) {
     const normalized = match.replace(TRAILING_PUNCTUATION, "");
-    if (normalized.includes("douyin.com") || normalized.includes("iesdouyin.com")) {
+    if (matchesSupportedHost(normalized)) {
       return normalized;
     }
   }
 
   const normalized = raw.replace(TRAILING_PUNCTUATION, "");
-  if (normalized.includes("douyin.com") || normalized.includes("iesdouyin.com")) {
+  if (matchesSupportedHost(normalized)) {
     return normalized;
   }
 
@@ -38,9 +55,9 @@ export default function ImportPage() {
 
   const handleUrlImport = async () => {
     if (!url.trim()) return;
-    const extractedUrl = extractDouyinUrl(url);
+    const extractedUrl = extractVideoUrl(url);
     if (!extractedUrl) {
-      setError("未识别到有效的抖音链接，请直接粘贴分享文案或完整链接");
+      setError("未识别到支持的视频链接，请粘贴抖音 / B站 / 快手 / 小红书的分享文案或完整链接");
       return;
     }
 
@@ -90,13 +107,13 @@ export default function ImportPage() {
           导入新视频
         </h1>
         <p className="mt-4 text-[15px] leading-7 text-white/45">
-          粘贴抖音链接，或者上传本地 MP4。系统会自动下载视频、拆分节拍、生成课程卡片。
+          粘贴抖音 / B站 / 快手 / 小红书链接，或者上传本地 MP4。系统会自动下载视频、拆分节拍、生成课程卡片。
         </p>
 
         <textarea
           value={url}
           onChange={(event) => setUrl(event.target.value)}
-          placeholder="粘贴抖音链接"
+          placeholder="粘贴抖音 / B站 / 快手 / 小红书链接"
           className="mt-8 h-40 w-full rounded-[24px] border border-white/8 bg-bg-root px-5 py-4 text-[20px] leading-8 text-white placeholder:text-white/28"
         />
 

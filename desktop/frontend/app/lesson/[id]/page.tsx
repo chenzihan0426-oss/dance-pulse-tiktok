@@ -161,7 +161,7 @@ export default function LessonPageDesktop() {
   const [regeneratingSegId, setRegeneratingSegId] = React.useState<string | null>(null);
   const detailRef = React.useRef<HTMLDivElement | null>(null);
 
-  const { setTotal, isLearned } = useLearningProgress(lessonId);
+  const { setTotal, isLearned, learnedCount, total } = useLearningProgress(lessonId);
 
   React.useEffect(() => {
     setShowCustomCursor(window.matchMedia("(pointer:fine)").matches);
@@ -258,6 +258,7 @@ export default function LessonPageDesktop() {
 
   const activeSegments: Segment[] = lesson.segments.filter((s) => !s.deleted && !s.is_still);
   const demoReady = lessonIsDemoReady(lesson);
+  const allLearned = activeSegments.length > 0 && activeSegments.every((s) => isLearned(s.id));
   const resumeSegId = lastViewedSegmentId ?? activeSegments[0]?.id;
 
   return (
@@ -554,7 +555,7 @@ export default function LessonPageDesktop() {
                 </Link>
               ) : null}
 
-              {demoReady ? (
+              {demoReady && allLearned ? (
                 <Link
                   href={`/lesson/${lesson.id}/tracking-desktop`}
                   className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#ff0055] via-[#9d4edd] to-[#00f3ff] px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110"
@@ -565,8 +566,13 @@ export default function LessonPageDesktop() {
                   跟拍挑战
                 </Link>
               ) : (
-                <span className="rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm text-white/40">
-                  跟拍挑战未就绪
+                <span
+                  className="rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm text-white/40"
+                  title={!demoReady ? "课程数据未处理完整" : "先学完所有动作卡再来挑战"}
+                >
+                  {!demoReady
+                    ? "跟拍挑战未就绪"
+                    : `先学完动作卡 (${learnedCount}/${total || activeSegments.length})`}
                 </span>
               )}
             </div>

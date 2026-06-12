@@ -18,6 +18,7 @@ from routes.me import router as me_router
 from routes.segments import router as segments_router
 from routes.teaching import router as teaching_router
 from routes.tracking import router as tracking_router
+from services.db import init_db
 from services.job_store import recover_interrupted_jobs
 from services.social_store import ensure_social_dir
 from services.teaching_queue import teaching_queue
@@ -82,6 +83,7 @@ def _parse_cors_origins() -> list[str]:
 
 
 _ensure_ffmpeg_on_path()
+init_db()
 ensure_tracking_dirs()
 ensure_social_dir()
 

@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-import json
 import os
 import re
 import secrets
 from datetime import UTC, datetime, timedelta
-from pathlib import Path
 
 from fastapi import HTTPException
+from sqlmodel import select
 
 from models import (
     ActivitySnapshot,
@@ -20,34 +19,10 @@ from models import (
     UserLessonState,
     UserStats,
 )
+from services.db import session_scope
+from services.db_models import SessionRow, SmsCodeRow, SnapshotRow, UserRow
 
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-AUTH_DIR = BASE_DIR / "data" / "auth"
-USERS_FILE = AUTH_DIR / "users.json"
-SESSIONS_FILE = AUTH_DIR / "sessions.json"
-CODES_FILE = AUTH_DIR / "codes.json"
-SNAPSHOTS_FILE = AUTH_DIR / "snapshots.json"
 TRUTHY_ENV_VALUES = {"1", "true", "yes", "on"}
-
-
-def _ensure_auth_dir() -> None:
-    AUTH_DIR.mkdir(parents=True, exist_ok=True)
-
-
-def _read_json(path: Path, fallback):
-    _ensure_auth_dir()
-    if not path.exists():
-      return fallback
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return fallback
-
-
-def _write_json(path: Path, payload) -> None:
-    _ensure_auth_dir()
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def _now_iso() -> str:
@@ -65,36 +40,57 @@ def should_expose_sms_code() -> bool:
     return os.environ.get("DANCEPULSE_EXPOSE_DEV_SMS_CODE", "").lower() in TRUTHY_ENV_VALUES
 
 
+def _replace_all(session, model, rows) -> None:
+    """全量重写一张表：清空后插入（保持旧 JSON 实现的整体读写语义）。"""
+    for existing in session.exec(select(model)).all():
+        session.delete(existing)
+    session.flush()
+    for row in rows:
+        session.add(row)
+
+
 def _load_users() -> dict[str, dict]:
-    return _read_json(USERS_FILE, {})
+    with session_scope() as s:
+        return {row.id: row.to_api_dict() for row in s.exec(select(UserRow)).all()}
 
 
 def _save_users(users: dict[str, dict]) -> None:
-    _write_json(USERS_FILE, users)
+    with session_scope() as s:
+        _replace_all(s, UserRow, [UserRow.from_api_dict(raw) for raw in users.values()])
 
 
 def _load_sessions() -> dict[str, dict]:
-    return _read_json(SESSIONS_FILE, {})
+    with session_scope() as s:
+        return {row.token: row.to_api_dict() for row in s.exec(select(SessionRow)).all()}
 
 
 def _save_sessions(sessions: dict[str, dict]) -> None:
-    _write_json(SESSIONS_FILE, sessions)
+    with session_scope() as s:
+        _replace_all(s, SessionRow, [SessionRow.from_api_dict(raw) for raw in sessions.values()])
 
 
 def _load_codes() -> dict[str, dict]:
-    return _read_json(CODES_FILE, {})
+    with session_scope() as s:
+        return {row.phone: row.to_api_dict() for row in s.exec(select(SmsCodeRow)).all()}
 
 
 def _save_codes(codes: dict[str, dict]) -> None:
-    _write_json(CODES_FILE, codes)
+    with session_scope() as s:
+        _replace_all(s, SmsCodeRow, [SmsCodeRow.from_api_dict(raw) for raw in codes.values()])
 
 
 def _load_snapshots() -> dict[str, dict]:
-    return _read_json(SNAPSHOTS_FILE, {})
+    with session_scope() as s:
+        return {row.user_id: dict(row.data or {}) for row in s.exec(select(SnapshotRow)).all()}
 
 
 def _save_snapshots(snapshots: dict[str, dict]) -> None:
-    _write_json(SNAPSHOTS_FILE, snapshots)
+    with session_scope() as s:
+        _replace_all(
+            s,
+            SnapshotRow,
+            [SnapshotRow(user_id=user_id, data=data) for user_id, data in snapshots.items()],
+        )
 
 
 def _generate_username(users: dict[str, dict]) -> str:

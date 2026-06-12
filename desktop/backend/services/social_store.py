@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import json
 import secrets
 from pathlib import Path
 
 from fastapi import HTTPException
+from sqlmodel import select
 
 from models import (
     CommunityComment,
@@ -15,6 +15,8 @@ from models import (
     TrackingResult,
     UserStats,
 )
+from services.db import session_scope
+from services.db_models import CommentRow, FollowRow, LikeRow, UserRow
 from services.lesson_store import load_lesson
 from services.tracking_store import (
     delete_tracking_result,
@@ -27,64 +29,57 @@ from services.tracking_store import (
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SOCIAL_DIR = BASE_DIR / "data" / "social"
-AUTH_USERS_FILE = BASE_DIR / "data" / "auth" / "users.json"
-FOLLOWS_FILE = SOCIAL_DIR / "follows.json"
-LIKES_FILE = SOCIAL_DIR / "likes.json"
-COMMENTS_FILE = SOCIAL_DIR / "comments.json"
 GUEST_USER_ID = "guest_local"
 GUEST_USERNAME = "local_guest"
 
 
 def ensure_social_dir() -> None:
+    # 社交数据已迁移到数据库；保留目录创建以兼容历史调用。
     SOCIAL_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def _read_json(path: Path, fallback):
-    ensure_social_dir()
-    if not path.exists():
-        return fallback
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return fallback
-
-
-def _write_json(path: Path, payload) -> None:
-    ensure_social_dir()
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+def _replace_all(session, model, rows) -> None:
+    """全量重写一张表：清空后插入（保持旧 JSON 实现的整体读写语义）。"""
+    for existing in session.exec(select(model)).all():
+        session.delete(existing)
+    session.flush()
+    for row in rows:
+        session.add(row)
 
 
 def _load_users() -> dict[str, dict]:
-    if not AUTH_USERS_FILE.exists():
-        return {}
-    try:
-        return json.loads(AUTH_USERS_FILE.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return {}
+    with session_scope() as s:
+        return {row.id: row.to_api_dict() for row in s.exec(select(UserRow)).all()}
 
 
 def _load_follows() -> list[dict]:
-    return _read_json(FOLLOWS_FILE, [])
+    with session_scope() as s:
+        return [row.to_api_dict() for row in s.exec(select(FollowRow)).all()]
 
 
 def _save_follows(records: list[dict]) -> None:
-    _write_json(FOLLOWS_FILE, records)
+    with session_scope() as s:
+        _replace_all(s, FollowRow, [FollowRow.from_api_dict(r) for r in records])
 
 
 def _load_likes() -> list[dict]:
-    return _read_json(LIKES_FILE, [])
+    with session_scope() as s:
+        return [row.to_api_dict() for row in s.exec(select(LikeRow)).all()]
 
 
 def _save_likes(records: list[dict]) -> None:
-    _write_json(LIKES_FILE, records)
+    with session_scope() as s:
+        _replace_all(s, LikeRow, [LikeRow.from_api_dict(r) for r in records])
 
 
 def _load_comments() -> list[dict]:
-    return _read_json(COMMENTS_FILE, [])
+    with session_scope() as s:
+        return [row.to_api_dict() for row in s.exec(select(CommentRow)).all()]
 
 
 def _save_comments(records: list[dict]) -> None:
-    _write_json(COMMENTS_FILE, records)
+    with session_scope() as s:
+        _replace_all(s, CommentRow, [CommentRow.from_api_dict(r) for r in records])
 
 
 def build_feed_items(*, viewer_id: str | None = None, username: str | None = None) -> list[CommunityFeedItem]:
@@ -208,40 +203,34 @@ def remove_tracking_result(result_id: str, *, actor_id: str) -> None:
     if result.userId not in {actor_id, GUEST_USER_ID}:
         raise HTTPException(status_code=403, detail="Cannot delete another user's result")
 
-    likes = [item for item in _load_likes() if item["trackingResultId"] != result_id]
-    comments = [item for item in _load_comments() if item["trackingResultId"] != result_id]
-    _save_likes(likes)
-    _save_comments(comments)
+    with session_scope() as s:
+        for like in s.exec(select(LikeRow).where(LikeRow.tracking_result_id == result_id)).all():
+            s.delete(like)
+        for cmt in s.exec(select(CommentRow).where(CommentRow.tracking_result_id == result_id)).all():
+            s.delete(cmt)
     delete_tracking_result(result_id)
 
 
 def toggle_like(result_id: str, *, actor_id: str) -> ToggleLikeResponse:
-    likes = _load_likes()
-    existing = next(
-        (
-            item
-            for item in likes
-            if item["userId"] == actor_id and item["trackingResultId"] == result_id
-        ),
-        None,
-    )
-    if existing:
-        likes = [item for item in likes if item is not existing]
-        liked = False
-    else:
-        likes.append(
-            {
-                "id": f"like_{secrets.token_hex(6)}",
-                "userId": actor_id,
-                "trackingResultId": result_id,
-                "createdAt": now_iso(),
-            }
+    with session_scope() as s:
+        existing = s.exec(
+            select(LikeRow).where(
+                LikeRow.user_id == actor_id,
+                LikeRow.tracking_result_id == result_id,
+            )
+        ).first()
+        if existing:
+            s.delete(existing)
+            liked = False
+        else:
+            s.add(LikeRow(user_id=actor_id, tracking_result_id=result_id, created_at=now_iso()))
+            liked = True
+        s.flush()
+        like_count = len(
+            s.exec(select(LikeRow).where(LikeRow.tracking_result_id == result_id)).all()
         )
-        liked = True
-    _save_likes(likes)
 
     result = get_tracking_result(result_id)
-    like_count = sum(1 for item in likes if item["trackingResultId"] == result_id)
     update_tracking_result(result.model_copy(update={"likeCount": like_count}))
     return ToggleLikeResponse(liked=liked, likeCount=like_count)
 
@@ -251,31 +240,24 @@ def toggle_follow(username: str, *, actor_id: str) -> ToggleFollowResponse:
     if followee_id == actor_id:
         raise HTTPException(status_code=400, detail="Cannot follow yourself")
 
-    follows = _load_follows()
-    existing = next(
-        (
-            item
-            for item in follows
-            if item["followerId"] == actor_id and item["followeeId"] == followee_id
-        ),
-        None,
-    )
-    if existing:
-        follows = [item for item in follows if item is not existing]
-        following = False
-    else:
-        follows.append(
-            {
-                "id": f"fol_{secrets.token_hex(6)}",
-                "followerId": actor_id,
-                "followeeId": followee_id,
-                "createdAt": now_iso(),
-            }
+    with session_scope() as s:
+        existing = s.exec(
+            select(FollowRow).where(
+                FollowRow.follower_id == actor_id,
+                FollowRow.followee_id == followee_id,
+            )
+        ).first()
+        if existing:
+            s.delete(existing)
+            following = False
+        else:
+            s.add(FollowRow(follower_id=actor_id, followee_id=followee_id, created_at=now_iso()))
+            following = True
+        s.flush()
+        follower_count = len(
+            s.exec(select(FollowRow).where(FollowRow.followee_id == followee_id)).all()
         )
-        following = True
-    _save_follows(follows)
 
-    follower_count = sum(1 for item in follows if item["followeeId"] == followee_id)
     return ToggleFollowResponse(following=following, followerCount=follower_count)
 
 
@@ -307,11 +289,13 @@ def add_comment(result_id: str, *, actor_id: str, content: str) -> CommunityComm
         createdAt=now_iso(),
     )
 
-    raw_comments = _load_comments()
-    raw_comments.append(comment.model_dump(mode="json"))
-    _save_comments(raw_comments)
+    with session_scope() as s:
+        s.add(CommentRow.from_api_dict(comment.model_dump(mode="json")))
+        s.flush()
+        comment_count = len(
+            s.exec(select(CommentRow).where(CommentRow.tracking_result_id == result_id)).all()
+        )
 
     result = get_tracking_result(result_id)
-    comment_count = sum(1 for item in raw_comments if item["trackingResultId"] == result_id)
     update_tracking_result(result.model_copy(update={"commentCount": comment_count}))
     return comment

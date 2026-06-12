@@ -38,6 +38,8 @@ _COOKIE_RETRY_MARKERS = (
     "unable to extract webpage video data",
     "unable to extract sigi state",
     "verification",
+    "precondition failed",
+    "http error 412",
 )
 _BROWSER_VERIFY_MARKERS = (
     "fresh cookies",
@@ -103,7 +105,46 @@ class WindowsBrowserDebugConfig:
     user_data_root: Path
 
 
-def extract_douyin_url(text: str) -> str:
+# 支持的视频平台域名：抖音 / B站 / 快手 / 小红书
+_SUPPORTED_HOSTS = (
+    "douyin.com",
+    "iesdouyin.com",
+    "bilibili.com",
+    "b23.tv",
+    "kuaishou.com",
+    "v.kuaishou.com",
+    "chenzhongtech.com",
+    "xiaohongshu.com",
+    "xhslink.com",
+)
+
+# 各平台下载时使用的 Referer（yt-dlp 内置 extractor 通常也会自理，这里显式兜底）
+_PLATFORM_REFERERS = {
+    "douyin": "https://www.douyin.com/",
+    "bilibili": "https://www.bilibili.com/",
+    "kuaishou": "https://www.kuaishou.com/",
+    "xiaohongshu": "https://www.xiaohongshu.com/",
+}
+
+
+def _is_supported_host(url: str) -> bool:
+    return any(host in url for host in _SUPPORTED_HOSTS)
+
+
+def _detect_platform(url: str | None) -> str:
+    lowered = (url or "").lower()
+    if "douyin.com" in lowered or "iesdouyin.com" in lowered:
+        return "douyin"
+    if "bilibili.com" in lowered or "b23.tv" in lowered:
+        return "bilibili"
+    if "kuaishou.com" in lowered or "chenzhongtech.com" in lowered:
+        return "kuaishou"
+    if "xiaohongshu.com" in lowered or "xhslink.com" in lowered:
+        return "xiaohongshu"
+    return "douyin"
+
+
+def extract_video_url(text: str) -> str:
     raw = text.strip()
     if not raw:
         raise FetchError("链接为空")
@@ -112,23 +153,28 @@ def extract_douyin_url(text: str) -> str:
     if matches:
         for candidate in matches:
             normalized = _normalize_candidate(candidate)
-            if "douyin.com" in normalized or "iesdouyin.com" in normalized:
+            if _is_supported_host(normalized):
                 return normalized
 
     normalized = _normalize_candidate(raw)
-    if "douyin.com" in normalized or "iesdouyin.com" in normalized:
+    if _is_supported_host(normalized):
         return normalized
 
-    raise FetchError("未识别到有效的抖音链接，请粘贴分享文案或完整链接")
+    raise FetchError("未识别到支持的视频链接，请粘贴抖音 / B站 / 快手 / 小红书的分享文案或完整链接")
 
 
-def normalize_douyin_url(text: str) -> str:
-    url = extract_douyin_url(text)
+def normalize_video_url(text: str) -> str:
+    url = extract_video_url(text)
     if not url:
         raise FetchError("链接为空")
-    if "douyin.com" not in url and "iesdouyin.com" not in url:
-        raise FetchError("当前仅支持抖音分享链接，或使用本地上传")
+    if not _is_supported_host(url):
+        raise FetchError("当前仅支持抖音 / B站 / 快手 / 小红书链接，或使用本地上传")
     return url
+
+
+# 向后兼容旧函数名（其它模块仍以 douyin 命名引用）
+extract_douyin_url = extract_video_url
+normalize_douyin_url = normalize_video_url
 
 
 def _normalize_candidate(candidate: str) -> str:
@@ -162,7 +208,13 @@ def _friendly_yt_dlp_error(
     excerpt = combined[:500] if combined else ""
     lowered = combined.lower()
 
-    if "fresh cookies" in lowered:
+    if "precondition failed" in lowered or "http error 412" in lowered:
+        message = (
+            "下载失败：该视频平台触发了反爬限制（HTTP 412），是按 IP 限流的临时封禁，"
+            "常持续几分钟到几小时，即使登录也可能被挡。建议：① 隔几分钟或换个网络再试；"
+            "② 最稳妥是把视频下载到本地后用「本地上传」；③ 抖音链接导入相对更稳定。"
+        )
+    elif "fresh cookies" in lowered:
         message = (
             "下载失败：抖音当前返回需要 fresh cookies。"
             "系统会优先尝试浏览器 cookies，但当前没有拿到可用授权。"
@@ -244,20 +296,18 @@ def _subprocess_env() -> dict[str, str]:
     return env
 
 
-def _yt_dlp_common_args() -> tuple[str, ...]:
+def _yt_dlp_common_args(url: str | None = None) -> tuple[str, ...]:
     args: list[str] = []
     if _truthy_env("DOUYIN_DISABLE_PROXY", True):
         args.extend(["--proxy", ""])
 
     user_agent = os.environ.get("DOUYIN_USER_AGENT", "").strip() or _DEFAULT_USER_AGENT
-    args.extend(
-        [
-            "--add-header",
-            f"User-Agent:{user_agent}",
-            "--add-header",
-            "Referer:https://www.douyin.com/",
-        ]
-    )
+    args.extend(["--add-header", f"User-Agent:{user_agent}"])
+
+    # 按平台设置 Referer；url 为空时默认抖音（兼容旧调用）
+    referer = _PLATFORM_REFERERS.get(_detect_platform(url))
+    if referer:
+        args.extend(["--add-header", f"Referer:{referer}"])
     return tuple(args)
 
 
@@ -393,7 +443,7 @@ def _probe_cookie_strategy(
 ) -> tuple[bool, str | None]:
     probe_cmd = [
         *base_cmd,
-        *_yt_dlp_common_args(),
+        *_yt_dlp_common_args(url),
         *strategy.args,
         "--skip-download",
         "--print",
@@ -494,7 +544,7 @@ def _download_cmd(
     template = str(out_path.with_suffix("").absolute()) + ".%(ext)s"
     return [
         *base_cmd,
-        *_yt_dlp_common_args(),
+        *_yt_dlp_common_args(url),
         *extra_args,
         "-f",
         "bv*+ba/b",
