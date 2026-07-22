@@ -343,6 +343,7 @@ export default function TrackingDesktopPage() {
     state: scoringState,
     finish: finishScoring,
     kptsRef: userKptsRef,
+    hotspotRef: userHotspotRef,
   } = useSessionScoring({
     active: challengeActive,
     lessonId,
@@ -1049,6 +1050,7 @@ export default function TrackingDesktopPage() {
                   <UserSkeletonOverlay
                     videoRef={cameraRef}
                     kptsRef={userKptsRef}
+                    hotspotRef={userHotspotRef}
                     mirror={userMirror}
                     active={challengeActive}
                   />
@@ -1077,23 +1079,33 @@ export default function TrackingDesktopPage() {
               </div>
             )}
 
-            {/* 实时评分徽标 */}
+            {/* 实时评分徽标 + 最差关节提示 */}
             {cameraReady && challengeActive ? (
-              <div className="pointer-events-none absolute right-3 top-3 z-40 flex items-center gap-2 rounded-full border border-white/15 bg-black/55 px-3 py-1 backdrop-blur">
-                <span className="text-[10px] uppercase tracking-[0.15em] text-white/50">Live</span>
-                <span
-                  className={`font-mono text-[15px] font-bold ${
-                    scoringState.liveScore >= 85
-                      ? "text-[#ccff00]"
-                      : scoringState.liveScore >= 70
-                        ? "text-[#00f3ff]"
-                        : scoringState.liveScore >= 50
-                          ? "text-amber-300"
-                          : "text-red-300"
-                  }`}
-                >
-                  {scoringState.ready ? scoringState.liveScore : "…"}
-                </span>
+              <div className="pointer-events-none absolute right-3 top-3 z-40 flex flex-col items-end gap-1.5">
+                <div className="flex items-center gap-2 rounded-full border border-white/15 bg-black/55 px-3 py-1 backdrop-blur">
+                  <span className="text-[10px] uppercase tracking-[0.15em] text-white/50">Live</span>
+                  <span
+                    className={`font-mono text-[15px] font-bold ${
+                      scoringState.liveScore >= 85
+                        ? "text-[#ccff00]"
+                        : scoringState.liveScore >= 70
+                          ? "text-[#00f3ff]"
+                          : scoringState.liveScore >= 50
+                            ? "text-amber-300"
+                            : "text-red-300"
+                    }`}
+                  >
+                    {scoringState.ready ? scoringState.liveScore : "…"}
+                  </span>
+                </div>
+                {scoringState.hotspotLabel ? (
+                  <div className="flex items-center gap-1.5 rounded-full border border-[#ff5c8a]/40 bg-black/60 px-2.5 py-0.5 backdrop-blur">
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#ff5c8a]" />
+                    <span className="text-[11px] font-semibold text-[#ff9cbb]">
+                      注意{scoringState.hotspotLabel}
+                    </span>
+                  </div>
+                ) : null}
               </div>
             ) : null}
 

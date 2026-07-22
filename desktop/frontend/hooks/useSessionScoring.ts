@@ -11,6 +11,7 @@
 
 import * as React from "react";
 
+import { pickLiveHotspot, type LiveHotspot } from "@/lib/feedback/liveHotspot";
 import { getPoseLandmarker, landmarksToKeypoints } from "@/lib/pose/mediapipeClient";
 import type { Keypoint } from "@/lib/pose/types";
 import { scoreFrameFused, type Kpt, type TeacherFrame } from "@/lib/pose/scoring";
@@ -44,6 +45,25 @@ function mirrorKpts(kpts: Kpt[]): Kpt[] {
   return out;
 }
 
+const INDEX_MIRROR: Record<number, number> = Object.fromEntries(
+  MIRROR_PAIRS.flatMap(([a, b]) => [
+    [a, b],
+    [b, a],
+  ])
+);
+
+function mirrorIndex(i: number): number {
+  return INDEX_MIRROR[i] ?? i;
+}
+
+function mirrorHotspotIndices(h: LiveHotspot): LiveHotspot {
+  return {
+    ...h,
+    vertex: mirrorIndex(h.vertex),
+    edges: h.edges.map(([a, b]) => [mirrorIndex(a), mirrorIndex(b)] as [number, number]),
+  };
+}
+
 interface Options {
   active: boolean; // 挑战进行中为 true
   lessonId: string;
@@ -57,6 +77,10 @@ export interface SessionScoringState {
   liveScore: number; // 0-100,当前段的平滑分,用于实时显示
   ready: boolean; // MediaPipe 是否就绪
   error: string | null;
+  /** 当前最需纠正的关节名(中文);无明显问题时为 null */
+  hotspotLabel: string | null;
+  /** 该关节的角度误差 0-1 */
+  hotspotError: number;
 }
 
 // [x_norm, y_norm, visibility] -> Kpt
@@ -70,17 +94,22 @@ export function useSessionScoring(opts: Options): {
   reset: () => void;
   /** 最新一帧用户关键点([x,y,vis],原始镜头坐标未翻转),给实时骨架叠层用 */
   kptsRef: React.MutableRefObject<Keypoint[] | null>;
+  /** 当前最差关节热点(索引已按镜像翻回镜头坐标),给骨架高亮用 */
+  hotspotRef: React.MutableRefObject<LiveHotspot | null>;
 } {
   const { active, lessonId, videoRef, playheadRef, segments, mirror } = opts;
 
   const accRef = React.useRef<SessionAccumulator | null>(null);
   const kptsRef = React.useRef<Keypoint[] | null>(null);
+  const hotspotRef = React.useRef<LiveHotspot | null>(null);
   const segmentsRef = React.useRef<SegmentMeta[]>(segments);
   const mirrorRef = React.useRef(mirror);
   const [state, setState] = React.useState<SessionScoringState>({
     liveScore: 0,
     ready: false,
     error: null,
+    hotspotLabel: null,
+    hotspotError: 0,
   });
 
   React.useEffect(() => {
@@ -182,9 +211,19 @@ export function useSessionScoring(opts: Options): {
             scoreBuf.push(s01);
             if (scoreBuf.length > 15) scoreBuf.shift();
             const avg = scoreBuf.reduce((a, b) => a + b, 0) / scoreBuf.length;
+
+            // 最差关节热点:kpts 此刻已是老师手性;叠层画在镜头坐标上,
+            // 镜像时需把索引翻回去
+            const hotspot = pickLiveHotspot(kpts, nearest.keypoints);
+            hotspotRef.current =
+              hotspot && mirrorRef.current ? mirrorHotspotIndices(hotspot) : hotspot;
+
             setState((prev) => {
               const next = Math.round(avg * 100);
-              return prev.liveScore === next ? prev : { ...prev, liveScore: next };
+              const label = hotspot?.label ?? null;
+              const err = hotspot?.error ?? 0;
+              if (prev.liveScore === next && prev.hotspotLabel === label) return prev;
+              return { ...prev, liveScore: next, hotspotLabel: label, hotspotError: err };
             });
           }
         }
@@ -197,12 +236,13 @@ export function useSessionScoring(opts: Options): {
     return () => {
       disposed = true;
       kptsRef.current = null;
+      hotspotRef.current = null;
       if (rafId) cancelAnimationFrame(rafId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, lessonId]);
 
-  return { state, finish, reset, kptsRef };
+  return { state, finish, reset, kptsRef, hotspotRef };
 }
 
 // —— 内部小工具(避免额外 import 造成的循环) ——
