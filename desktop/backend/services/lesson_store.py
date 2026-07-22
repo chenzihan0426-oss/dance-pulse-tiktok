@@ -47,10 +47,11 @@ def list_lessons() -> list[LessonListItem]:
     items: list[LessonListItem] = []
     for path in list_lesson_files():
         lesson = _sync_lesson_thumbnail(Lesson.model_validate_json(path.read_text(encoding="utf-8")))
-        segs = [s for s in lesson.segments if not s.deleted]
+        # 与前端 demoReady 一致：可练段有 clip + pose(或 pose_full) 即可挑战；
+        # matte/particle 为可选特效，不挡入口。
+        segs = [s for s in lesson.segments if not s.deleted and not s.is_still]
         demo_ready = bool(segs) and all(
-            s.matte_rgb_url and s.matte_mask_url and s.particle_url and s.pose_full_url
-            for s in segs
+            s.clip_url and (s.pose_full_url or s.pose_url) for s in segs
         )
         # 检查本地 video 文件是否存在
         has_video = _local_media_exists(lesson.video_url)

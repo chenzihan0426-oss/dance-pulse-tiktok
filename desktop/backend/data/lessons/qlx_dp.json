@@ -139,21 +139,42 @@
       "ai_description": "前奏·静止定格,保持姿态",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "前奏部分以步伐移动和肩部动作为主",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左脚向前迈步 右肩微动"
+          },
+          {
+            "beats": "3-4",
+            "content": "重心下沉 双臂自然摆动"
+          },
+          {
+            "beats": "5-6",
+            "content": "右脚向侧迈步 肩部发力"
+          },
+          {
+            "beats": "7-8",
+            "content": "左脚跟进 双臂展开"
+          }
+        ],
+        "tips": [
+          "保持身体重心稳定",
+          "肩部动作要轻快",
+          "注意脚步与节奏配合"
+        ],
         "beat_cues": [
+          "左脚迈步",
           null,
+          "重心下沉",
           null,
+          "右脚侧迈",
           null,
-          null,
-          null,
-          null,
-          null,
+          "左脚跟进",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T09:16:16Z"
       },
       "deleted": false
     },
@@ -484,21 +505,42 @@
       "ai_description": "前奏·静止定格,保持姿态",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
-        "beat_cues": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
+        "status": "ready",
+        "summary": "双手举过头顶，身体下沉并转身",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手举过头顶，掌心相对"
+          },
+          {
+            "beats": "3-4",
+            "content": "身体下沉，重心放低"
+          },
+          {
+            "beats": "5-6",
+            "content": "向右侧转身，左脚点地"
+          },
+          {
+            "beats": "7-8",
+            "content": "双臂伸展，保持平衡"
+          }
         ],
-        "generated_at": ""
+        "tips": [
+          "注意双手举过头顶时肩膀放松",
+          "下沉时膝盖微屈，保持弹性",
+          "转身时重心放在支撑腿上"
+        ],
+        "beat_cues": [
+          "双手过头",
+          null,
+          "下沉",
+          "转身",
+          null,
+          "点地",
+          null,
+          "伸展"
+        ],
+        "generated_at": "2026-07-22T09:16:21Z"
       },
       "deleted": false
     },
