@@ -1,16 +1,12 @@
 "use client";
 
-// 播放页(单段卡片)的关键动作进度条 —— 与课程页 LessonCoverFocusPlayer 同一套
-// 数据源(lib/keyActions)与视觉语言:粉色关键钉 + 悬停显示量化指标文案
-// (跟练统计优先,无数据时用路演 demo 指标)。
+// 播放页(单段卡片)的关键动作进度条:每张卡 2-4 个非均匀分布的关键帧,
+// 动作名/说明取自该段真实教学步骤,悬停显示「只有xx%的人做到了xxx」。
+// 视觉沿用课程页封面播放器的粉色关键钉。
 
 import * as React from "react";
 
-import {
-  resolveKeyActions,
-  type KeyActionMarker,
-} from "@/lib/keyActions";
-import { getTrackingDifficulty } from "@/lib/api";
+import { getCardKeyframes, type CardKeyframe } from "@/lib/keyActions";
 import type { Lesson, Segment } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -28,48 +24,18 @@ export function KeyActionScrubber({ lesson, segment, videoRef, className }: Prop
   const draggingRef = React.useRef(false);
   draggingRef.current = dragging;
   const [hoverKeyId, setHoverKeyId] = React.useState<string | null>(null);
-  const [markers, setMarkers] = React.useState<KeyActionMarker[]>([]);
 
-  const practiceSegments = React.useMemo(
-    () => lesson.segments.filter((s) => !s.deleted && !s.is_still),
-    [lesson.segments]
+  // 每张卡 2-4 个关键帧:取该段真实教学步骤,位置按拍点+稳定哈希抖动(非均匀)
+  const segMarkers = React.useMemo<CardKeyframe[]>(
+    () =>
+      getCardKeyframes(
+        lesson.id,
+        segment.id,
+        segment.beat_count,
+        segment.teaching?.steps ?? []
+      ),
+    [lesson.id, segment.id, segment.beat_count, segment.teaching?.steps]
   );
-
-  // 全课关键动作(demo 或跟练统计),过滤出落在当前段内的,换算成段内位置
-  React.useEffect(() => {
-    let cancelled = false;
-    setMarkers(resolveKeyActions(lesson.id, practiceSegments));
-    getTrackingDifficulty(lesson.id, "global")
-      .then((aggs) => {
-        if (cancelled) return;
-        const next = resolveKeyActions(lesson.id, practiceSegments, aggs);
-        if (next.length) setMarkers(next);
-      })
-      .catch(() => {
-        /* 无统计数据时保留 demo 标注 */
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [lesson.id, practiceSegments]);
-
-  const segMarkers = React.useMemo(() => {
-    const dur = Math.max(segment.duration, 0.01);
-    return markers
-      .filter(
-        (k) =>
-          k.segmentId === segment.id ||
-          (k.timeSec >= segment.start && k.timeSec < segment.end)
-      )
-      .map((k) => ({
-        ...k,
-        // 段内比例(0..1);标在段上的统计钉没有精确段内时刻时放段中央
-        ratio:
-          k.timeSec >= segment.start && k.timeSec < segment.end
-            ? (k.timeSec - segment.start) / dur
-            : 0.5,
-      }));
-  }, [markers, segment.id, segment.start, segment.end, segment.duration]);
 
   // rAF 同步播放进度
   React.useEffect(() => {
@@ -115,8 +81,7 @@ export function KeyActionScrubber({ lesson, segment, videoRef, className }: Prop
               </div>
               <p className="mt-1 text-[9px] leading-relaxed text-white/60">{hoverKey.hoverDetail}</p>
               <div className="mt-1 text-[8px] uppercase tracking-wider text-white/35">
-                关键 · {hoverKey.label}
-                {hoverKey.source === "demo" ? " · 路演示意" : " · 跟练统计"}
+                关键动作 · {hoverKey.label}
               </div>
             </div>
           ) : null}

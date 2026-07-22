@@ -850,3 +850,89 @@ export function resolveKeyActions(
     };
   });
 }
+
+// ---------------------------------------------------------------------------
+// 卡片级关键帧:每张卡(segment)2-4 个,非均匀分布。
+// 动作名/说明取自该段真实教学步骤(与视频动作对应),
+// 比例与位置由 (lessonId, segmentId) 稳定哈希决定 —— 每次进来都一样,
+// 等效"写死",且新导入课程自动获得标注。
+// 句式统一:「只有xx%的人做到了xxx」。
+// ---------------------------------------------------------------------------
+
+export interface CardKeyframe {
+  id: string;
+  /** 段内位置 0..1(非均匀) */
+  ratio: number;
+  /** 短动作名(取步骤第一小句) */
+  label: string;
+  /** 悬停主文案:只有xx%的人做到了「动作名」 */
+  hoverTitle: string;
+  /** 悬停补充:完整步骤描述 */
+  hoverDetail: string;
+  percent: number;
+}
+
+function cardHash(input: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < input.length; i += 1) {
+    h ^= input.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return Math.abs(h);
+}
+
+/** 步骤文案 -> 短动作名:取第一个逗号/顿号前的小句,超长截断 */
+function actionNameOf(content: string): string {
+  const first = content.split(/[,，、;；。]/)[0]?.trim() ?? content.trim();
+  return first.length > 12 ? `${first.slice(0, 12)}…` : first;
+}
+
+/** "1-2" / "3" -> 起始拍(1-based);解析失败返回 null */
+function startBeatOf(beats: string): number | null {
+  const m = beats.match(/(\d+)/);
+  return m ? Number(m[1]) : null;
+}
+
+export function getCardKeyframes(
+  lessonId: string,
+  segmentId: string,
+  beatCount: number,
+  steps: Array<{ beats: string; content: string }>
+): CardKeyframe[] {
+  const usable = (steps ?? []).filter((s) => s.content?.trim());
+  if (!usable.length) return [];
+
+  const seed = cardHash(`${lessonId}:${segmentId}`);
+  // 每张卡 2-4 个:由哈希决定,但不超过可用步骤数
+  const want = Math.min(usable.length, 2 + (seed % 3));
+
+  // 选步骤:从哈希起点开始按步进取,保证同卡稳定、不同卡选择不同
+  const picked: Array<{ step: { beats: string; content: string }; idx: number }> = [];
+  const stride = 1 + ((seed >> 4) % Math.max(1, usable.length - 1));
+  for (let i = 0; picked.length < want && i < usable.length; i++) {
+    const idx = (seed + i * stride) % usable.length;
+    if (!picked.some((p) => p.idx === idx)) picked.push({ step: usable[idx], idx });
+  }
+  picked.sort((a, b) => a.idx - b.idx);
+
+  const bc = Math.max(beatCount, 1);
+  return picked.map(({ step, idx }, order) => {
+    const h = cardHash(`${lessonId}:${segmentId}:${idx}`);
+    // 位置:步骤起始拍的段内比例 + 哈希抖动(±12%),整体非均匀
+    const startBeat = startBeatOf(step.beats);
+    const base = startBeat !== null ? (startBeat - 1) / bc : (idx + 0.5) / usable.length;
+    const jitter = ((h % 25) - 12) / 100; // -0.12 .. +0.12
+    const ratio = Math.min(0.94, Math.max(0.05, base + jitter));
+    // 比例:9%-38%,低比例=难点,分布靠哈希打散
+    const percent = 9 + (h % 30);
+    const label = actionNameOf(step.content);
+    return {
+      id: `ck_${segmentId}_${idx}`,
+      ratio,
+      label,
+      hoverTitle: `只有 ${percent}% 的人做到了「${label}」`,
+      hoverDetail: step.content.trim(),
+      percent,
+    };
+  });
+}
