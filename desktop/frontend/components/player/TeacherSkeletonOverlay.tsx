@@ -99,16 +99,32 @@ export function TeacherSkeletonOverlay({
       };
       const py = (p: PoseKp) => p.y * vh * scale + offY;
 
-      // 双虚线骨架:每根骨头 = 两条平行虚线(沿骨骼方向左右各偏移),
-      // 中空管状轮廓比单实线更清晰,虚线让画面不被遮死。
-      const HALF_GAP = 5; // 双线各偏移 5px(管径 10px)
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      ctx.setLineDash([10, 7]);
+      // 珠链式点状骨架(样式对齐 pipeline/_xuange_pose_guide.py 的玄哥引导视觉):
+      // 每根骨头 = 两排平行的小圆点链(偏移 ±HALF_GAP),关节 = 同心圆环+圆心点。
+      // 点链遮挡感最低,骨骼交叠时也能分清各自走向。
+      const HALF_GAP = 5; // 双链各偏移 5px
+      const DOT_R = 2.4; // 链上珠点半径
+      const DOT_SPACING = 9; // 珠点间距(px)
 
-      const drawBonePass = (strokeStyle: string, lineWidth: number) => {
-        ctx.strokeStyle = strokeStyle;
-        ctx.lineWidth = lineWidth;
+      const drawBeadLine = (
+        x1: number, y1: number, x2: number, y2: number,
+        r: number, fill: string
+      ) => {
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const len = Math.hypot(dx, dy);
+        if (len < 1) return;
+        const steps = Math.max(1, Math.round(len / DOT_SPACING));
+        ctx.fillStyle = fill;
+        for (let i = 0; i <= steps; i++) {
+          const t = i / steps;
+          ctx.beginPath();
+          ctx.arc(x1 + dx * t, y1 + dy * t, r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      };
+
+      const drawBonesPass = (r: number, fill: string) => {
         for (const [a, b] of POSE_CONNECTIONS) {
           const pa = pts[a];
           const pb = pts[b];
@@ -121,40 +137,40 @@ export function TeacherSkeletonOverlay({
           const dy = y2 - y1;
           const len = Math.hypot(dx, dy);
           if (len < 1) continue;
-          // 单位法向量:垂直于骨骼方向
           const nx = (-dy / len) * HALF_GAP;
           const ny = (dx / len) * HALF_GAP;
-          ctx.beginPath();
-          ctx.moveTo(x1 + nx, y1 + ny);
-          ctx.lineTo(x2 + nx, y2 + ny);
-          ctx.moveTo(x1 - nx, y1 - ny);
-          ctx.lineTo(x2 - nx, y2 - ny);
-          ctx.stroke();
+          drawBeadLine(x1 + nx, y1 + ny, x2 + nx, y2 + ny, r, fill);
+          drawBeadLine(x1 - nx, y1 - ny, x2 - nx, y2 - ny, r, fill);
         }
       };
 
-      // 底层深色描边托底(亮背景可读),上层纯白双虚线
-      drawBonePass("rgba(0,0,0,0.4)", 6.5);
-      drawBonePass("rgba(255,255,255,0.95)", 4);
+      // 底层深色珠点托底(亮背景可读),上层纯白珠点
+      drawBonesPass(DOT_R + 1.2, "rgba(0,0,0,0.4)");
+      drawBonesPass(DOT_R, "rgba(255,255,255,0.95)");
 
-      ctx.setLineDash([]);
-
-      // 关节点:空心白圈(与中空管状骨骼呼应,不糊住关节)
+      // 关节:同心圆环 + 圆心点(对齐截图里的关节样式)
       for (const idx of DRAWN_KEYPOINTS) {
         const p = pts[idx];
         if (!p || p.visibility < MIN_VIS) continue;
         const x = px(p);
         const y = py(p);
+        // 深色托底环
         ctx.beginPath();
-        ctx.arc(x, y, 5.5, 0, Math.PI * 2);
+        ctx.arc(x, y, 6.5, 0, Math.PI * 2);
         ctx.strokeStyle = "rgba(0,0,0,0.4)";
-        ctx.lineWidth = 5.5;
+        ctx.lineWidth = 4;
         ctx.stroke();
+        // 白色外环
         ctx.beginPath();
-        ctx.arc(x, y, 5.5, 0, Math.PI * 2);
+        ctx.arc(x, y, 6.5, 0, Math.PI * 2);
         ctx.strokeStyle = "rgba(255,255,255,0.95)";
-        ctx.lineWidth = 3.5;
+        ctx.lineWidth = 2;
         ctx.stroke();
+        // 圆心点
+        ctx.beginPath();
+        ctx.arc(x, y, 2.2, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255,255,255,0.95)";
+        ctx.fill();
       }
     };
     raf = requestAnimationFrame(draw);
