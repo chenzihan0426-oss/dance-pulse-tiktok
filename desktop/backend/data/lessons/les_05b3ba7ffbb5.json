@@ -1,0 +1,312 @@
+{
+  "id": "les_05b3ba7ffbb5",
+  "title": "因为红",
+  "source_url": "https://v.douyin.com/-LwTI31GuWQ/",
+  "duration": 20.13,
+  "bpm": 103.36,
+  "video_url": "/videos/les_05b3ba7ffbb5.mp4",
+  "thumbnail": "/thumbs/les_05b3ba7ffbb5_seg_000.jpg",
+  "confirmed": false,
+  "beat_quality": "high",
+  "beats": [
+    0.23,
+    0.81,
+    1.39,
+    2.0,
+    2.58,
+    3.18,
+    3.74,
+    4.34,
+    4.92,
+    5.5,
+    6.11,
+    6.69,
+    7.29,
+    7.89,
+    8.45,
+    9.03,
+    9.64,
+    10.22,
+    10.82,
+    11.4,
+    11.98,
+    12.59,
+    13.17,
+    13.75,
+    14.35,
+    14.93,
+    15.51,
+    16.11,
+    16.7,
+    17.3,
+    17.86,
+    18.46,
+    19.04
+  ],
+  "sections": [
+    {
+      "id": "intro",
+      "label": "前奏",
+      "start": 0.0,
+      "end": 3.99
+    },
+    {
+      "id": "chorus_1",
+      "label": "副歌 1",
+      "start": 3.99,
+      "end": 8.99
+    },
+    {
+      "id": "outro",
+      "label": "尾声",
+      "start": 8.99,
+      "end": 20.13
+    }
+  ],
+  "segments": [
+    {
+      "id": "seg_000",
+      "lesson_id": "les_05b3ba7ffbb5",
+      "index": 0,
+      "section": "intro",
+      "section_label": "前奏",
+      "start": 0.23,
+      "end": 4.92,
+      "duration": 4.69,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_05b3ba7ffbb5_seg_000.jpg",
+      "clip_url": "/clips/les_05b3ba7ffbb5_seg_000.mp4",
+      "pose_url": "/pose/les_05b3ba7ffbb5/seg_000.json",
+      "matte_rgb_url": "/matte/les_05b3ba7ffbb5/seg_000_rgb.mp4",
+      "matte_mask_url": "/matte/les_05b3ba7ffbb5/seg_000_mask.mp4",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 5,
+      "is_still": false,
+      "ai_description": "前奏·爆发段落,快速连续移动",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双手拍打，双腿点地，身体扭动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手胸前拍打，右脚点地"
+          },
+          {
+            "beats": "3-4",
+            "content": "身体向右扭动，左脚点地"
+          },
+          {
+            "beats": "5-6",
+            "content": "双臂打开，重心下沉"
+          },
+          {
+            "beats": "7-8",
+            "content": "双臂上举过头，身体回正"
+          }
+        ],
+        "tips": [
+          "保持核心收紧，动作流畅",
+          "注意手部与脚步的协调",
+          "眼神跟随动作方向变化"
+        ],
+        "beat_cues": [
+          null,
+          null,
+          null,
+          "下沉",
+          null,
+          "上举",
+          null,
+          null
+        ],
+        "generated_at": "2026-07-22T16:57:32Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_001",
+      "lesson_id": "les_05b3ba7ffbb5",
+      "index": 1,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 4.92,
+      "end": 9.64,
+      "duration": 4.72,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_05b3ba7ffbb5_seg_001.jpg",
+      "clip_url": "/clips/les_05b3ba7ffbb5_seg_001.mp4",
+      "pose_url": "/pose/les_05b3ba7ffbb5/seg_001.json",
+      "matte_rgb_url": "/matte/les_05b3ba7ffbb5/seg_001_rgb.mp4",
+      "matte_mask_url": "/matte/les_05b3ba7ffbb5/seg_001_mask.mp4",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 1,
+      "is_still": false,
+      "ai_description": "副歌 1·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "手臂波浪与胯部律动结合",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手举过头顶，掌心相对"
+          },
+          {
+            "beats": "3-4",
+            "content": "手臂自然下落至胸前，指尖轻点"
+          },
+          {
+            "beats": "5-6",
+            "content": "身体向右侧倾斜，左臂伸展"
+          },
+          {
+            "beats": "7-8",
+            "content": "重心移回，双臂平举展开"
+          }
+        ],
+        "tips": [
+          "保持核心收紧，动作流畅",
+          "注意手部线条优美",
+          "跟随节奏控制力度"
+        ],
+        "beat_cues": [
+          "举手",
+          null,
+          "下落",
+          null,
+          "侧倾",
+          null,
+          "展开",
+          null
+        ],
+        "generated_at": "2026-07-22T16:57:32Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_002",
+      "lesson_id": "les_05b3ba7ffbb5",
+      "index": 2,
+      "section": "outro",
+      "section_label": "尾声",
+      "start": 9.64,
+      "end": 14.35,
+      "duration": 4.71,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_05b3ba7ffbb5_seg_002.jpg",
+      "clip_url": "/clips/les_05b3ba7ffbb5_seg_002.mp4",
+      "pose_url": "/pose/les_05b3ba7ffbb5/seg_002.json",
+      "matte_rgb_url": "/matte/les_05b3ba7ffbb5/seg_002_rgb.mp4",
+      "matte_mask_url": "/matte/les_05b3ba7ffbb5/seg_002_mask.mp4",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 2,
+      "is_still": false,
+      "ai_description": "尾声·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双手指向前方，随后交叉于胸前并上举",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂前伸，双手食指指向前方"
+          },
+          {
+            "beats": "3-4",
+            "content": "双臂向两侧打开，掌心相对，随后交叉于胸前"
+          },
+          {
+            "beats": "5-6",
+            "content": "双臂向上举过头顶，掌心相对"
+          },
+          {
+            "beats": "7-8",
+            "content": "双臂自然放下，恢复胸前交叉姿势"
+          }
+        ],
+        "tips": [
+          "保持核心收紧，动作流畅",
+          "注意手臂线条优美",
+          "头部跟随手部动作转动"
+        ],
+        "beat_cues": [
+          "指向前方",
+          null,
+          "交叉胸前",
+          null,
+          "举过头顶",
+          null,
+          "放回胸前",
+          null
+        ],
+        "generated_at": "2026-07-22T16:57:32Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_003",
+      "lesson_id": "les_05b3ba7ffbb5",
+      "index": 3,
+      "section": "outro",
+      "section_label": "尾声",
+      "start": 14.35,
+      "end": 19.04,
+      "duration": 4.69,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_05b3ba7ffbb5_seg_003.jpg",
+      "clip_url": "/clips/les_05b3ba7ffbb5_seg_003.mp4",
+      "pose_url": "/pose/les_05b3ba7ffbb5/seg_003.json",
+      "matte_rgb_url": "/matte/les_05b3ba7ffbb5/seg_003_rgb.mp4",
+      "matte_mask_url": "/matte/les_05b3ba7ffbb5/seg_003_mask.mp4",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 4,
+      "is_still": false,
+      "ai_description": "尾声·节奏紧凑,动作幅度大",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "尾声：红衣舞者完成转身与定点动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂上举，身体微仰"
+          },
+          {
+            "beats": "3-4",
+            "content": "左脚点地，重心转移"
+          },
+          {
+            "beats": "5-6",
+            "content": "快速转身，右肩前送"
+          },
+          {
+            "beats": "7-8",
+            "content": "双腿分开，双手胸前定点"
+          }
+        ],
+        "tips": [
+          "保持核心收紧，转身后稳定重心",
+          "手臂动作流畅，跟随身体转动",
+          "最后定点时注意眼神方向"
+        ],
+        "beat_cues": [
+          null,
+          null,
+          "左脚点",
+          null,
+          "转身",
+          null,
+          "双腿开",
+          "定点"
+        ],
+        "generated_at": "2026-07-22T16:57:32Z"
+      },
+      "deleted": false
+    }
+  ]
+}

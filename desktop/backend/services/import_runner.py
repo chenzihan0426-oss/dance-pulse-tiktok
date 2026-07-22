@@ -36,6 +36,42 @@ def _ensure_repo_root_path() -> None:
         sys.path.insert(0, str(REPO_ROOT))
 
 
+def _run_matte_sync(lesson_id: str) -> None:
+    """对一门课跑 RVM matte 抠像并把 URL 写回 lesson JSON。
+
+    独立后台任务:torch 缺失或单段失败都只记日志,不影响导入主流程。
+    """
+    _ensure_repo_root_path()
+    try:
+        from pipeline.batch_matte import process_lesson  # noqa: PLC0415
+
+        lesson_path = BACKEND_DATA_DIR / "lessons" / f"{lesson_id}.json"
+        if not lesson_path.exists():
+            return
+        processed, skipped, failed = process_lesson(lesson_path)
+        print(
+            f"==> [matte] {lesson_id}: 完成 {processed} 段, 跳过 {skipped}, 失败 {failed}",
+            flush=True,
+        )
+    except ModuleNotFoundError as exc:
+        # 常见于 torch 未安装:光影是可选特效,不阻塞课程可用
+        print(f"==> [matte] 跳过({exc});安装 torch 后可运行 batch_matte 补齐", flush=True)
+    except Exception as exc:  # noqa: BLE001
+        print(f"==> [matte] {lesson_id} 生成失败: {exc}", flush=True)
+
+
+def schedule_matte_generation(lesson_id: str) -> None:
+    """导入完成后异步补 matte(不阻塞导入 ready 状态)。"""
+    async def _run() -> None:
+        await asyncio.to_thread(_run_matte_sync, lesson_id)
+
+    try:
+        asyncio.get_running_loop().create_task(_run())
+    except RuntimeError:
+        # 无事件循环(理论上不会发生):放弃后台补齐,可手动跑 batch_matte
+        pass
+
+
 def _run_pipeline(
     video_path: Path,
     lesson_id: str,
@@ -195,6 +231,8 @@ async def run_import_job(
 
         seg_ids = [segment.id for segment in lesson.segments]
         await teaching_queue.enqueue(lesson.id, seg_ids)
+        # 后台补 matte 抠像(光影/剪影模式数据),不阻塞导入完成
+        schedule_matte_generation(lesson.id)
     except FetchError as exc:
         update_job(job_id, status="failed", error=str(exc))
     except Exception as exc:
@@ -239,6 +277,8 @@ async def run_upload_job(job_id: str, upload_file_path: str, filename: str) -> N
 
         seg_ids = [segment.id for segment in lesson.segments]
         await teaching_queue.enqueue(lesson.id, seg_ids)
+        # 后台补 matte 抠像(光影/剪影模式数据),不阻塞导入完成
+        schedule_matte_generation(lesson.id)
     except Exception as exc:
         update_job(job_id, status="failed", error=str(exc))
     finally:
