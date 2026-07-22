@@ -478,9 +478,12 @@ export default function TrackingDesktopPage() {
     return lesson.segments.find((s) => !s.deleted) ?? null;
   }, [lesson, teacherPlayhead]);
 
-  // Load the current segment pose_full data into TeacherFrame[].
+  // Load the current segment pose data into TeacherFrame[].
+  // pose_full 优先;没有时回退基础 pose(poseFrameToKeypoints 兼容两种格式)。
+  // 之前只认 pose_full_url,导致 harry_dp 等只有 pose_url 的课骨架完全不显示。
   React.useEffect(() => {
-    if (!currentSegment?.pose_full_url) {
+    const poseUrl = currentSegment?.pose_full_url || currentSegment?.pose_url;
+    if (!currentSegment || !poseUrl) {
       teacherFramesRef.current = [];
       setTeacherPoseAspect(DEFAULT_POSE_ASPECT);
       return;
@@ -492,7 +495,7 @@ export default function TrackingDesktopPage() {
       return;
     }
     if (teacherFramesLoadedRef.current.has(currentSegment.id)) return;
-    const url = currentSegment.pose_full_url;
+    const url = poseUrl;
     const segStart = currentSegment.start;
     teacherFramesLoadedRef.current.add(currentSegment.id);
     fetch(url)
