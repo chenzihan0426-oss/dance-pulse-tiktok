@@ -816,7 +816,7 @@ export default function TrackingDesktopPage() {
       }, 0);
       return;
     }
-    // 整支跳完:停止播放并结算本次挑战。
+    // 整支跳完:停止播放并结算本次挑战，再进入猜你喜欢。
     setPlaying(false);
     void finishChallenge();
     setChallengeDone(true);

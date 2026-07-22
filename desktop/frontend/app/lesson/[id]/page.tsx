@@ -21,8 +21,10 @@ import type { Lesson, Segment } from "@/lib/types";
 import { useLearningProgress } from "@/hooks/useLearningProgress";
 import { lessonIsDemoReady, segmentIsReady } from "@/lib/demoReady";
 import { TeachingPanelKpop } from "@/components/TeachingPanelKpop";
+import { LessonCoverFocusPlayer } from "@/components/lesson/LessonCoverFocusPlayer";
 import { SimilarRecommendPanel } from "@/components/lesson/SimilarRecommendPanel";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 type LessonBottomTab = "similar" | "segments";
 
@@ -178,6 +180,7 @@ export default function LessonPageDesktop() {
   const [activeTeachingSegId, setActiveTeachingSegId] = React.useState<string | null>(null);
   const [regeneratingSegId, setRegeneratingSegId] = React.useState<string | null>(null);
   const [bottomTab, setBottomTab] = React.useState<LessonBottomTab>("segments");
+  const [focusPreview, setFocusPreview] = React.useState(false);
   const detailRef = React.useRef<HTMLDivElement | null>(null);
 
   const { setTotal, isLearned, learnedCount, total } = useLearningProgress(lessonId);
@@ -559,44 +562,79 @@ export default function LessonPageDesktop() {
       ) : null}
 
       <section className="relative z-10 overflow-hidden px-6 pb-16 pt-14 md:px-12 md:pt-16">
-        <div className="mx-auto flex max-w-7xl flex-col gap-8 lg:flex-row lg:items-center">
-          <div className="w-full max-w-[360px]">
-            <Link
-              href="/"
-              className="mb-4 inline-flex items-center gap-2 text-sm text-white/65 transition hover:text-white"
-              onMouseEnter={() => setIsHovering(true)}
-              onMouseLeave={() => setIsHovering(false)}
-            >
-              <ArrowLeft className="h-4 w-4" />
-              返回首页
-            </Link>
-            <div className="aspect-[9/16] overflow-hidden rounded-[24px] border border-white/10 bg-black shadow-[0_35px_70px_rgba(0,0,0,0.55)]">
-              <video
-                src={lesson.video_url}
-                poster={lesson.thumbnail}
-                className="h-full w-full object-cover"
-                muted
-                autoPlay
-                loop
-                playsInline
-              />
-            </div>
-          </div>
+        <div className="mx-auto mb-4 max-w-7xl">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-sm text-white/65 transition hover:text-white"
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            返回首页
+          </Link>
+        </div>
 
-          <div className="flex flex-1 flex-col gap-5 lg:pl-10 xl:pl-14">
+        {/* 始终左右横排：预览时整组水平居中，封面略放大，文案跟在右侧同高对齐 */}
+        <div
+          className={cn(
+            "mx-auto flex min-h-[min(72vh,760px)] w-full items-center px-0 transition-[max-width] duration-500 ease-out",
+            "flex-col md:flex-row",
+            focusPreview
+              ? "max-w-6xl justify-center gap-8 md:gap-10"
+              : "max-w-7xl justify-start gap-8 lg:gap-12"
+          )}
+        >
+          <motion.div
+            className="relative shrink-0"
+            initial={false}
+            animate={
+              focusPreview
+                ? { width: 448, scale: 1.06 }
+                : { width: 360, scale: 1 }
+            }
+            transition={{ type: "spring", stiffness: 220, damping: 26, mass: 0.85 }}
+            style={{ originX: 0.5, originY: 0.5 }}
+          >
+            <LessonCoverFocusPlayer
+              focused={focusPreview}
+              lesson={lesson}
+              segments={activeSegments}
+              onFocus={() => setFocusPreview(true)}
+              onCollapse={() => setFocusPreview(false)}
+              onHoverChange={setIsHovering}
+            />
+          </motion.div>
+
+          <motion.div
+            className={cn(
+              "flex min-w-0 flex-col justify-center",
+              focusPreview ? "max-w-[340px] gap-4" : "max-w-xl flex-1 gap-5"
+            )}
+            initial={false}
+            animate={
+              focusPreview
+                ? { opacity: 1, x: 0 }
+                : { opacity: 1, x: 0 }
+            }
+            transition={{ type: "spring", stiffness: 240, damping: 28 }}
+          >
             <div
-              className={`inline-flex w-fit items-center gap-2 rounded-full px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${
+              className={cn(
+                "inline-flex w-fit items-center gap-2 rounded-full px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.22em]",
                 demoReady
                   ? "border border-amber-300/40 bg-amber-400/10 text-amber-200"
                   : "border border-white/10 bg-white/6 text-white/45"
-              }`}
+              )}
             >
               <Sparkles className="h-3 w-3" />
               {demoReady ? "DEMO 就绪" : "跟拍未就绪"}
             </div>
 
             <h1
-              className="kpop-glitch text-5xl font-black leading-[1.05] tracking-tight md:text-7xl"
+              className={cn(
+                "kpop-glitch font-black leading-[1.05] tracking-tight",
+                focusPreview ? "text-4xl md:text-5xl" : "text-5xl md:text-7xl"
+              )}
               data-text={lesson.title}
               onMouseEnter={() => setIsHovering(true)}
               onMouseLeave={() => setIsHovering(false)}
@@ -619,7 +657,7 @@ export default function LessonPageDesktop() {
               </span>
             </div>
 
-            <div className="mt-2 flex flex-wrap items-center gap-3">
+            <div className="mt-1 flex flex-wrap items-center gap-3">
               {resumeSegId ? (
                 <Link
                   href={`/player/${resumeSegId}?lesson=${lesson.id}`}
@@ -647,7 +685,7 @@ export default function LessonPageDesktop() {
               ) : (
                 <span
                   className="rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm text-white/40"
-                  title={!demoReady ? "课程数据未处理完整" : "先学完所有动作卡再来挑战"}
+                  title={!demoReady ? "缺少切片或姿态数据" : "先学完所有动作卡再来挑战"}
                 >
                   {!demoReady
                     ? "跟拍挑战未就绪"
@@ -655,7 +693,7 @@ export default function LessonPageDesktop() {
                 </span>
               )}
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 

@@ -1064,7 +1064,7 @@ export function DesktopPlayer({
               ) : (
                 <div
                   className="flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-medium text-white/45"
-                  title={!demoReady ? "课程数据未处理完整" : "先学完所有动作卡再来挑战"}
+                  title={!demoReady ? "缺少切片或姿态数据" : "先学完所有动作卡再来挑战"}
                 >
                   <Sparkles className="h-4 w-4" />
                   <span>

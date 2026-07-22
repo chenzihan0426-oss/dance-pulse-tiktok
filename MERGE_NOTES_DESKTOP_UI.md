@@ -30,6 +30,13 @@
 | 2026-07-22 16:38 | 课程页 Tab 顺序：详细解析在前，相似推荐在后 |
 | 2026-07-22 16:48 | 配置千问 VLM key；真实解析 `harry`/`qlx` 为 `harry_dp`/`qlx_dp` 课程（切片+教学）；showcase 接入新 demo |
 | 2026-07-22 16:53 | 相似推荐：分数改为 1–5 星（相似度越高星越多）；标签文案多样化 |
+| 2026-07-22 18:50 | **跟拍挑战入口**：`demoReady` 从「必须 matte+particle+pose_full」放宽为「clip + pose/pose_full」；缺抠像/粒子时跟拍页降级骨架比对，不再挡入口 |
+| 2026-07-22 19:03 | **Cloudflare 临时公网**：双 Quick Tunnel（前端+API）；本机需保持唤醒；URL 每次重启会变 |
+| 2026-07-22 20:15 | **课程封面居中预览**：点击左侧舞蹈卡 → 居中播放；进度条/倍速/骨架开关；分段关键动作高亮；Esc/遮罩/收起退出 |
+| 2026-07-22 20:30 | **封面改为页内平移**：非全屏另层；右侧文案同步上移收紧；倍速最低 0.1x；进度条关键动作刻度+小字解析；不再自动打开 Cursor 内浏览器 |
+| 2026-07-22 20:40 | **封面交互修正**：保持左右横排水平居中平移；视频 360→448 并 scale 1.06 放大；控件叠在画面内不撑高度；文案同高跟随、按钮保留 |
+| 2026-07-22 20:55 | **进度条关键动作**：`lib/keyActions.ts` 统计推导（低分/高难/高方差→关键点+完美率文案）；demo 课 harry/qlx/antifragile 写死路演标注；悬停显示详情 |
+| 2026-07-22 21:00 | **关键动作文案多样化**：失误率/均分/重练次数/关节集中度/节奏滞后/评级分布/放弃率/波动标准差等多种量化指标轮换 |
 
 ---
 
@@ -286,18 +293,91 @@ MERGE_NOTES_DESKTOP_UI.md
 
 ---
 
-*本文件仅作合并备忘，不参与运行时逻辑。*
+## 8. 跟拍挑战「未就绪」根因与修复（2026-07-22 18:50）
+
+**现象**：动作卡全部学完，按钮仍显示「整支跟拍挑战未就绪 / 跟拍挑战未就绪」。
+
+**根因**：入口不只看学习进度 `allLearned`，还要求 `lessonIsDemoReady`。旧逻辑要求每段都有：
+`matte_rgb` + `matte_mask` + `particle` + `pose_full`。
+`harry_dp` / `qlx_dp` 等千问解析课只有 `clip_url` + 普通 `pose_url`，没有后处理抠像/粒子，故永远不通过。
+
+**修复**：
+
+| 文件 | 改动 |
+|------|------|
+| `desktop/frontend/lib/demoReady.ts` | 就绪 = `clip_url` + (`pose_full_url` \|\| `pose_url`)；新增 `segmentIsFxReady` 仅表示完整特效 |
+| `desktop/frontend/app/lesson/[id]/tracking-desktop/page.tsx` | 骨架姿态加载 `pose_full_url ?? pose_url`（`poseFrameToKeypoints` 已支持 `kp` / `keypoints` 两种格式） |
+| `desktop/backend/services/lesson_store.py` | 列表 `demo_ready` 与前端同口径；排除 `is_still` |
+| `DesktopPlayer.tsx` / 课程页 CTA | tooltip 改为「缺少切片或姿态数据」 |
+
+**说明**：缺 matte/particle 时跟拍页剪影/粒子层不显示，仍可进挑战做姿态比对。若要完整 DEMO 特效，再跑后处理管线补资产即可。
 
 ---
 
-## 8. community 分支全量同步（2026-07-22）
+## 9. Cloudflare 临时公网演示（2026-07-22）
 
-目标远程：`https://github.com/chenzihan0426-oss/dance-pulse-tiktok` 分支 `community`。
+**结论**：整套不能纯 Cloudflare Pages/Workers 托管（FastAPI + 大媒体需本机）；用 `cloudflared` Quick Tunnel 把本机前后端变成 HTTPS 公网地址即可演示。
 
-本轮策略变更（相对上文 §1.9 / §6）：
+### 架构
 
-- 允许提交 `desktop/.env`（演示千问 key；仓库若为公开请知悉风险）
-- 允许提交 `desktop/backend/data` 下演示媒体与 lesson JSON（harry_dp / qlx_dp 等）
-- 根 `.gitignore` 与 `desktop/.gitignore` 已放宽对应规则
+- 前端本机：`http://127.0.0.1:3202`（Next，`NEXT_PUBLIC_API_BASE` = API 隧道 URL）
+- 后端本机：`http://127.0.0.1:8210`（FastAPI + `desktop/backend/data`）
+- 公网：两条 `cloudflared tunnel --url ...` → `*.trycloudflare.com`
 
-本地对照导出：`D:\DANCEPULSE\exports\dancepulse-full-sync-20260722\demo-media\`
+### 启动步骤
+
+```powershell
+# 终端 A：后端
+cd D:\DANCEPULSE\_git\dance-pulse-tiktok\desktop\backend
+python -m uvicorn main:app --host 127.0.0.1 --port 8210
+
+# 终端 B：API 隧道（记下输出的 https://xxx.trycloudflare.com）
+cloudflared tunnel --url http://127.0.0.1:8210 --no-autoupdate
+
+# 终端 C：前端（API_BASE 换成终端 B 的 URL）
+cd D:\DANCEPULSE\_git\dance-pulse-tiktok\desktop\frontend
+$env:NEXT_PUBLIC_API_BASE = "https://<API隧道>.trycloudflare.com"
+npm run dev -- --hostname 127.0.0.1 --port 3202
+
+# 终端 D：前端隧道（分享这个 URL）
+cloudflared tunnel --url http://127.0.0.1:3202 --no-autoupdate
+```
+
+分享链接日志：`D:\DANCEPULSE\_git\dance-pulse-tiktok\.codex-run-logs\cf-share-url.txt`
+
+### 注意
+
+- 电脑休眠 / 断网会断隧道；URL **每次重启都会变**
+- 摄像头跟拍需要 HTTPS，隧道已满足
+- 后端 CORS 已允许 `*.trycloudflare.com`（见 `desktop/backend/main.py`）
+- 稳定域名方案见 `desktop/DEPLOY_NAMED_TUNNEL.md`（需自有域名 + Named Tunnel）
+
+### 本次演示地址（会过期）
+
+- 前端：`https://ambien-warning-voting-surprise.trycloudflare.com`
+- API：`https://view-treasurer-doc-consistently.trycloudflare.com`
+
+---
+
+## 10. 课程封面卡居中预览（2026-07-22）
+
+**交互（页内平移，非另开遮罩页）**：点击封面 → 同一页 layout 动画把竖卡滑到中央；右侧标题区上移并收成居中紧凑排版。
+
+| 文件 | 改动 |
+|------|------|
+| `desktop/frontend/components/lesson/LessonCoverFocusPlayer.tsx` | 页内舞台：同一 video；进度条分段刻度 + 段名小字；当前段 teaching/ai 解析；倍速 **0.1–1.5x**；骨架开关 |
+| `desktop/frontend/app/lesson/[id]/page.tsx` | `focusPreview` + framer-motion `layout` 重排左右栏 |
+
+退出：Esc /「收起」。学习入口路由不变。  
+协作约定：改完不自动用 Cursor 打开前端，由外部浏览器自行刷新。
+
+### 10.1 进度条「关键动作」算法与路演写死点
+
+- 模块：[`desktop/frontend/lib/keyActions.ts`](desktop/frontend/lib/keyActions.ts)
+- **有跟练聚合时**：`deriveKeyActionsFromStats` 综合低均分、measuredDifficulty、方差，估算完美率文案「只有 X% 的人在这里能达到完美」
+- **Demo 无数据时**：`DEMO_KEY_ACTIONS` 写死 `harry_dp` / `qlx_dp` / `les_122ea874306b` 关键时刻与说明（路演用）
+- UI：封面预览进度条上的粉色钉点可悬停/点击跳转
+
+---
+
+*本文件仅作合并备忘，不参与运行时逻辑。*
