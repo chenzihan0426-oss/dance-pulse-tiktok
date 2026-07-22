@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowLeft, Heart, Sparkles } from "lucide-react";
 import { resolveMediaUrl, getLesson } from "@/lib/api";
-import { loadDemoMedia, rotateFeedThumbs } from "@/lib/demoMedia";
+import { loadDemoMedia, rotateFeedMedia } from "@/lib/demoMedia";
 import {
   getForYouRecommendations,
   type ForYouRecommendation,
@@ -23,7 +23,7 @@ export default function ForYouPage() {
     void (async () => {
       const demo = await loadDemoMedia();
       const next = getForYouRecommendations(lessonId, 12).map((rec) => {
-        const [rotated] = rotateFeedThumbs([rec.item], demo.thumbs);
+        const [rotated] = rotateFeedMedia([rec.item], demo.thumbs, demo.videos);
         return { ...rec, item: rotated ?? rec.item };
       });
       if (!cancelled) setRecs(next);

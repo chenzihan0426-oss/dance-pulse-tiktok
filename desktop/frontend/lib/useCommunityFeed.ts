@@ -9,7 +9,7 @@ import {
   toggleCommunityLike,
   addCommunityComment,
 } from "@/lib/api";
-import { loadDemoMedia, rotateFeedThumbs } from "@/lib/demoMedia";
+import { loadDemoMedia, rotateFeedMedia, rotateFeedThumbs } from "@/lib/demoMedia";
 import {
   forceCommunityShowcase,
   getShowcaseDetail,
@@ -46,7 +46,7 @@ export function useCommunityFeed(filter: PlazaFilter = "hot") {
 
       if (forceCommunityShowcase()) {
         if (!cancelled) {
-          setItems(rotateFeedThumbs(getShowcaseFeedSorted(filter), demo.thumbs));
+          setItems(rotateFeedMedia(getShowcaseFeedSorted(filter), demo.thumbs, demo.videos));
           setSource("showcase");
           setLoading(false);
         }
@@ -57,15 +57,16 @@ export function useCommunityFeed(filter: PlazaFilter = "hot") {
         const feed = await getCommunityFeed();
         if (cancelled) return;
         if (!feed.length) {
-          setItems(rotateFeedThumbs(getShowcaseFeedSorted(filter), demo.thumbs));
+          setItems(rotateFeedMedia(getShowcaseFeedSorted(filter), demo.thumbs, demo.videos));
           setSource("showcase");
         } else {
+          // 真实 API 作品有自己的视频,只轮换缺失的封面,不动 videoUrl
           setItems(rotateFeedThumbs(feed, demo.thumbs.length ? demo.thumbs : []));
           setSource("api");
         }
       } catch (err) {
         if (cancelled) return;
-        setItems(rotateFeedThumbs(getShowcaseFeedSorted(filter), demo.thumbs));
+        setItems(rotateFeedMedia(getShowcaseFeedSorted(filter), demo.thumbs, demo.videos));
         setSource("showcase");
         setError(err instanceof Error ? err.message : String(err));
       } finally {
@@ -103,7 +104,9 @@ export function useCommunityDetail(resultId: string) {
             setError("作品不存在");
             setDetail(null);
           } else {
-            const [rotated] = rotateFeedThumbs([local.item], demo.thumbs);
+            // rotateFeedMedia 按 result.id 稳定哈希选视频+配对封面,
+            // 与列表卡片(同一 key)选择一致 → 点开播的就是卡片那支
+            const [rotated] = rotateFeedMedia([local.item], demo.thumbs, demo.videos);
             setDetail({ ...local, item: rotated ?? local.item });
           }
           setSource("showcase");
@@ -122,7 +125,7 @@ export function useCommunityDetail(resultId: string) {
         const local = getShowcaseDetail(resultId);
         if (cancelled) return;
         if (local) {
-          const [rotated] = rotateFeedThumbs([local.item], demo.thumbs);
+          const [rotated] = rotateFeedMedia([local.item], demo.thumbs, demo.videos);
           setDetail({ ...local, item: rotated ?? local.item });
           setSource("showcase");
         } else {
