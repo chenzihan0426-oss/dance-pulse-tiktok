@@ -21,7 +21,7 @@ import {
 import type { Lesson, Segment } from "@/lib/types";
 import { XuangeGuideOverlay } from "@/components/player/XuangeGuideOverlay";
 import { BeatCounterBadge } from "@/components/player/BeatCounterBadge";
-import { KeyframeScrubber } from "@/components/player/KeyframeScrubber";
+import { KeyActionScrubber } from "@/components/player/KeyActionScrubber";
 import { TeachingPanelKpop, parseBeatsRange } from "@/components/TeachingPanelKpop";
 import { useLearningProgress } from "@/hooks/useLearningProgress";
 import { lessonIsDemoReady } from "@/lib/demoReady";
@@ -789,16 +789,11 @@ export function DesktopPlayer({
           </div>
 
           {!immersive ? (
-            <KeyframeScrubber
+            <KeyActionScrubber
               key={segment.id}
+              lesson={lesson}
+              segment={segment}
               videoRef={videoRef}
-              clipUrl={segment.clip_url}
-              durationHint={segment.duration}
-              beatCount={segment.beat_count}
-              beatCues={segment.teaching?.beat_cues ?? []}
-              steps={segment.teaching?.steps ?? []}
-              thumbnail={segment.thumbnail}
-              mirror={mirror}
               className="absolute bottom-[64px] left-1/2 z-30 w-[min(34vw,520px)] min-w-[300px] -translate-x-1/2"
             />
           ) : null}
