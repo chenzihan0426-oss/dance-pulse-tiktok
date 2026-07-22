@@ -4,7 +4,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { ArrowLeft, Camera, Pause, Play, Maximize2, Minimize2, Volume2, VolumeX } from "lucide-react";
 
 import AdaptiveSkeletonOverlay from "@/components/tracking/AdaptiveSkeletonOverlay";
@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { getLesson } from "@/lib/api";
 import type { Kpt, TeacherFrame } from "@/lib/pose/scoring";
 import type { SegmentMeta } from "@/lib/pose/sessionAccumulator";
+import { JOINT_LABELS_ZH } from "@/lib/feedback/liveHotspot";
 import { useSessionScoring } from "@/hooks/useSessionScoring";
 import { submitTrackingSession } from "@/lib/api";
 import type { Lesson, Segment } from "@/lib/types";
@@ -287,7 +288,6 @@ function DotFieldBackground({ mouseRef }: { mouseRef: React.MutableRefObject<{ x
 
 export default function TrackingDesktopPage() {
   const params = useParams<{ id: string }>();
-  const router = useRouter();
   const lessonId = params?.id ?? "";
 
   const [lesson, setLesson] = React.useState<Lesson | null>(null);
@@ -332,7 +332,12 @@ export default function TrackingDesktopPage() {
   const [scoringSegments, setScoringSegments] = React.useState<SegmentMeta[]>([]);
   const [challengeActive, setChallengeActive] = React.useState(false);
   const [sessionSummary, setSessionSummary] = React.useState<
-    { overallScore: number; hardest: { label: string; score: number } | null } | null
+    {
+      overallScore: number;
+      hardest: { label: string; score: number } | null;
+      // 改进建议:最薄弱的 2-3 段,各自的最差关节与得分
+      improvements: Array<{ label: string; joint: string | null; score: number }>;
+    } | null
   >(null);
   // Mirror state drives both the camera video transform and the matte overlay.
   // 评分链路也用它决定是否翻转用户姿态,故声明在 useSessionScoring 之前。
@@ -666,7 +671,22 @@ export default function TrackingDesktopPage() {
         hardest = { label: meta?.section_label ?? seg.segmentId, score: seg.score };
       }
     }
-    setSessionSummary({ overallScore: result.overallScore, hardest });
+
+    // 改进建议:得分最低的 2-3 段(只挑低于 85 的),标出各自最差关节
+    const improvements = [...result.segments]
+      .sort((a, b) => a.score - b.score)
+      .filter((seg) => seg.score < 85)
+      .slice(0, 3)
+      .map((seg) => {
+        const meta = lesson?.segments.find((s) => s.id === seg.segmentId);
+        return {
+          label: meta?.section_label ?? seg.segmentId,
+          joint: seg.worstJoint ? JOINT_LABELS_ZH[seg.worstJoint] ?? seg.worstJoint : null,
+          score: seg.score,
+        };
+      });
+
+    setSessionSummary({ overallScore: result.overallScore, hardest, improvements });
 
     try {
       await submitTrackingSession(lessonId, result);
@@ -847,14 +867,6 @@ export default function TrackingDesktopPage() {
     setChallengeDone(true);
   }, [finishChallenge, setTeacherPlayheadNow, startTeacherPlayback, teacherMuted]);
 
-  React.useEffect(() => {
-    if (!challengeDone || !lessonId) return;
-    const timer = window.setTimeout(() => {
-      router.push(`/lesson/${lessonId}/for-you`);
-    }, 1600);
-    return () => window.clearTimeout(timer);
-  }, [challengeDone, lessonId, router]);
-
   const toggleTeacherSound = React.useCallback(async () => {
     const nextMuted = !teacherMuted;
     const video = teacherRef.current;
@@ -935,7 +947,37 @@ export default function TrackingDesktopPage() {
             >
               跟练完成
             </h2>
-            <p className="mt-2 text-[13px] text-white/50">即将进入猜你喜欢…</p>
+            {sessionSummary ? (
+              <div className="mt-2 font-mono text-[44px] font-black leading-none text-[#ccff00]">
+                {sessionSummary.overallScore}
+              </div>
+            ) : null}
+
+            {sessionSummary && sessionSummary.improvements.length > 0 ? (
+              <div className="mt-5 border border-white/10 bg-white/[0.04] px-4 py-3 text-left">
+                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#ff5c8a]">
+                  需要改进
+                </div>
+                <ul className="mt-2 space-y-1.5">
+                  {sessionSummary.improvements.map((item) => (
+                    <li key={item.label} className="flex items-center justify-between gap-3 text-[12px]">
+                      <span className="text-white/80">
+                        {item.label}
+                        {item.joint ? (
+                          <span className="text-white/45">
+                            {" "}· {item.joint}偏差最大
+                          </span>
+                        ) : null}
+                      </span>
+                      <span className="shrink-0 font-mono text-[#ff9cbb]">{item.score} 分</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : sessionSummary ? (
+              <p className="mt-3 text-[13px] text-white/50">各段完成度都不错,保持!</p>
+            ) : null}
+
             <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
               <Link
                 href={`/lesson/${lessonId}/for-you`}
@@ -1119,27 +1161,7 @@ export default function TrackingDesktopPage() {
               </div>
             ) : null}
 
-            {/* 挑战结束摘要 */}
-            {sessionSummary ? (
-              <div className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-black/70 px-6 text-center backdrop-blur">
-                <span className="text-[11px] uppercase tracking-[0.2em] text-white/50">本次挑战</span>
-                <span className="font-mono text-[52px] font-bold leading-none tracking-neon">
-                  {sessionSummary.overallScore}
-                </span>
-                {sessionSummary.hardest ? (
-                  <div className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-[13px] text-white/80">
-                    最需要加强:<span className="text-[#ff5c8a]">{sessionSummary.hardest.label}</span>
-                    <span className="ml-2 font-mono text-white/50">{sessionSummary.hardest.score} 分</span>
-                  </div>
-                ) : null}
-                <Button
-                  onClick={() => setSessionSummary(null)}
-                  className="mt-1 rounded-full bg-gradient-to-r from-[#ff0055] via-[#9d4edd] to-[#00f3ff] px-4 py-1.5 text-[12px] text-white hover:brightness-110"
-                >
-                  知道了
-                </Button>
-              </div>
-            ) : null}
+            {/* 挑战结束摘要已整合进 challengeDone 完成弹窗(含改进建议) */}
 
             {cameraReady && trackingOverlayLayer === "silhouette" && currentSegment?.matte_rgb_url && currentSegment?.matte_mask_url ? (
               <MatteOverlay
