@@ -277,9 +277,11 @@ export default function LessonPageDesktop() {
 
         body {
           font-family: "Michroma", sans-serif;
-          cursor: ${showCustomCursor ? "none" : "auto"};
           background: #050505;
         }
+        ${showCustomCursor
+          ? `html, body, html *, html *::before, html *::after { cursor: none !important; }`
+          : ""}
 
         .cursor-dot {
           transition: transform 0.1s ease-out;
@@ -724,7 +726,7 @@ export default function LessonPageDesktop() {
                       />
                       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0)_45%,rgba(0,0,0,0.85)_100%)]" />
                       <div className="absolute left-3 top-3 rounded-full border border-white/20 bg-black/55 px-2 py-0.5 text-[10px] uppercase tracking-wider text-white/85">
-                        #{seg.index + 1}
+                        #{idx + 1}
                       </div>
                       {ready ? (
                         <div className="absolute right-3 top-3 rounded-full bg-amber-400/95 px-2 py-0.5 text-[9px] font-bold text-amber-950">
@@ -802,6 +804,7 @@ export default function LessonPageDesktop() {
         ? (() => {
             const activeSeg = activeSegments.find((s) => s.id === activeTeachingSegId);
             if (!activeSeg) return null;
+            const activePracticeNo = activeSegments.findIndex((s) => s.id === activeSeg.id) + 1;
             return (
               <section
                 ref={detailRef}
@@ -812,7 +815,7 @@ export default function LessonPageDesktop() {
                     <h3 className="flex flex-wrap items-baseline gap-3 text-2xl font-black uppercase tracking-tight md:text-3xl">
                       <span className="kpop-text">AI 图文教学</span>
                       <span className="text-sm font-normal normal-case tracking-normal text-white/50">
-                        #{activeSeg.index + 1} · {activeSeg.section_label}
+                        #{activePracticeNo} · {activeSeg.section_label}
                       </span>
                     </h3>
                     <button

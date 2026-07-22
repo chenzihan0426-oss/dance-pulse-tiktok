@@ -328,6 +328,21 @@ export async function getLessons(): Promise<LessonListItem[]> {
   return items.map(normalizeLessonListItem);
 }
 
+// 删除课程及其全部本地文件(原视频/切片/缩略图/姿态等),释放磁盘空间。
+export interface DeleteLessonResponse {
+  deleted: boolean;
+  freedBytes: number;
+  removed: number;
+}
+
+export async function deleteLesson(lessonId: string): Promise<DeleteLessonResponse> {
+  if (USE_MOCK) {
+    await sleep(120);
+    return { deleted: true, freedBytes: 0, removed: 0 };
+  }
+  return http<DeleteLessonResponse>(`/api/lessons/${lessonId}`, { method: "DELETE" });
+}
+
 export async function sendSmsCode(phone: string): Promise<SendSmsResponse> {
   if (USE_MOCK) {
     await sleep(120);
@@ -697,6 +712,25 @@ export async function submitTrackingSession(
     method: "POST",
     json: payload,
   });
+}
+
+export type TrackingSessionSummary = {
+  sessionId: string;
+  overallScore: number;
+  frameCount: number;
+  poseSource: string;
+  createdAt: string;
+};
+
+export async function listTrackingSessions(lessonId: string): Promise<TrackingSessionSummary[]> {
+  if (USE_MOCK) {
+    await sleep(80);
+    return [];
+  }
+  const res = await http<{ sessions: TrackingSessionSummary[] }>(
+    `/api/lessons/${lessonId}/tracking/sessions`
+  );
+  return res.sessions ?? [];
 }
 
 // 逐动作难度聚合（Phase 3/4）。scope: 'global' | 'me'

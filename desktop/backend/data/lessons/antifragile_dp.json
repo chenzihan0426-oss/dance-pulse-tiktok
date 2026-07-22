@@ -69,7 +69,7 @@
       "thumbnail": "/thumbs/seg_000.jpg",
       "clip_url": "/clips/seg_000.mp4",
       "difficulty": 1,
-      "is_still": true,
+      "is_still": false,
       "ai_description": "开场定点和准备动作",
       "user_edited": true,
       "teaching": {
@@ -96,7 +96,8 @@
         ],
         "generated_at": "2026-04-17T16:17:43Z"
       },
-      "deleted": false
+      "deleted": false,
+      "pose_url": "/pose/antifragile_dp/seg_000.json"
     },
     {
       "id": "seg_001",
@@ -138,7 +139,8 @@
         ],
         "generated_at": "2026-04-17T16:17:36Z"
       },
-      "deleted": false
+      "deleted": false,
+      "pose_url": "/pose/antifragile_dp/seg_001.json"
     },
     {
       "id": "seg_002",
@@ -180,7 +182,8 @@
         ],
         "generated_at": "2026-04-17T15:42:25Z"
       },
-      "deleted": false
+      "deleted": false,
+      "pose_url": "/pose/antifragile_dp/seg_002.json"
     },
     {
       "id": "seg_003",
@@ -222,7 +225,8 @@
         ],
         "generated_at": "2026-04-17T15:14:45Z"
       },
-      "deleted": false
+      "deleted": false,
+      "pose_url": "/pose/antifragile_dp/seg_003.json"
     }
   ]
 }

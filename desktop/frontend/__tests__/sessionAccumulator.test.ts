@@ -44,7 +44,10 @@ describe("SessionAccumulator", () => {
     const result = acc.build();
     expect(result.segments).toHaveLength(1);
     expect(result.segments[0].score).toBeGreaterThan(90);
+    expect(result.segments[0].boneScore).toBeGreaterThan(90);
     expect(result.overallScore).toBeGreaterThan(90);
+    expect(result.overallBoneScore).toBeGreaterThan(90);
+    expect(Object.keys(result.segments[0].boneMeans).length).toBeGreaterThan(0);
     expect(result.frameCount).toBe(20);
   });
 
@@ -66,11 +69,12 @@ describe("SessionAccumulator", () => {
     expect(s.beatScores).toHaveLength(4);
   });
 
-  it("落在 segment 区间外的帧不计入", () => {
+  it("落在 segment 区间外的帧归入最近段并计入", () => {
     const acc = new SessionAccumulator({ lessonId: "L1", poseSource: "test", segments: [seg] });
-    acc.pushFrame(5.0, teacherPose); // 超出 [0,2)
+    acc.pushFrame(5.0, teacherPose); // 超出 [0,2) → 归入最近段
     const result = acc.build();
-    expect(result.frameCount).toBe(0);
-    expect(result.segments).toHaveLength(0);
+    expect(result.frameCount).toBe(1);
+    expect(result.segments).toHaveLength(1);
+    expect(result.segments[0].segmentId).toBe(seg.id);
   });
 });

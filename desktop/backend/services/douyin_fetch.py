@@ -313,6 +313,8 @@ def _yt_dlp_common_args(url: str | None = None) -> tuple[str, ...]:
 
 def _autodetect_browser_specs() -> list[str]:
     home = Path.home()
+    local_appdata = Path(os.environ.get("LOCALAPPDATA", ""))
+    roaming = Path(os.environ.get("APPDATA", ""))
 
     if sys.platform == "darwin":
         candidates = [
@@ -327,12 +329,25 @@ def _autodetect_browser_specs() -> list[str]:
             ("chrome:Default", home / ".config/google-chrome/Default/Cookies"),
             ("firefox", home / ".mozilla/firefox"),
         ]
+    elif sys.platform.startswith("win"):
+        # Windows：此前漏了探测，导致「浏览器已登录抖音」却提示找不到 cookies 来源。
+        candidates = [
+            ("edge:Default", local_appdata / "Microsoft" / "Edge" / "User Data" / "Default" / "Network" / "Cookies"),
+            ("edge:Default", local_appdata / "Microsoft" / "Edge" / "User Data" / "Default" / "Cookies"),
+            ("chrome:Default", local_appdata / "Google" / "Chrome" / "User Data" / "Default" / "Network" / "Cookies"),
+            ("chrome:Default", local_appdata / "Google" / "Chrome" / "User Data" / "Default" / "Cookies"),
+            ("firefox", roaming / "Mozilla" / "Firefox" / "Profiles"),
+        ]
     else:
         candidates = []
 
     specs: list[str] = []
+    seen: set[str] = set()
     for spec, path in candidates:
+        if spec in seen:
+            continue
         if path.exists():
+            seen.add(spec)
             specs.append(spec)
     return specs
 

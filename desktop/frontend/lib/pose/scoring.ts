@@ -87,8 +87,9 @@ function jointAngle(a: Kpt, b: Kpt, c: Kpt): number {
 // 主指标:加权的角度差评分,[0, 1]
 // visibility < MIN_VIS 的关节整组跳过
 // ---------------------------------------------------------------------------
-const MIN_VIS = 0.5;
-const HALF_PI = Math.PI / 2;
+const MIN_VIS = 0.35;
+/** 角度差分母放大 → 同等偏差得分更高（放宽） */
+const ANGLE_SOFT_DEN = (Math.PI / 2) * 1.45;
 
 export function scoreFrameByAngles(userKpts: Kpt[], teacherKpts: Kpt[]): number {
   const u = normalize(userKpts);
@@ -108,11 +109,13 @@ export function scoreFrameByAngles(userKpts: Kpt[], teacherKpts: Kpt[]): number 
     const aU = jointAngle(u[a], u[b], u[c]);
     const aT = jointAngle(t[a], t[b], t[c]);
     const diff = Math.abs(aU - aT);
-    const s = Math.max(0, 1 - diff / HALF_PI);
+    const s = Math.max(0, 1 - diff / ANGLE_SOFT_DEN);
     total += s * weight;
     wSum += weight;
   }
-  return wSum > 0 ? total / wSum : 0;
+  // 有效关节过少时给保守中等分，避免直接 0
+  if (wSum <= 0) return 0.35;
+  return total / wSum;
 }
 
 // ---------------------------------------------------------------------------
@@ -187,8 +190,8 @@ export function scoreFrameDetailed(userKpts: Kpt[], teacherKpts: Kpt[]): FrameDe
       continue;
     const aU = jointAngle(u[a], u[b], u[c]);
     const aT = jointAngle(t[a], t[b], t[c]);
-    // 误差归一到 [0,1]:角度差 / (π/2) 截断
-    jointErrors[name] = Math.min(1, Math.abs(aU - aT) / HALF_PI);
+    // 误差归一：用放宽后的分母，报告里「偏差%」不会动不动就爆表
+    jointErrors[name] = Math.min(1, Math.abs(aU - aT) / ANGLE_SOFT_DEN);
   }
   return { jointErrors, score: scoreFrameFused(userKpts, teacherKpts) };
 }

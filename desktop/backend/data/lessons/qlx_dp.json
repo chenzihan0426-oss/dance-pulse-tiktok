@@ -135,7 +135,7 @@
       "pose_full_url": "",
       "particle_url": "",
       "difficulty": 1,
-      "is_still": true,
+      "is_still": false,
       "ai_description": "前奏·静止定格,保持姿态",
       "user_edited": false,
       "teaching": {

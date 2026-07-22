@@ -1,4 +1,4 @@
-# DancePulse Desktop 本地改动合并对照
+﻿# DancePulse Desktop 本地改动合并对照
 
 > 生成日期：2026-07-22  
 > 目的：当前工作区**不是**从 GitHub 主项目拉分支做的改动，合并前用本文件做对照与回退清单。  
@@ -37,8 +37,27 @@
 | 2026-07-22 20:40 | **封面交互修正**：保持左右横排水平居中平移；视频 360→448 并 scale 1.06 放大；控件叠在画面内不撑高度；文案同高跟随、按钮保留 |
 | 2026-07-22 20:55 | **进度条关键动作**：`lib/keyActions.ts` 统计推导（低分/高难/高方差→关键点+完美率文案）；demo 课 harry/qlx/antifragile 写死路演标注；悬停显示详情 |
 | 2026-07-22 21:00 | **关键动作文案多样化**：失误率/均分/重练次数/关节集中度/节奏滞后/评级分布/放弃率/波动标准差等多种量化指标轮换 |
-
----
+| 2026-07-23 01:10 | **光标去重**：非首页自定义光标开启时强制 `cursor:none !important`，去掉 button/a 上的系统手形指针（`SceneCursor` + 课程/播放/跟拍页） |
+| 2026-07-23 01:10 | **Demo 第一切片丢失**：`antifragile_dp` 首段误标 `is_still` 且无 pose → 列表从第2起且跟拍未就绪；已清 still、补生成 pose；列表序号改用可练段序 |
+| 2026-07-23 01:10 | **qlx_dp**：首段 `is_still` 误标已清除，避免「丢掉第1切片」显示 |
+| 2026-07-23 01:45 | **导入页重设计**：左右分栏霓虹叙事 + 链接/拖拽上传；平台芯片与流水线步骤；逻辑不变 |
+| 2026-07-23 01:50 | **Feedback 阶段1**：骨段方向余弦主分 + `FeedbackReport` + 结束后跳转 `/lesson/[id]/feedback` 报告页；单测 9 通过 |
+| 2026-07-23 01:55 | **导入解析进度条**：processing 页霓虹进度条 + 01/02/03 随进度闪烁；说明文案改白字同「下载解析」字重 |
+| 2026-07-23 02:10 | **Windows 抖音 cookies 探测**：`douyin_fetch._autodetect_browser_specs` 补齐 Edge/Chrome；`.env` 设 `DOUYIN_COOKIES_FROM_BROWSER=edge:Default,chrome:Default` |
+| 2026-07-23 02:20 | **Feedback 阶段2**：规则诊断引擎（总评 + 问题/建议 + 分段点评）；报告页展示；旧缓存自动补文案 |
+| 2026-07-23 02:25 | **清理误导入 B 站**：删除非舞蹈课 `les_f60f842049e2`（巫师财经 BV13aNd64EXD）视频/info/四帧封面/pose 目录/失败 job，以及中断流水线残留的 `seg_003`–`seg_070` 切片与缩略图 |
+| 2026-07-23 02:35 | **用户实时骨架**：摄像头就绪即跑 MediaPipe；画面叠黄绿用户骨架（老师幽灵骨架仍保留）；评分仅在挑战开始后累加 |
+| 2026-07-23 03:05 | **姿态模型本地化**：下载 WASM+lite 模型到 `public/mediapipe/`（此前 404 只能走外网 Google 模型导致卡在 POSE…）；加载超时提示；GPU→CPU 回退 |
+| 2026-07-23 03:20 | **Feedback 阶段3**：实时 HUD 档位色+「注意关节」；用户骨架粉红高亮最差关节；结束报告 requestIdleCallback 构建防卡顿 |
+| 2026-07-23 03:36 | **打分放宽+自适应老师骨架**：角度/余弦门槛放宽；未计分段显示「—」；老师骨架按用户肩胯刚体对齐（含左右自动选择） |
+| 2026-07-23 03:40 | **开始跟拍 3-2-1 倒计时**：点「开始挑战」先开摄像头倒计时，结束后再播老师视频并计分 |
+| 2026-07-23 03:45 | **整支视频计分**：含静止段 pose；播放头落在间隙时归入最近段；实时/累加器全程比对 |
+| 2026-07-23 03:48 | **修复缺少老师姿态**：评分预加载误用 pose_full_url ?? pose_url，空串不会回退；改为 \|\| |
+| 2026-07-23 03:50 | **修复摄像头闪退**：卸载 cleanup 误绑随 challengeActive 变化的 stopCameraStream，一点开始就关摄像头；改为仅卸载时停轨道 |
+| 2026-07-23 03:55 | **去掉练完→猜你喜欢**：结束只进 Feedback；去掉完成浮层 |
+| 2026-07-23 03:56 | **Feedback 阶段4（最终报告）**：localStorage 历史 + 同上次对比；报告页展示本地/服务端会话；提交总分用骨段主分 |
+| 2026-07-23 03:58 | **修复无法开摄像头**：去掉完成浮层后残留 `setSessionSummary`，开始挑战即 ReferenceError；已删除 |
+| 2026-07-23 04:08 | **`feature/feedback` 整合推送**：阶段1–4 代码 + 备忘；**不提交** `desktop/.env`（含本机 `DOUYIN_COOKIES_FROM_BROWSER` 与已有 API key，仅本机保留） |
 
 ## 0. 合并前建议操作（强烈建议）
 
@@ -58,7 +77,7 @@ git status
 
 本工作区路径（当前实现所在）：
 
-`D:\DANCEPULSE\dance-pulse-tiktok-main\dance-pulse-tiktok-main\desktop\frontend\`
+`D:\DANCEPULSE\_git\dance-pulse-tiktok\desktop\frontend\`（同步副本：`dance-pulse-tiktok-main\...`）
 
 ---
 
@@ -122,14 +141,51 @@ git status
 
 | 文件 | 改动 |
 |------|------|
-| `app/lesson/[id]/for-you/page.tsx` | **新建** 猜你喜欢推荐页 |
+| `app/lesson/[id]/for-you/page.tsx` | **新建** 猜你喜欢推荐页（仍可手动访问） |
 | `lib/communityShowcase.ts` | `getForYouRecommendations`（同曲→相似→热门→新人混排）；`previewThumbnail` 按分段缩略图轮换 |
-| `app/lesson/[id]/tracking-desktop/page.tsx` | 跟练播完弹层，约 1.6s 后跳转 `/lesson/{id}/for-you` |
+| `app/lesson/[id]/tracking-desktop/page.tsx` | ~~播完自动跳 for-you~~ → **2026-07-23 已改为只进 Feedback 最终报告** |
 
 **Demo 媒体物理位置（勿放 frontend/public）：**
 - 视频：`desktop/backend/data/videos/`
 - 封面：`desktop/backend/data/thumbs/`
 - 经 FastAPI 挂载为 `http://localhost:8000/videos|thumbs/...`，前端 `resolveMediaUrl` 拼接
+
+### 1.8.1 Feedback 阶段4 · 最终报告持久化（2026-07-23）
+
+| 文件 | 改动 |
+|------|------|
+| `lib/feedback/storage.ts` | `appendFeedbackHistory` / `listFeedbackHistory` / `getPreviousFeedbackSummary`（localStorage） |
+| `lib/api.ts` | `listTrackingSessions` |
+| `app/lesson/[id]/feedback/page.tsx` | 最终报告：总分、较上次、洞察、分段、本地历史 + 服务端会话 |
+| `tracking-desktop/page.tsx` | 结束 → `/feedback`；提交 `overallScore` 用骨段主分；去掉完成浮层 |
+
+### 1.8.2 Feedback 阶段1–4 总览（整合 · 2026-07-23）
+
+目标：跟拍用骨段余弦主分 + 实时纠正 HUD + 跳完出具最终报告（含诊断与历史对比）。分支：`feature/feedback`。
+
+| 阶段 | 交付 | 关键路径 |
+|------|------|----------|
+| **1 内核** | 骨段方向余弦 → 0–100；`FeedbackReport`；结束后进报告页 | `lib/feedback/{bones,scoreMap,types,buildReport}.ts` · `app/lesson/[id]/feedback` |
+| **2 诊断** | 规则引擎：总评 + 问题/建议 + 分段点评（不接 LLM） | `lib/feedback/insights.ts` |
+| **3 实时** | HUD 档位色、「注意关节」、用户骨架高亮最差关节；`requestIdleCallback` 构建报告；MediaPipe 本地化；打分放宽；老师骨架自适应对齐；3-2-1 倒计时 | `liveHotspot.ts` · `UserSkeletonOverlay` · `alignSkeleton.ts` · `useSessionScoring` · `tracking-desktop` |
+| **4 回看** | localStorage 历史 + 较上次；`listTrackingSessions`；结束不再跳猜你喜欢 | `storage.ts` · `api.ts` · feedback 页 |
+
+**体验闭环**：开始挑战 → 倒计时 → 跟拍实时分/骨架 → 整支结束 → `/lesson/[id]/feedback` 最终报告（可再挑战 / 看历史）。
+
+**明确不做（本轮）**：LLM 写报告、强制推 main、大媒体进仓库。
+
+**本机不入库（备忘）**：
+- `desktop/.env`：含 `DASHSCOPE_API_KEY` 与本机抖音 cookies 探测配置（`DOUYIN_COOKIES_FROM_BROWSER=edge:Default,chrome:Default`）；推 `feature/feedback` 时**故意不 commit**，请各环境自备 `.env`。
+- 本地导入课媒体 / job（如 `les_6b7c…`）、临时 clips/thumbs 变更：不进本分支。
+
+### 分支关系（备忘）
+
+| 分支 | 用途 |
+|------|------|
+| `main` | GitHub 主线 |
+| `community` | 社区 UI / demo 媒体等桌面端合集 |
+| `preview-merge` | **路演/预览合集分支**：把 community + 跟拍挑战 + 封面预览等已能演示的桌面能力揉在一起，方便本地跑通与临时公网演示；**不是** Feedback 功能分支 |
+| `feature/feedback` | 从 `preview-merge` 拉出：骨段评分 / 报告 / 实时 HUD / 历史回看（本轮推送目标） |
 
 ### 1.9 Demo 媒体极简方案（2026-07-22 15:40）
 
