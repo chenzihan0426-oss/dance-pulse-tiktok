@@ -8,7 +8,7 @@ from pathlib import Path
 
 from models import Teaching, TeachingStatus
 from services.clip_reexport import reexport_segment_clip_and_thumb
-from services.lesson_store import list_lesson_files, load_lesson, save_lesson
+from services.lesson_store import list_lesson_files, load_lesson, update_segment
 from services.teaching_cues import build_null_beat_cues
 
 
@@ -29,12 +29,12 @@ def _clip_path_for_segment(clip_url: str) -> Path:
 
 
 def _teaching_worker_count() -> int:
-    raw_value = os.getenv("TEACHING_QUEUE_WORKERS", "2").strip()
+    raw_value = os.getenv("TEACHING_QUEUE_WORKERS", "4").strip()
     try:
         worker_count = int(raw_value)
     except ValueError:
-        worker_count = 2
-    return max(1, min(3, worker_count))
+        worker_count = 4
+    return max(1, min(8, worker_count))
 
 
 class TeachingQueue:
@@ -42,7 +42,6 @@ class TeachingQueue:
         self._queue: asyncio.Queue[tuple[str, list[str]]] = asyncio.Queue()
         self._worker_tasks: list[asyncio.Task[None]] = []
         self._worker_count = _teaching_worker_count()
-        self._lesson_locks: dict[str, asyncio.Lock] = {}
 
     async def start(self) -> None:
         if not self._worker_tasks:
@@ -54,8 +53,10 @@ class TeachingQueue:
             await self._recover_incomplete_segments()
 
     async def enqueue(self, lesson_id: str, segment_ids: list[str]) -> None:
-        if segment_ids:
-            await self._queue.put((lesson_id, segment_ids))
+        # 每段作为独立任务入队，让多个 worker 并行处理同一门课的不同段
+        # (写盘由 update_segment 的 per-lesson 锁保证原子性)。
+        for segment_id in segment_ids:
+            await self._queue.put((lesson_id, [segment_id]))
 
     async def _recover_incomplete_segments(self) -> None:
         recovered = 0
@@ -79,25 +80,20 @@ class TeachingQueue:
         if recovered:
             logger.info("Recovered %d incomplete teaching task(s) in total", recovered)
 
-    def _lock_for_lesson(self, lesson_id: str) -> asyncio.Lock:
-        lock = self._lesson_locks.get(lesson_id)
-        if lock is None:
-            lock = asyncio.Lock()
-            self._lesson_locks[lesson_id] = lock
-        return lock
-
     async def _worker(self, worker_index: int) -> None:
         while True:
             lesson_id, segment_ids = await self._queue.get()
             try:
-                async with self._lock_for_lesson(lesson_id):
-                    logger.debug(
-                        "Worker %d processing lesson=%s segments=%s",
-                        worker_index + 1,
-                        lesson_id,
-                        ",".join(segment_ids),
-                    )
-                    await self._process(lesson_id, segment_ids)
+                # 不再对整门课加锁：写盘用 lesson_store.update_segment 的 per-lesson
+                # 锁保证原子性，所以多个 worker 可并行处理同一门课的不同段(VLM 调用
+                # 是耗时大头，并行后整门课总时长≈原来的 1/worker 数)。
+                logger.debug(
+                    "Worker %d processing lesson=%s segments=%s",
+                    worker_index + 1,
+                    lesson_id,
+                    ",".join(segment_ids),
+                )
+                await self._process(lesson_id, segment_ids)
             finally:
                 self._queue.task_done()
 
@@ -105,12 +101,12 @@ class TeachingQueue:
         _ensure_repo_root_path()
         from teaching.generate_teaching import generate_teaching_for_segment  # noqa: PLC0415
 
-        lesson = load_lesson(lesson_id)
-        updated_segments = []
-
-        for segment in lesson.segments:
-            if segment.id not in segment_ids:
-                updated_segments.append(segment)
+        # 逐段生成，每段完成后立即原子写回(update_segment 内部持 per-lesson 锁，
+        # 重读磁盘合并其它 worker 的进度)。前端可一段一段看到 ready。
+        for target_id in segment_ids:
+            lesson = load_lesson(lesson_id)  # 重读，拿到其它 worker 已写入的进度
+            segment = next((s for s in lesson.segments if s.id == target_id), None)
+            if segment is None:
                 continue
 
             prepared_segment = segment
@@ -123,25 +119,26 @@ class TeachingQueue:
                     prepared_segment,
                     generate_teaching_for_segment,
                 )
-                updated_segments.append(prepared_segment.model_copy(update={"teaching": teaching}))
+                new_segment = prepared_segment.model_copy(update={"teaching": teaching})
             except Exception:
-                updated_segments.append(
-                    prepared_segment.model_copy(
-                        update={
-                            "teaching": prepared_segment.teaching.model_copy(
-                                update={
-                                    "status": TeachingStatus.FAILED,
-                                    "summary": prepared_segment.ai_description,
-                                    "steps": [],
-                                    "tips": ["生成失败，请稍后重试或检查 teaching 配置"],
-                                    "beat_cues": build_null_beat_cues(prepared_segment.beat_count),
-                                }
-                            )
-                        }
-                    )
+                new_segment = prepared_segment.model_copy(
+                    update={
+                        "teaching": prepared_segment.teaching.model_copy(
+                            update={
+                                "status": TeachingStatus.FAILED,
+                                "summary": prepared_segment.ai_description,
+                                "steps": [],
+                                "tips": ["生成失败，请稍后重试或检查 teaching 配置"],
+                                "beat_cues": build_null_beat_cues(prepared_segment.beat_count),
+                            }
+                        )
+                    }
                 )
 
-        save_lesson(lesson.model_copy(update={"segments": updated_segments}))
+            # 原子写回：锁内重读→只替换目标段→原子替换文件
+            update_segment(lesson_id, new_segment)
+
+
 
     async def _generate_teaching_with_retry(
         self,

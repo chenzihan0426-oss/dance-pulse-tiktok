@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import json
+import os
+import threading
 from pathlib import Path
 
 from fastapi import HTTPException
 
-from models import Lesson, LessonListItem
+from models import Lesson, LessonListItem, Segment
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,10 +39,51 @@ def load_lesson(lesson_id: str) -> Lesson:
 def save_lesson(lesson: Lesson) -> None:
     path = get_lesson_path(lesson.id)
     lesson = _sync_lesson_thumbnail(lesson)
-    path.write_text(
-        json.dumps(lesson.model_dump(mode="json"), ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
+    _atomic_write_json(path, json.dumps(lesson.model_dump(mode="json"), ensure_ascii=False, indent=2))
+
+
+# ---------------------------------------------------------------------------
+# 并发安全的单段更新
+#   多个教学 worker 可并行跑 VLM(耗时部分),只在写盘瞬间用 per-lesson 锁
+#   串行化"重读最新 → 只替换目标段 → 原子写回",避免读改写竞态互相覆盖。
+# ---------------------------------------------------------------------------
+
+_lesson_write_locks: dict[str, threading.Lock] = {}
+_locks_guard = threading.Lock()
+
+
+def _lock_for(lesson_id: str) -> threading.Lock:
+    with _locks_guard:
+        lock = _lesson_write_locks.get(lesson_id)
+        if lock is None:
+            lock = threading.Lock()
+            _lesson_write_locks[lesson_id] = lock
+        return lock
+
+
+def _atomic_write_json(path: Path, text: str) -> None:
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, path)  # 原子替换,避免半写文件被读到
+
+
+def update_segment(lesson_id: str, segment: Segment) -> None:
+    """只更新某一段并写回,持 per-lesson 锁保证并发安全。
+
+    锁内重新从磁盘读取整门课,合并其它 worker 已写入的进度,只替换目标段。
+    """
+    lock = _lock_for(lesson_id)
+    with lock:
+        path = get_lesson_path(lesson_id)
+        if not path.exists():
+            raise HTTPException(status_code=404, detail="Lesson not found")
+        current = Lesson.model_validate_json(path.read_text(encoding="utf-8"))
+        merged = [segment if s.id == segment.id else s for s in current.segments]
+        updated = _sync_lesson_thumbnail(current.model_copy(update={"segments": merged}))
+        _atomic_write_json(
+            path,
+            json.dumps(updated.model_dump(mode="json"), ensure_ascii=False, indent=2),
+        )
 
 
 def list_lessons() -> list[LessonListItem]:

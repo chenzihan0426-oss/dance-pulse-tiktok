@@ -209,6 +209,48 @@ export default function LessonPageDesktop() {
     };
   }, [lessonId, setTotal]);
 
+  // 教学自动轮询:只要还有段落处于 pending(教学生成中),就每 4s 拉一次,
+  // 直到全部非 pending 或达到上限(避免无限轮询)。解决"刚导入进来的课
+  // 教学一直停在生成中、不手动刷新就不更新"的问题。
+  React.useEffect(() => {
+    if (!lesson) return;
+    const hasPending = lesson.segments.some(
+      (s) => !s.deleted && s.teaching?.status === "pending"
+    );
+    if (!hasPending) return;
+
+    let cancelled = false;
+    let tries = 0;
+    const MAX_TRIES = 90; // 90 × 4s = 6 分钟上限,足够真 VLM 跑完整门课
+    let timer: ReturnType<typeof setTimeout>;
+
+    const poll = async () => {
+      try {
+        const fresh = await getLesson(lessonId);
+        if (cancelled) return;
+        setLesson(fresh);
+        const stillPending = fresh.segments.some(
+          (s) => !s.deleted && s.teaching?.status === "pending"
+        );
+        tries += 1;
+        if (stillPending && tries < MAX_TRIES) {
+          timer = setTimeout(poll, 4000);
+        }
+      } catch {
+        if (!cancelled && tries < MAX_TRIES) {
+          tries += 1;
+          timer = setTimeout(poll, 4000);
+        }
+      }
+    };
+    timer = setTimeout(poll, 4000);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+    // 依赖 lesson 引用:每次成功轮询 setLesson 后重新评估是否还需继续
+  }, [lesson, lessonId]);
+
   // 拉取该课的逐动作难度聚合(global scope),用于在卡片上标注难点。
   // 失败静默(功能未产生数据时后端返回空数组即可)。
   React.useEffect(() => {

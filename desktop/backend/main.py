@@ -105,6 +105,25 @@ init_db()
 ensure_tracking_dirs()
 ensure_social_dir()
 
+# 启动时打印当前 VLM 模式,方便一眼确认走的是真千问还是 mock 占位文案。
+def _log_vlm_mode() -> None:
+    mode = os.environ.get("DP_VLM_MODE", "").strip().lower()
+    has_key = bool(
+        os.environ.get("DASHSCOPE_API_KEY", "").strip()
+        or os.environ.get("QWEN_API_KEY", "").strip()
+    )
+    if mode == "mock":
+        state = "MOCK(DP_VLM_MODE=mock 强制,教学为占位文案)"
+    elif mode == "real" or has_key:
+        state = "REAL 千问 VLM(教学按视频真实生成)"
+    else:
+        state = "MOCK(未设 DASHSCOPE_API_KEY,教学为占位文案)"
+    print(f"==> [AI 图文教学] VLM 模式: {state}", flush=True)
+
+
+_log_vlm_mode()
+
+
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):

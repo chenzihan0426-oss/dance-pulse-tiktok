@@ -30,6 +30,12 @@ if ! "$PYTHON_BIN" -c "import fastapi, uvicorn, sqlmodel" >/dev/null 2>&1; then
   "$PYTHON_BIN" -m pip install -r "$ROOT/backend/requirements.txt"
 fi
 
+# pipeline 依赖(librosa/mediapipe 等，抖音导入的节拍检测/切片必需)
+if ! "$PYTHON_BIN" -c "import librosa, mediapipe" >/dev/null 2>&1; then
+  echo "==> 安装 pipeline 依赖（librosa/mediapipe 等，首次较慢，需要联网）..."
+  "$PYTHON_BIN" -m pip install -r "$ROOT/pipeline/requirements.txt"
+fi
+
 # 3. 前端依赖
 if [ ! -d "$ROOT/frontend/node_modules" ]; then
   echo "==> 安装前端依赖（首次较慢，需要联网）..."
