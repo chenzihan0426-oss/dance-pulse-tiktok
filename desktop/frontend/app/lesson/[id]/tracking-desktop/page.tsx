@@ -8,6 +8,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Camera, Pause, Play, Maximize2, Minimize2, Volume2, VolumeX } from "lucide-react";
 
 import AdaptiveSkeletonOverlay from "@/components/tracking/AdaptiveSkeletonOverlay";
+import UserSkeletonOverlay from "@/components/tracking/UserSkeletonOverlay";
 import MatteOverlay, { type MatteOverlayStatus } from "@/components/tracking/MatteOverlay";
 import SegmentParticleLayer from "@/components/tracking/SegmentParticleLayer";
 import CameraPicker from "@/components/tracking/CameraPicker";
@@ -341,6 +342,7 @@ export default function TrackingDesktopPage() {
   const {
     state: scoringState,
     finish: finishScoring,
+    kptsRef: userKptsRef,
   } = useSessionScoring({
     active: challengeActive,
     lessonId,
@@ -1034,13 +1036,24 @@ export default function TrackingDesktopPage() {
 
           <div className="relative h-full w-full overflow-hidden rounded-[18px] border border-white/12 bg-transparent">
             {cameraReady ? (
-              <video
-                ref={cameraRef}
-                className="absolute inset-0 h-full w-full object-cover"
-                style={{ transform: userMirror ? "scaleX(-1)" : "none" }}
-                muted
-                playsInline
-              />
+              <>
+                <video
+                  ref={cameraRef}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  style={{ transform: userMirror ? "scaleX(-1)" : "none" }}
+                  muted
+                  playsInline
+                />
+                {/* 用户实时骨架(镜头跟踪,黄绿色):关键点来自评分 hook,零额外推理 */}
+                {challengeActive ? (
+                  <UserSkeletonOverlay
+                    videoRef={cameraRef}
+                    kptsRef={userKptsRef}
+                    mirror={userMirror}
+                    active={challengeActive}
+                  />
+                ) : null}
+              </>
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-4 text-center text-white/70">
                 <Camera className="h-10 w-10 text-[#00f3ff]" />

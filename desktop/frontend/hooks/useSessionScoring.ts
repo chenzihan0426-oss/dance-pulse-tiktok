@@ -12,6 +12,7 @@
 import * as React from "react";
 
 import { getPoseLandmarker, landmarksToKeypoints } from "@/lib/pose/mediapipeClient";
+import type { Keypoint } from "@/lib/pose/types";
 import { scoreFrameFused, type Kpt, type TeacherFrame } from "@/lib/pose/scoring";
 import {
   SessionAccumulator,
@@ -67,10 +68,13 @@ export function useSessionScoring(opts: Options): {
   state: SessionScoringState;
   finish: () => SessionResult | null;
   reset: () => void;
+  /** 最新一帧用户关键点([x,y,vis],原始镜头坐标未翻转),给实时骨架叠层用 */
+  kptsRef: React.MutableRefObject<Keypoint[] | null>;
 } {
   const { active, lessonId, videoRef, playheadRef, segments, mirror } = opts;
 
   const accRef = React.useRef<SessionAccumulator | null>(null);
+  const kptsRef = React.useRef<Keypoint[] | null>(null);
   const segmentsRef = React.useRef<SegmentMeta[]>(segments);
   const mirrorRef = React.useRef(mirror);
   const [state, setState] = React.useState<SessionScoringState>({
@@ -154,6 +158,9 @@ export function useSessionScoring(opts: Options): {
         }
         if (!kpts || kpts.length < 33) return;
 
+        // 发布原始镜头坐标关键点(未做手性翻转)给骨架叠层
+        kptsRef.current = kpts.map((k) => [k.x, k.y, k.visibility] as Keypoint);
+
         // 镜像画面下,评分前把用户姿态翻转回与老师一致的手性。
         if (mirrorRef.current) kpts = mirrorKpts(kpts);
 
@@ -189,12 +196,13 @@ export function useSessionScoring(opts: Options): {
     void run();
     return () => {
       disposed = true;
+      kptsRef.current = null;
       if (rafId) cancelAnimationFrame(rafId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, lessonId]);
 
-  return { state, finish, reset };
+  return { state, finish, reset, kptsRef };
 }
 
 // —— 内部小工具(避免额外 import 造成的循环) ——
