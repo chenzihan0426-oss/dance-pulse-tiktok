@@ -12,7 +12,7 @@
 *.swo
 
 # ===== Environment / secrets =====
-.env
+# community 分支主动跟踪 .env（演示用千问 key）；其它本地变体仍忽略
 .env.local
 .env.development
 .env.production
@@ -52,25 +52,8 @@ htmlcov/
 .coverage
 .coverage.*
 
-# ===== Runtime / data (kept out of public repo) =====
-backend/data/auth/
-backend/data/clips/
-backend/data/jobs/
-backend/data/lessons/
-backend/data/matte/
-backend/data/particles/
-backend/data/pose/
-backend/data/pose_full/
-backend/data/social/
-backend/data/thumbs/
-backend/data/tracking/
-backend/data/videos/
-backend/data/**/*.json
-backend/data/**/*.mp4
-backend/data/**/*.webm
-backend/data/**/*.png
-backend/data/**/*.jpg
-!backend/data/.gitkeep
+# ===== Runtime / data =====
+# community 全量同步：backend/data 演示媒体与 lesson JSON 入库，不再忽略。
 
 # ===== Logs =====
 *.log

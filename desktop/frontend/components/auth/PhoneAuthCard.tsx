@@ -3,11 +3,27 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Loader2, MessageSquareText, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Loader2, ShieldCheck, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { applyLocalProgressSnapshot, buildLocalProgressSnapshot, setAuthSession } from "@/lib/auth";
-import { getMe, migrateLocalSnapshot, sendSmsCode, verifySmsCode } from "@/lib/api";
+import { setAuthSession } from "@/lib/auth";
+import type { User } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
+
+function buildDemoUser(phoneInput: string): User {
+  const raw = phoneInput.trim() || "guest";
+  const slug = raw.replace(/[^\w\u4e00-\u9fff]/g, "").slice(-8) || "guest";
+  const suffix = slug.slice(-4) || "0000";
+  return {
+    id: `usr_demo_${slug}`,
+    phone: raw,
+    username: `u_${slug}`.toLowerCase().slice(0, 24),
+    displayName: `舞者_${suffix}`,
+    avatar: null,
+    bio: "跳舞的人",
+    isVerified: false,
+    createdAt: new Date().toISOString(),
+  };
+}
 
 export function PhoneAuthCard({
   mode,
@@ -17,18 +33,13 @@ export function PhoneAuthCard({
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const [phone, setPhone] = React.useState("");
-  const [code, setCode] = React.useState("");
-  const [devCode, setDevCode] = React.useState<string | null>(null);
-  const [sent, setSent] = React.useState(false);
-  const [sending, setSending] = React.useState(false);
-  const [verifying, setVerifying] = React.useState(false);
+  const [password, setPassword] = React.useState("");
+  const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  const title = mode === "login" ? "手机号登录" : "创建账号";
+  const title = mode === "login" ? "登录" : "注册";
   const subtitle =
-    mode === "login"
-      ? "登录后会同步你的学习进度、连续学习和徽章。"
-      : "注册成功后会自动生成公开用户名，后续社区功能直接沿用。";
+    mode === "login" ? "登录后同步练习进度与社区身份。" : "注册后即可发布作品、关注舞者。";
 
   React.useEffect(() => {
     if (isAuthenticated) {
@@ -36,39 +47,29 @@ export function PhoneAuthCard({
     }
   }, [isAuthenticated, router]);
 
-  const handleSendCode = React.useCallback(async () => {
-    setSending(true);
-    setError(null);
-    try {
-      const response = await sendSmsCode(phone);
-      setSent(true);
-      setDevCode(response.devCode);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setSending(false);
+  const handleSubmit = React.useCallback(async () => {
+    if (!phone.trim() || !password.trim()) {
+      setError("请填写手机号和密码。");
+      return;
     }
-  }, [phone]);
 
-  const handleVerify = React.useCallback(async () => {
-    setVerifying(true);
+    setSubmitting(true);
     setError(null);
     try {
-      const verify = await verifySmsCode(phone, code);
-      setAuthSession({ token: verify.token, user: verify.user });
-
-      const snapshotResponse = await migrateLocalSnapshot(buildLocalProgressSnapshot());
-      applyLocalProgressSnapshot(snapshotResponse.snapshot);
-
-      const me = await getMe();
-      setAuthSession({ token: verify.token, user: me.user });
+      // 演示登录：不校验后端，本地写入会话即可
+      await new Promise((resolve) => setTimeout(resolve, 280));
+      const user = buildDemoUser(phone);
+      setAuthSession({
+        token: `demo_token_${user.id}_${Date.now()}`,
+        user,
+      });
       router.replace("/me");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
-      setVerifying(false);
+      setSubmitting(false);
     }
-  }, [code, phone, router]);
+  }, [password, phone, router]);
 
   return (
     <main className="mx-auto flex min-h-screen max-w-[480px] flex-col justify-center px-8 pb-12 pt-12 text-white">
@@ -80,13 +81,9 @@ export function PhoneAuthCard({
         返回我的
       </Link>
 
-      <section className="mt-8 rounded-[32px] border border-white/8 bg-bg-raised px-6 py-7">
+      <section className="mt-8 rounded-[32px] border border-white/8 bg-black/45 px-6 py-7 backdrop-blur-md">
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand/16 text-brand-light">
-          {mode === "login" ? (
-            <ShieldCheck className="h-7 w-7" />
-          ) : (
-            <MessageSquareText className="h-7 w-7" />
-          )}
+          {mode === "login" ? <ShieldCheck className="h-7 w-7" /> : <UserPlus className="h-7 w-7" />}
         </div>
 
         <h1 className="mt-6 text-[30px] font-semibold tracking-tight text-white">{title}</h1>
@@ -98,31 +95,30 @@ export function PhoneAuthCard({
             <input
               value={phone}
               onChange={(event) => setPhone(event.target.value)}
-              inputMode="numeric"
-              placeholder="请输入手机号"
+              autoComplete="username"
+              placeholder="任意字符串"
               className="h-14 w-full rounded-[18px] border border-white/10 bg-white/[0.04] px-4 text-[15px] text-white outline-none transition focus:border-brand/50"
+              onKeyDown={(event) => {
+                if (event.key === "Enter") void handleSubmit();
+              }}
             />
           </label>
 
-          {sent ? (
-            <label className="block">
-              <span className="mb-2 block text-[13px] text-white/50">验证码</span>
-              <input
-                value={code}
-                onChange={(event) => setCode(event.target.value)}
-                inputMode="numeric"
-                placeholder="请输入 6 位验证码"
-                className="h-14 w-full rounded-[18px] border border-white/10 bg-white/[0.04] px-4 text-[15px] text-white outline-none transition focus:border-brand/50"
-              />
-            </label>
-          ) : null}
+          <label className="block">
+            <span className="mb-2 block text-[13px] text-white/50">密码</span>
+            <input
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              autoComplete="current-password"
+              placeholder="任意字符串"
+              className="h-14 w-full rounded-[18px] border border-white/10 bg-white/[0.04] px-4 text-[15px] text-white outline-none transition focus:border-brand/50"
+              onKeyDown={(event) => {
+                if (event.key === "Enter") void handleSubmit();
+              }}
+            />
+          </label>
         </div>
-
-        {devCode ? (
-          <div className="mt-4 rounded-[18px] border border-brand/20 bg-brand/10 px-4 py-3 text-[13px] text-brand-light">
-            开发验证码：<span className="font-semibold tracking-[0.18em]">{devCode}</span>
-          </div>
-        ) : null}
 
         {error ? (
           <div className="mt-4 rounded-[18px] border border-state-danger/20 bg-state-danger/10 px-4 py-3 text-[13px] text-red-200">
@@ -131,50 +127,23 @@ export function PhoneAuthCard({
         ) : null}
 
         <div className="mt-6 flex flex-col gap-3">
-          {!sent ? (
-            <Button
-              variant="primary"
-              className="h-14 w-full rounded-[18px] text-[15px]"
-              onClick={handleSendCode}
-              disabled={sending || phone.trim().length < 6}
-            >
-              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              发送验证码
-            </Button>
-          ) : (
-            <Button
-              variant="primary"
-              className="h-14 w-full rounded-[18px] text-[15px]"
-              onClick={handleVerify}
-              disabled={verifying || code.trim().length < 4}
-            >
-              {verifying ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              完成登录
-            </Button>
-          )}
+          <Button
+            variant="primary"
+            className="h-14 w-full rounded-[18px] text-[15px]"
+            onClick={() => void handleSubmit()}
+            disabled={submitting || !phone.trim() || !password.trim()}
+          >
+            {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            {mode === "login" ? "登录" : "注册并登录"}
+          </Button>
 
           <Button
             variant="secondary"
             className="h-12 w-full rounded-[18px] text-[14px]"
-            onClick={() => {
-              setSent(false);
-              setCode("");
-              setDevCode(null);
-            }}
+            onClick={() => router.push("/me")}
           >
-            {sent ? "重新填写手机号" : "稍后再说"}
+            稍后再说
           </Button>
-
-          {sent ? (
-            <button
-              type="button"
-              onClick={handleSendCode}
-              disabled={sending}
-              className="text-[13px] text-white/42 transition hover:text-white/78 disabled:opacity-40"
-            >
-              重新发送验证码
-            </button>
-          ) : null}
         </div>
 
         <div className="mt-6 text-center text-[13px] text-white/40">

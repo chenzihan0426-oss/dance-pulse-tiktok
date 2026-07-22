@@ -1,0 +1,10 @@
+{
+  "job_id": "job_ca4a57e29ca3",
+  "status": "ready",
+  "url": null,
+  "lesson_id": "les_946ff78f688a",
+  "error": "服务已重启，之前的导入任务已中断，请重新发起导入。",
+  "progress": 100,
+  "phase": "teaching",
+  "fallback_hint": "导入完成，正在进入课程页。"
+}

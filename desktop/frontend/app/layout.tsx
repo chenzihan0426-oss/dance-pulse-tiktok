@@ -25,6 +25,10 @@ export default function RootLayout({
     <html lang="zh-CN" className="dark">
       <head>
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Michroma&family=Noto+Sans+SC:wght@400;700;900&family=Orbitron:wght@900&display=swap"
+        />
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no"

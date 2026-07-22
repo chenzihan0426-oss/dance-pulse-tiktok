@@ -255,4 +255,78 @@ body {
   }
 }
 
+@keyframes shine {
+  to {
+    background-position: 200% center;
+  }
+}
+
+@keyframes dpLivePulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 0, 85, 0.55);
+    filter: brightness(1);
+  }
+  50% {
+    box-shadow: 0 0 10px 2px rgba(255, 0, 85, 0.45);
+    filter: brightness(1.15);
+  }
+}
+
+@keyframes dpLivePing {
+  0% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  70% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.dp-live-badge {
+  animation: dpLivePulse 1.6s ease-in-out infinite;
+}
+
+.dp-live-ping {
+  animation: dpLivePing 1.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes arenaIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes duelIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes arenaCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* ═════════ 跟拍挑战 · PERFECT 命中震撼效果 ═════════ */

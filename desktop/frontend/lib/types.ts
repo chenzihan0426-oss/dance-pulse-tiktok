@@ -142,6 +142,8 @@ export interface CommunityComment {
   avatar: string | null;
   content: string;
   createdAt: string;
+  /** 精选评论（约 10%） */
+  isFeatured?: boolean;
 }
 
 export interface CommunityFeedItem {

@@ -49,133 +49,10 @@ const FALLBACK_LESSONS: HomeLesson[] = [
   },
 ];
 
-function ParticleBackground({ mouseRef }: { mouseRef: React.MutableRefObject<{ x: number; y: number }> }) {
-  const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
-
-  React.useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let animationFrameId = 0;
-    let particles: Array<{
-      originX: number;
-      originY: number;
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      baseSize: number;
-    }> = [];
-    const spacing = 24;
-
-    let width = window.innerWidth;
-    let height = window.innerHeight;
-
-    const initCanvas = () => {
-      canvas.width = width;
-      canvas.height = height;
-      particles = [];
-      for (let x = -spacing; x < width + spacing; x += spacing) {
-        for (let y = -spacing; y < height + spacing; y += spacing) {
-          particles.push({ originX: x, originY: y, x, y, vx: 0, vy: 0, baseSize: 1.5 });
-        }
-      }
-    };
-    initCanvas();
-
-    const handleResize = () => {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      initCanvas();
-    };
-    window.addEventListener("resize", handleResize);
-
-    let time = 0;
-    const render = () => {
-      time += 0.03;
-      ctx.fillStyle = "#050505";
-      ctx.fillRect(0, 0, width, height);
-
-      const mx = mouseRef.current.x;
-      const my = mouseRef.current.y;
-
-      for (let i = 0; i < particles.length; i += 1) {
-        const p = particles[i];
-        const waveX = Math.sin(p.originY * 0.005 + time) * 12;
-        const waveY = Math.sin(p.originX * 0.008 + time) * Math.cos(p.originY * 0.008 + time) * 20;
-
-        const targetX = p.originX + waveX;
-        const targetY = p.originY + waveY;
-
-        const dx = mx - p.x;
-        const dy = my - p.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist < 180) {
-          const force = Math.pow((180 - dist) / 180, 2);
-          const angle = Math.atan2(dy, dx);
-          p.vx -= Math.cos(angle) * force * 4;
-          p.vy -= Math.sin(angle) * force * 4;
-        }
-
-        p.vx += (targetX - p.x) * 0.04;
-        p.vy += (targetY - p.y) * 0.04;
-        p.vx *= 0.88;
-        p.vy *= 0.88;
-        p.x += p.vx;
-        p.y += p.vy;
-
-        const devX = p.x - p.originX;
-        const devY = p.y - p.originY;
-        const totalDev = Math.sqrt(devX * devX + devY * devY);
-
-        let r: number;
-        let g: number;
-        let b: number;
-        if (totalDev < 15) {
-          const factor = totalDev / 15;
-          r = Math.floor(255 * factor);
-          g = Math.floor(243 * (1 - factor));
-          b = Math.floor(255 + (85 - 255) * factor);
-        } else {
-          const factor = Math.min((totalDev - 15) / 25, 1);
-          r = Math.floor(255 + (204 - 255) * factor);
-          g = Math.floor(255 * factor);
-          b = Math.floor(85 * (1 - factor));
-        }
-
-        ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, Math.max(0.5, p.baseSize + totalDev * 0.02), 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      animationFrameId = requestAnimationFrame(render);
-    };
-    render();
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [mouseRef]);
-
-  return <canvas ref={canvasRef} className="pointer-events-none fixed inset-0 z-0" />;
-}
-
 export default function DesktopHome() {
-  const [mousePos, setMousePos] = React.useState({ x: 0, y: 0 });
-  const [isHovering, setIsHovering] = React.useState(false);
-  const [showCustomCursor, setShowCustomCursor] = React.useState(false);
-  const mouseRef = React.useRef({ x: -1000, y: -1000 });
   const [lessons, setLessons] = React.useState<HomeLesson[]>([]);
 
   React.useEffect(() => {
-    setShowCustomCursor(window.matchMedia("(pointer:fine)").matches);
-
     let cancelled = false;
     getLessons()
       .then((items) => {
@@ -205,37 +82,13 @@ export default function DesktopHome() {
     };
   }, []);
 
-  React.useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
-      mouseRef.current = { x: e.clientX, y: e.clientY };
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
-
   return (
-    <main className="relative min-h-screen overflow-x-hidden bg-[#050505] font-sans text-white selection:bg-[#ff0055] selection:text-white">
-      <ParticleBackground mouseRef={mouseRef} />
-
+    <main className="relative min-h-screen overflow-x-hidden bg-transparent font-sans text-white selection:bg-[#ff0055] selection:text-white">
       <style jsx global>{`
         @import url("https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Michroma&family=Noto+Sans+SC:wght@900&display=swap");
 
         body {
-          font-family: "Michroma", sans-serif;
-          cursor: ${showCustomCursor ? "none" : "auto"};
-          background: #050505;
-        }
-
-        .cursor-dot {
-          transition: transform 0.1s ease-out;
-        }
-
-        .cursor-ring {
-          transition:
-            transform 0.3s ease-out,
-            width 0.2s,
-            height 0.2s;
+          font-family: "Michroma", "Noto Sans SC", sans-serif;
         }
 
         .kpop-glitch {
@@ -318,7 +171,7 @@ export default function DesktopHome() {
         .marquee-container {
           display: flex;
           white-space: nowrap;
-          font-family: "Black Han Sans", sans-serif;
+          font-family: "Black Han Sans", "Noto Sans SC", sans-serif;
           animation: marquee 20s linear infinite;
         }
 
@@ -472,39 +325,18 @@ export default function DesktopHome() {
         }
       `}</style>
 
-      {showCustomCursor ? (
-        <>
-          <div
-            className="cursor-dot pointer-events-none fixed left-0 top-0 z-[100] h-3 w-3 rounded-full bg-[#ccff00] mix-blend-difference"
-            style={{ transform: `translate(${mousePos.x - 6}px, ${mousePos.y - 6}px) scale(${isHovering ? 0.5 : 1})` }}
-          />
-          <div
-            className="cursor-ring pointer-events-none fixed left-0 top-0 z-[100] h-10 w-10 rounded-full border border-[#00f3ff] mix-blend-screen"
-            style={{
-              transform: `translate(${mousePos.x - 20}px, ${mousePos.y - 20}px) scale(${isHovering ? 1.5 : 1})`,
-              opacity: isHovering ? 0.8 : 0.3,
-              borderColor: isHovering ? "#ff0055" : "#00f3ff",
-            }}
-          />
-        </>
-      ) : null}
-
       <header className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden">
         <div className="z-10 flex flex-col items-center text-center">
           <h1
-            className="kpop-glitch mt-2 select-none text-7xl font-black uppercase leading-none tracking-tighter md:text-9xl"
-            data-text="不如跳舞"
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
+            className="kpop-glitch mt-2 select-none text-6xl font-black uppercase leading-none tracking-tighter md:text-8xl lg:text-9xl"
+            data-text="DANCE PULSE"
           >
-            不如跳舞
+            DANCE PULSE
           </h1>
 
           <button
             type="button"
             className="btn-strike z-10 mt-12 cursor-pointer px-10 py-4 text-lg font-bold uppercase tracking-widest transition-colors"
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
             onClick={() => document.getElementById("lessons")?.scrollIntoView({ behavior: "smooth" })}
           >
             <span className="relative z-10 flex items-center gap-3">
@@ -525,7 +357,7 @@ export default function DesktopHome() {
         <div className="marquee-container text-2xl font-black uppercase tracking-widest">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="flex items-center gap-8 px-4">
-              <span>不如跳舞 DP</span>
+              <span>跳舞吧！</span>
               <Sparkles size={24} />
               <span>DANCE PULSE</span>
               <Zap size={24} />
@@ -538,11 +370,34 @@ export default function DesktopHome() {
         </div>
       </div>
 
+      <section className="relative z-10 mx-auto max-w-7xl px-6 py-10">
+        <Link
+          href="/community?tab=hot"
+          className="group flex flex-wrap items-center justify-between gap-6 overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(110deg,rgba(255,0,85,0.18),rgba(0,243,255,0.08),rgba(5,5,5,0.95))] px-7 py-6 transition hover:border-white/25"
+        >
+          <div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#ff0055]">本周同舞挑战</div>
+            <h3
+              className="mt-2 text-3xl font-black tracking-tight text-white md:text-4xl"
+              style={{ fontFamily: "'ZCOOL XiaoWei', 'Black Han Sans', 'Noto Sans SC', sans-serif", transform: "skewX(-6deg)" }}
+            >
+              ANTIFRAGILE · 社区广场
+            </h3>
+            <p className="mt-2 max-w-xl text-sm text-white/55">
+              1,284 人已参与 · 最高 97 分 · 跟跳即可上榜
+            </p>
+          </div>
+          <span className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-black transition group-hover:bg-[#ccff00]">
+            进入社区 <ChevronRight size={16} />
+          </span>
+        </Link>
+      </section>
+
       <section id="lessons" className="relative z-10 mx-auto max-w-7xl px-6 py-24">
         <div className="mb-16 flex items-end justify-between">
           <h3
             className="text-4xl font-bold uppercase tracking-tighter md:text-6xl"
-            style={{ fontFamily: "'Black Han Sans', sans-serif", transform: "skewX(-10deg)" }}
+            style={{ fontFamily: "'ZCOOL XiaoWei', 'Black Han Sans', 'Noto Sans SC', sans-serif", transform: "skewX(-10deg)" }}
           >
             课程
             <br />
@@ -552,8 +407,6 @@ export default function DesktopHome() {
             href="#lessons"
             className="flex cursor-pointer items-center gap-2 text-sm uppercase tracking-widest text-white/50 transition-colors hover:text-white"
             style={{ transform: "skewX(-10deg)" }}
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
           >
             EXPLORE ALL <ChevronRight size={16} />
           </a>
@@ -564,10 +417,8 @@ export default function DesktopHome() {
             <Link
               key={lesson.id}
               href={`/lesson/${lesson.id}`}
-              className="neon-card group relative flex h-[420px] flex-col overflow-hidden border border-white/10 bg-[#0a0a0a] p-1"
+              className="neon-card group relative flex h-[420px] flex-col overflow-hidden border border-white/10 bg-[#0a0a0a]/90 p-1"
               style={{ "--hover-color": lesson.cover } as React.CSSProperties}
-              onMouseEnter={() => setIsHovering(true)}
-              onMouseLeave={() => setIsHovering(false)}
             >
               <div
                 className="relative h-3/5 w-full overflow-hidden bg-[#111] bg-cover bg-center"
@@ -590,7 +441,7 @@ export default function DesktopHome() {
                 <div>
                   <h4
                     className="line-clamp-1 text-xl font-bold uppercase tracking-wide text-white transition-colors group-hover:text-white"
-                    style={{ fontFamily: "'Black Han Sans', sans-serif" }}
+                    style={{ fontFamily: "'ZCOOL XiaoWei', 'Black Han Sans', 'Noto Sans SC', sans-serif" }}
                   >
                     {lesson.title}
                   </h4>
