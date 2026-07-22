@@ -1,1 +1,3 @@
 .vercel
+# MediaPipe self-hosted WASM + model files (large binaries, download via scripts/download-mediapipe.sh)
+public/mediapipe/

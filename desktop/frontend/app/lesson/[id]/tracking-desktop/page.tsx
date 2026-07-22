@@ -17,6 +17,9 @@ import TeacherMiniWindow from "@/components/tracking/TeacherMiniWindow";
 import { Button } from "@/components/ui/button";
 import { getLesson } from "@/lib/api";
 import type { Kpt, TeacherFrame } from "@/lib/pose/scoring";
+import type { SegmentMeta } from "@/lib/pose/sessionAccumulator";
+import { useSessionScoring } from "@/hooks/useSessionScoring";
+import { submitTrackingSession } from "@/lib/api";
 import type { Lesson, Segment } from "@/lib/types";
 import { fmtTime } from "@/lib/utils";
 
@@ -211,7 +214,17 @@ function DotFieldBackground({ mouseRef }: { mouseRef: React.MutableRefObject<{ x
     };
 
     let t = 0;
-    const render = () => {
+    // Throttle to ~30fps: the decorative field does not need full refresh rate,
+    // and it otherwise competes for the main thread with video decode + overlays
+    // during the challenge. Cap the per-frame time step so motion stays constant
+    // regardless of the display's refresh rate.
+    const FRAME_MS = 1000 / 30;
+    let lastFrameMs = 0;
+    const render = (nowMs: number) => {
+      rafId = window.requestAnimationFrame(render);
+      if (nowMs - lastFrameMs < FRAME_MS) return;
+      lastFrameMs = nowMs;
+
       t += 0.028;
       ctx.fillStyle = "#050505";
       ctx.fillRect(0, 0, width, height);
@@ -256,12 +269,10 @@ function DotFieldBackground({ mouseRef }: { mouseRef: React.MutableRefObject<{ x
         ctx.arc(p.x, p.y, 1.8, 0, Math.PI * 2);
         ctx.fill();
       }
-
-      rafId = window.requestAnimationFrame(render);
     };
 
     reset();
-    render();
+    rafId = window.requestAnimationFrame(render);
     const onResize = () => reset();
     window.addEventListener("resize", onResize);
     return () => {
@@ -289,8 +300,11 @@ export default function TrackingDesktopPage() {
   const streamRef = React.useRef<MediaStream | null>(null);
   const [cameraStream, setCameraStream] = React.useState<MediaStream | null>(null);
   const [showCustomCursor, setShowCustomCursor] = React.useState(false);
-  const [mousePos, setMousePos] = React.useState({ x: -1000, y: -1000 });
+  // mousePos state removed — cursor divs are driven directly via cursorRef in a
+  // single rAF below, so mousemove no longer triggers a full page re-render.
   const mouseRef = React.useRef({ x: -1000, y: -1000 });
+  const cursorOuterRef = React.useRef<HTMLDivElement>(null);
+  const cursorInnerRef = React.useRef<HTMLDivElement>(null);
 
   // Lesson video is the main timeline driver for the teacher playback.
   const teacherRef = React.useRef<HTMLVideoElement>(null);
@@ -313,6 +327,29 @@ export default function TrackingDesktopPage() {
   const teacherPoseAspectCacheRef = React.useRef<Map<string, number>>(new Map());
   const [teacherPoseAspect, setTeacherPoseAspect] = React.useState(DEFAULT_POSE_ASPECT);
 
+  // 所有可评分 segment 的老师帧(供实时比对),挑战开始时用它构建 SessionAccumulator。
+  const [scoringSegments, setScoringSegments] = React.useState<SegmentMeta[]>([]);
+  const [challengeActive, setChallengeActive] = React.useState(false);
+  const [sessionSummary, setSessionSummary] = React.useState<
+    { overallScore: number; hardest: { label: string; score: number } | null } | null
+  >(null);
+  // Mirror state drives both the camera video transform and the matte overlay.
+  // 评分链路也用它决定是否翻转用户姿态,故声明在 useSessionScoring 之前。
+  const [userMirror, setUserMirror] = React.useState(true);
+
+  // 实时评分 hook:挑战进行中对摄像头跑姿态识别并累加比对结果。
+  const {
+    state: scoringState,
+    finish: finishScoring,
+  } = useSessionScoring({
+    active: challengeActive,
+    lessonId,
+    videoRef: cameraRef,
+    playheadRef: teacherPlayheadRef,
+    segments: scoringSegments,
+    mirror: userMirror,
+  });
+
   // Preload matte and particle assets into the HTTP cache when a lesson loads.
   React.useEffect(() => {
     if (!lesson) return;
@@ -326,6 +363,43 @@ export default function TrackingDesktopPage() {
       fetch(u, { mode: "cors", credentials: "omit", signal: ctrl.signal }).catch(() => null);
     }
     return () => { controllers.forEach((c) => c.abort()); };
+  }, [lesson]);
+
+  // 预加载所有可评分 segment 的老师姿态帧,构建 scoringSegments(供实时比对)。
+  React.useEffect(() => {
+    if (!lesson) {
+      setScoringSegments([]);
+      return;
+    }
+    let cancelled = false;
+    const scorable = lesson.segments.filter((s) => !s.deleted && !s.is_still);
+    Promise.all(
+      scorable.map(async (seg): Promise<SegmentMeta | null> => {
+        const url = seg.pose_full_url ?? seg.pose_url;
+        if (!url) return null;
+        try {
+          const doc: PoseJsonDoc = await fetch(url).then((r) => r.json());
+          const frames: TeacherFrame[] = (doc.frames ?? [])
+            .filter((f) => f.detected !== false)
+            .map((f) => ({ t: f.t + seg.start, keypoints: poseFrameToKeypoints(f) }))
+            .filter((fr) => fr.keypoints.length >= 17);
+          if (!frames.length) return null;
+          return {
+            id: seg.id,
+            start: seg.start,
+            end: seg.end,
+            beatCount: seg.beat_count ?? 0,
+            frames,
+          };
+        } catch {
+          return null;
+        }
+      })
+    ).then((metas) => {
+      if (cancelled) return;
+      setScoringSegments(metas.filter((m): m is SegmentMeta => m !== null));
+    });
+    return () => { cancelled = true; };
   }, [lesson]);
 
   React.useEffect(() => {
@@ -349,13 +423,32 @@ export default function TrackingDesktopPage() {
   React.useEffect(() => {
     setShowCustomCursor(window.matchMedia("(pointer:fine)").matches);
     const onMove = (e: MouseEvent) => {
-      const next = { x: e.clientX, y: e.clientY };
-      setMousePos(next);
-      mouseRef.current = next;
+      // Only update the ref — no setState, so mousemove never re-renders the page.
+      // The cursor divs are driven by a dedicated rAF loop below.
+      mouseRef.current = { x: e.clientX, y: e.clientY };
     };
     window.addEventListener("mousemove", onMove);
     return () => window.removeEventListener("mousemove", onMove);
   }, []);
+
+  // Drive the two custom-cursor divs directly from mouseRef via rAF instead of
+  // state, so pointer movement never triggers a React re-render.
+  React.useEffect(() => {
+    if (!showCustomCursor) return;
+    let rafId = 0;
+    const tick = () => {
+      const { x, y } = mouseRef.current;
+      if (cursorOuterRef.current) {
+        cursorOuterRef.current.style.transform = `translate(${x - 20}px, ${y - 20}px)`;
+      }
+      if (cursorInnerRef.current) {
+        cursorInnerRef.current.style.transform = `translate(${x - 6}px, ${y - 6}px)`;
+      }
+      rafId = window.requestAnimationFrame(tick);
+    };
+    rafId = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(rafId);
+  }, [showCustomCursor]);
 
   const teacherVideoSources = React.useMemo(() => buildTeacherVideoSources(lesson), [lesson]);
   const teacherVideoSource =
@@ -464,8 +557,6 @@ export default function TrackingDesktopPage() {
     if (typeof window === "undefined") return null;
     return window.localStorage.getItem(CAMERA_STORAGE_KEY);
   });
-  // Mirror state drives both the camera video transform and the matte overlay.
-  const [userMirror, setUserMirror] = React.useState(true);
   const [matteTuning, setMatteTuning] = React.useState<MatteTuning>(() => readMatteTuning());
   const [trackingOverlayLayer, setTrackingOverlayLayer] = React.useState<TrackingOverlayLayer>(() => readTrackingOverlayLayer());
   React.useEffect(() => {
@@ -552,14 +643,40 @@ export default function TrackingDesktopPage() {
     video.srcObject = cameraStream;
     if (cameraStream) void video.play().catch(() => null);
   }, [cameraStream, cameraReady]);
+  // 结束挑战:停止评分、汇总结果、POST 给后端、生成本地摘要。
+  const finishChallenge = React.useCallback(async () => {
+    if (!challengeActive) return;
+    setChallengeActive(false);
+    const result = finishScoring();
+    if (!result || result.segments.length === 0) return;
+
+    // 找最难的动作(分最低)做本地摘要展示
+    let hardest: { label: string; score: number } | null = null;
+    for (const seg of result.segments) {
+      if (!hardest || seg.score < hardest.score) {
+        const meta = lesson?.segments.find((s) => s.id === seg.segmentId);
+        hardest = { label: meta?.section_label ?? seg.segmentId, score: seg.score };
+      }
+    }
+    setSessionSummary({ overallScore: result.overallScore, hardest });
+
+    try {
+      await submitTrackingSession(lessonId, result);
+    } catch (err) {
+      // 提交失败不阻断用户,只在控制台留痕
+      console.warn("[tracking] session 提交失败:", err);
+    }
+  }, [challengeActive, finishScoring, lesson, lessonId]);
+
   const stopCameraStream = React.useCallback(() => {
+    void finishChallenge();
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
     setCameraStream(null);
     setCameraReady(false);
     teacherRef.current?.pause();
     setPlaying(false);
-  }, []);
+  }, [finishChallenge]);
 
   React.useEffect(() => () => { stopCameraStream(); }, [stopCameraStream]);
 
@@ -699,9 +816,11 @@ export default function TrackingDesktopPage() {
       }, 0);
       return;
     }
+    // 整支跳完:停止播放并结算本次挑战，再进入猜你喜欢。
     setPlaying(false);
+    void finishChallenge();
     setChallengeDone(true);
-  }, [setTeacherPlayheadNow, startTeacherPlayback, teacherMuted]);
+  }, [finishChallenge, setTeacherPlayheadNow, startTeacherPlayback, teacherMuted]);
 
   React.useEffect(() => {
     if (!challengeDone || !lessonId) return;
@@ -739,10 +858,13 @@ export default function TrackingDesktopPage() {
 
   const handleStart = async () => {
     resetChallengeState();
+    setSessionSummary(null);
     try {
       await startTeacherPlayback(true, true);
       await ensureCameraReady();
       setCameraError(null);
+      // 摄像头就绪后开始评分(有可评分 segment 才启动)
+      if (scoringSegments.length > 0) setChallengeActive(true);
     } catch (err) {
       setCameraError(err instanceof Error ? err.message : String(err));
     }
@@ -829,12 +951,14 @@ export default function TrackingDesktopPage() {
       {showCustomCursor ? (
         <>
           <div
+            ref={cursorInnerRef}
             className="pointer-events-none fixed left-0 top-0 z-[120] h-3 w-3 rounded-full bg-[#ccff00] mix-blend-difference"
-            style={{ transform: `translate(${mousePos.x - 6}px, ${mousePos.y - 6}px)` }}
+            style={{ transform: "translate(-1000px, -1000px)" }}
           />
           <div
+            ref={cursorOuterRef}
             className="pointer-events-none fixed left-0 top-0 z-[119] h-10 w-10 rounded-full border border-[#00f3ff]/70"
-            style={{ transform: `translate(${mousePos.x - 20}px, ${mousePos.y - 20}px)` }}
+            style={{ transform: "translate(-1000px, -1000px)" }}
           />
         </>
       ) : null}
@@ -919,6 +1043,48 @@ export default function TrackingDesktopPage() {
                 </Button>
               </div>
             )}
+
+            {/* 实时评分徽标 */}
+            {cameraReady && challengeActive ? (
+              <div className="pointer-events-none absolute right-3 top-3 z-40 flex items-center gap-2 rounded-full border border-white/15 bg-black/55 px-3 py-1 backdrop-blur">
+                <span className="text-[10px] uppercase tracking-[0.15em] text-white/50">Live</span>
+                <span
+                  className={`font-mono text-[15px] font-bold ${
+                    scoringState.liveScore >= 85
+                      ? "text-[#ccff00]"
+                      : scoringState.liveScore >= 70
+                        ? "text-[#00f3ff]"
+                        : scoringState.liveScore >= 50
+                          ? "text-amber-300"
+                          : "text-red-300"
+                  }`}
+                >
+                  {scoringState.ready ? scoringState.liveScore : "…"}
+                </span>
+              </div>
+            ) : null}
+
+            {/* 挑战结束摘要 */}
+            {sessionSummary ? (
+              <div className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-black/70 px-6 text-center backdrop-blur">
+                <span className="text-[11px] uppercase tracking-[0.2em] text-white/50">本次挑战</span>
+                <span className="font-mono text-[52px] font-bold leading-none tracking-neon">
+                  {sessionSummary.overallScore}
+                </span>
+                {sessionSummary.hardest ? (
+                  <div className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-[13px] text-white/80">
+                    最需要加强:<span className="text-[#ff5c8a]">{sessionSummary.hardest.label}</span>
+                    <span className="ml-2 font-mono text-white/50">{sessionSummary.hardest.score} 分</span>
+                  </div>
+                ) : null}
+                <Button
+                  onClick={() => setSessionSummary(null)}
+                  className="mt-1 rounded-full bg-gradient-to-r from-[#ff0055] via-[#9d4edd] to-[#00f3ff] px-4 py-1.5 text-[12px] text-white hover:brightness-110"
+                >
+                  知道了
+                </Button>
+              </div>
+            ) : null}
 
             {cameraReady && trackingOverlayLayer === "silhouette" && currentSegment?.matte_rgb_url && currentSegment?.matte_mask_url ? (
               <MatteOverlay

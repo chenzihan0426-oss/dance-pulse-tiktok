@@ -1,17 +1,38 @@
 "use client";
 
 import Link from "next/link";
-import { Lock, Sparkles } from "lucide-react";
+import { Lock, Sparkles, TrendingDown } from "lucide-react";
 import type { Segment } from "@/lib/types";
 import { getSectionTone } from "@/lib/section-tone";
 import { cn } from "@/lib/utils";
 import { Badge } from "./ui/badge";
+
+// 关节英文名 -> 中文,用于"重点"提示
+const JOINT_LABELS: Record<string, string> = {
+  leftElbow: "左肘",
+  rightElbow: "右肘",
+  leftShoulder: "左肩",
+  rightShoulder: "右肩",
+  leftKnee: "左膝",
+  rightKnee: "右膝",
+  leftHip: "左胯",
+  rightHip: "右胯",
+};
+
+// 从难度聚合读到的、机器测量的难点信息(区别于作者手填 difficulty)
+export interface MeasuredDifficulty {
+  measuredDifficulty: number; // 1-5,0=未知
+  avgScore: number;
+  attempts: number;
+  topWorstJoint: string | null;
+}
 
 interface SegmentCardProps {
   segment: Segment;
   lessonId: string;
   learned: boolean;
   onToggleLearned: (segment: Segment) => void;
+  measured?: MeasuredDifficulty;
 }
 
 export function SegmentCard({
@@ -19,6 +40,7 @@ export function SegmentCard({
   lessonId,
   learned,
   onToggleLearned,
+  measured,
 }: SegmentCardProps) {
   const tone = getSectionTone(segment.section_label || segment.section);
   const summary =
@@ -87,6 +109,20 @@ export function SegmentCard({
                 </span>
               </div>
             </div>
+
+            {/* 机器测量的难点(基于历次随拍比对聚合) */}
+            {measured && measured.attempts > 0 && measured.measuredDifficulty >= 4 ? (
+              <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-[#ff5c8a]/30 bg-[#ff0055]/10 px-2.5 py-1 text-[11px] text-[#ff9cbb]">
+                <TrendingDown className="h-3 w-3" />
+                <span>
+                  重点难点
+                  {measured.topWorstJoint && JOINT_LABELS[measured.topWorstJoint]
+                    ? ` · ${JOINT_LABELS[measured.topWorstJoint]}`
+                    : ""}
+                </span>
+                <span className="font-mono text-white/45">均分{Math.round(measured.avgScore)}</span>
+              </div>
+            ) : null}
 
             <Link href={`/player/${segment.id}?lesson=${lessonId}`} className="mt-3 block">
               <p className="truncate text-sm leading-6 text-[var(--muted)]">

@@ -678,6 +678,52 @@ export async function getTrackingResults(lessonId: string): Promise<TrackingResu
   return response.results.map(normalizeTrackingResult);
 }
 
+// 姿态比对会话（Phase 2）：挑战结束把 SessionResult POST 给后端。
+export interface SubmitSessionResponse {
+  sessionId: string;
+  overallScore: number;
+  segments: number;
+}
+
+export async function submitTrackingSession(
+  lessonId: string,
+  payload: unknown
+): Promise<SubmitSessionResponse> {
+  if (USE_MOCK) {
+    await sleep(120);
+    return { sessionId: `sess_mock_${Date.now()}`, overallScore: 0, segments: 0 };
+  }
+  return http<SubmitSessionResponse>(`/api/lessons/${lessonId}/tracking/sessions`, {
+    method: "POST",
+    json: payload,
+  });
+}
+
+// 逐动作难度聚合（Phase 3/4）。scope: 'global' | 'me'
+export interface DifficultyAggregate {
+  segmentId: string;
+  attempts: number;
+  avgScore: number;
+  scoreVariance: number;
+  measuredDifficulty: number;
+  topWorstJoint: string | null;
+  updatedAt: string;
+}
+
+export async function getTrackingDifficulty(
+  lessonId: string,
+  scope: "global" | "me" = "global"
+): Promise<DifficultyAggregate[]> {
+  if (USE_MOCK) {
+    await sleep(80);
+    return [];
+  }
+  const res = await http<{ aggregates: DifficultyAggregate[] }>(
+    `/api/lessons/${lessonId}/tracking/difficulty?scope=${scope}`
+  );
+  return res.aggregates;
+}
+
 export async function publishTrackingResult(resultId: string): Promise<TrackingResult> {
   if (USE_MOCK) {
     await sleep(120);

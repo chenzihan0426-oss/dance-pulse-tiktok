@@ -160,6 +160,40 @@ export function scoreFrameFused(userKpts: Kpt[], teacherKpts: Kpt[]): number {
 }
 
 // ---------------------------------------------------------------------------
+// 逐关节误差:返回每个核心关节的角度差归一化误差 [0,1](0=完美,1=最差)。
+// 难点检测需要知道"哪个关节错",而不仅是一个总分。
+// 关节不可见时该关节返回 null(不参与聚合)。
+// ---------------------------------------------------------------------------
+export interface FrameDetail {
+  // 关节名 -> 误差 [0,1];不可见的关节不出现在 map 里
+  jointErrors: Record<string, number>;
+  // 该帧融合分 [0,1]
+  score: number;
+}
+
+export function scoreFrameDetailed(userKpts: Kpt[], teacherKpts: Kpt[]): FrameDetail {
+  const u = normalize(userKpts);
+  const t = normalize(teacherKpts);
+  if (!u || !t) return { jointErrors: {}, score: 0 };
+
+  const jointErrors: Record<string, number> = {};
+  for (const { abc, name } of JOINTS) {
+    const [a, b, c] = abc;
+    if (
+      u[a].visibility < MIN_VIS ||
+      u[b].visibility < MIN_VIS ||
+      u[c].visibility < MIN_VIS
+    )
+      continue;
+    const aU = jointAngle(u[a], u[b], u[c]);
+    const aT = jointAngle(t[a], t[b], t[c]);
+    // 误差归一到 [0,1]:角度差 / (π/2) 截断
+    jointErrors[name] = Math.min(1, Math.abs(aU - aT) / HALF_PI);
+  }
+  return { jointErrors, score: scoreFrameFused(userKpts, teacherKpts) };
+}
+
+// ---------------------------------------------------------------------------
 // 滑动窗口 DTW(简化版):在 [current - W, current + W] 帧范围取最大分。
 // 吸收 ±200ms 时序偏差(W = 6 帧 @ 30fps)。
 // ---------------------------------------------------------------------------
