@@ -1021,7 +1021,16 @@ export function isShowcaseUsername(username: string): boolean {
 }
 
 export function getShowcaseFeedSorted(filter: PlazaFilter = "hot"): CommunityFeedItem[] {
-  const items = SHOWCASE_FEED.map((item) => ({
+  // 同一门课(同一个视频)只留最高分作品:社区列表不出现重复视频。
+  // 点开详情 → 视频/课程都真实存在,"查看详情/跟跳这支"可跳到对应教学页。
+  const bestPerLesson = new Map<string, CommunityFeedItem>();
+  for (const item of SHOWCASE_FEED) {
+    const cur = bestPerLesson.get(item.result.lessonId);
+    if (!cur || item.result.score > cur.result.score) {
+      bestPerLesson.set(item.result.lessonId, item);
+    }
+  }
+  const items = Array.from(bestPerLesson.values()).map((item) => ({
     ...item,
     result: { ...item.result },
     user: { ...item.user, stats: { ...item.user.stats } },
