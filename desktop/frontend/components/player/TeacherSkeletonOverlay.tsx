@@ -101,10 +101,10 @@ export function TeacherSkeletonOverlay({
 
       // 珠链式点状骨架(样式对齐 pipeline/_xuange_pose_guide.py 的玄哥引导视觉):
       // 每根骨头 = 两排平行的小圆点链(偏移 ±HALF_GAP),关节 = 同心圆环+圆心点。
-      // 点链遮挡感最低,骨骼交叠时也能分清各自走向。
-      const HALF_GAP = 5; // 双链各偏移 5px
-      const DOT_R = 2.4; // 链上珠点半径
-      const DOT_SPACING = 9; // 珠点间距(px)
+      // 头部单独画圆形珠链头圈(不用鼻-肩连线,三角形观感别扭)。
+      const HALF_GAP = 4; // 双链各偏移 4px
+      const DOT_R = 1.5; // 链上珠点半径(细珠,对齐玄哥引导的精细感)
+      const DOT_SPACING = 7; // 珠点间距(px)
 
       const drawBeadLine = (
         x1: number, y1: number, x2: number, y2: number,
@@ -124,8 +124,11 @@ export function TeacherSkeletonOverlay({
         }
       };
 
+      // 头部连线(鼻-肩)不画,由头圈替代
+      const BODY_CONNECTIONS = POSE_CONNECTIONS.filter(([a, b]) => a !== 0 && b !== 0);
+
       const drawBonesPass = (r: number, fill: string) => {
-        for (const [a, b] of POSE_CONNECTIONS) {
+        for (const [a, b] of BODY_CONNECTIONS) {
           const pa = pts[a];
           const pb = pts[b];
           if (!pa || !pb || pa.visibility < MIN_VIS || pb.visibility < MIN_VIS) continue;
@@ -144,31 +147,68 @@ export function TeacherSkeletonOverlay({
         }
       };
 
-      // 底层深色珠点托底(亮背景可读),上层纯白珠点
-      drawBonesPass(DOT_R + 1.2, "rgba(0,0,0,0.4)");
-      drawBonesPass(DOT_R, "rgba(255,255,255,0.95)");
+      // 圆形头圈:双耳中点为圆心,耳距推半径(耳不可见时退回鼻+肩宽估计)
+      const drawHeadCircle = (r: number, fill: string) => {
+        const nose = pts[0];
+        const earL = pts[7];
+        const earR = pts[8];
+        let cx: number | null = null;
+        let cy: number | null = null;
+        let headR = 0;
+        if (earL && earR && earL.visibility >= MIN_VIS && earR.visibility >= MIN_VIS) {
+          cx = (px(earL) + px(earR)) / 2;
+          cy = (py(earL) + py(earR)) / 2;
+          headR = Math.max(14, Math.hypot(px(earR) - px(earL), py(earR) - py(earL)) * 0.85);
+        } else if (nose && nose.visibility >= MIN_VIS) {
+          const shL = pts[11];
+          const shR = pts[12];
+          const shoulderW =
+            shL && shR && shL.visibility >= MIN_VIS && shR.visibility >= MIN_VIS
+              ? Math.hypot(px(shR) - px(shL), py(shR) - py(shL))
+              : 80;
+          cx = px(nose);
+          cy = py(nose) - shoulderW * 0.1;
+          headR = Math.max(14, shoulderW * 0.32);
+        }
+        if (cx === null || cy === null) return;
+        const steps = Math.max(10, Math.round((2 * Math.PI * headR) / DOT_SPACING));
+        ctx.fillStyle = fill;
+        for (let i = 0; i < steps; i++) {
+          const a = (i / steps) * Math.PI * 2;
+          ctx.beginPath();
+          ctx.arc(cx + Math.cos(a) * headR, cy + Math.sin(a) * headR, r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      };
 
-      // 关节:同心圆环 + 圆心点(对齐截图里的关节样式)
+      // 底层深色珠点托底(亮背景可读),上层纯白珠点
+      drawBonesPass(DOT_R + 1, "rgba(0,0,0,0.4)");
+      drawHeadCircle(DOT_R + 1, "rgba(0,0,0,0.4)");
+      drawBonesPass(DOT_R, "rgba(255,255,255,0.95)");
+      drawHeadCircle(DOT_R, "rgba(255,255,255,0.95)");
+
+      // 关节:同心圆环 + 圆心点(鼻子跳过 —— 头部已有头圈)
       for (const idx of DRAWN_KEYPOINTS) {
+        if (idx === 0) continue;
         const p = pts[idx];
         if (!p || p.visibility < MIN_VIS) continue;
         const x = px(p);
         const y = py(p);
         // 深色托底环
         ctx.beginPath();
-        ctx.arc(x, y, 6.5, 0, Math.PI * 2);
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
         ctx.strokeStyle = "rgba(0,0,0,0.4)";
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 3;
         ctx.stroke();
         // 白色外环
         ctx.beginPath();
-        ctx.arc(x, y, 6.5, 0, Math.PI * 2);
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
         ctx.strokeStyle = "rgba(255,255,255,0.95)";
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 1.5;
         ctx.stroke();
         // 圆心点
         ctx.beginPath();
-        ctx.arc(x, y, 2.2, 0, Math.PI * 2);
+        ctx.arc(x, y, 1.6, 0, Math.PI * 2);
         ctx.fillStyle = "rgba(255,255,255,0.95)";
         ctx.fill();
       }
