@@ -10,13 +10,13 @@ import {
   getShowcaseFeedSorted,
 } from "@/lib/communityShowcase";
 import { resolveMediaUrl } from "@/lib/api";
-import { rotateFeedThumbs, useDemoCoverPool } from "@/lib/demoMedia";
+import { alignFeedMedia, useDemoCoverPool } from "@/lib/demoMedia";
 
 export function FollowingFeed() {
-  const { thumbs } = useDemoCoverPool();
+  const { thumbs, videos } = useDemoCoverPool();
   const friendWorks = React.useMemo(
-    () => rotateFeedThumbs(getShowcaseFeedSorted("following").slice(0, 8), thumbs),
-    [thumbs]
+    () => alignFeedMedia(getShowcaseFeedSorted("following"), thumbs, videos).slice(0, 8),
+    [thumbs, videos]
   );
   const friendPulse = ACTIVITY_PULSE.filter((item) =>
     (FOLLOWING_USERNAMES as readonly string[]).includes(item.username)

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowLeft, Heart, Sparkles } from "lucide-react";
 import { resolveMediaUrl, getLesson } from "@/lib/api";
-import { loadDemoMedia, rotateFeedMedia } from "@/lib/demoMedia";
+import { loadDemoMedia, alignFeedMedia } from "@/lib/demoMedia";
 import {
   getForYouRecommendations,
   type ForYouRecommendation,
@@ -22,10 +22,14 @@ export default function ForYouPage() {
     let cancelled = false;
     void (async () => {
       const demo = await loadDemoMedia();
-      const next = getForYouRecommendations(lessonId, 12).map((rec) => {
-        const [rotated] = rotateFeedMedia([rec.item], demo.thumbs, demo.videos);
-        return { ...rec, item: rotated ?? rec.item };
-      });
+      // 严格对齐:视频文件不存在的假推荐直接过滤,封面取视频自己的抽帧图
+      const next = getForYouRecommendations(lessonId, 24)
+        .map((rec) => {
+          const [aligned] = alignFeedMedia([rec.item], demo.thumbs, demo.videos);
+          return aligned ? { ...rec, item: aligned } : null;
+        })
+        .filter((rec): rec is ForYouRecommendation => rec !== null)
+        .slice(0, 12);
       if (!cancelled) setRecs(next);
     })();
     void getLesson(lessonId)

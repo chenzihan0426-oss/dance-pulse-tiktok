@@ -35,7 +35,7 @@ import { CommunityFeedGrid } from "@/components/community/CommunityFeedGrid";
 import { ProfileEditPanel } from "@/components/profile/ProfileEditPanel";
 import { resolveMediaUrl } from "@/lib/api";
 import type { ProfilePageModel } from "@/lib/communityShowcase";
-import { pickDemoThumb, rotateFeedThumbs, useDemoCoverPool } from "@/lib/demoMedia";
+import { alignFeedMedia, pickDemoThumb, useDemoCoverPool } from "@/lib/demoMedia";
 import {
   PREMIUM_CHANGED_EVENT,
   PROFILE_CUSTOM_CHANGED_EVENT,
@@ -99,7 +99,7 @@ export function ProfileArenaPage({
   const [tab, setTab] = React.useState<BottomTab>("works");
   const [editOpen, setEditOpen] = React.useState(false);
   const [customTick, setCustomTick] = React.useState(0);
-  const { thumbs } = useDemoCoverPool();
+  const { thumbs, videos } = useDemoCoverPool();
 
   const displayModel = React.useMemo(() => {
     if (!thumbs.length) return model;
@@ -111,14 +111,15 @@ export function ProfileArenaPage({
           pickDemoThumb(`profile-cover-${model.user.username}`, thumbs, model.meta.coverThumb) ??
           model.meta.coverThumb,
       },
-      works: rotateFeedThumbs(model.works, thumbs),
-      liked: rotateFeedThumbs(model.liked, thumbs),
+      // 严格对齐:视频不存在的演示作品直接过滤,封面取视频抽帧图
+      works: alignFeedMedia(model.works, thumbs, videos),
+      liked: alignFeedMedia(model.liked, thumbs, videos),
       recent: model.recent.map((item) => ({
         ...item,
         thumb: pickDemoThumb(`recent-${item.resultId}`, thumbs, item.thumb) ?? item.thumb,
       })),
     };
-  }, [model, thumbs]);
+  }, [model, thumbs, videos]);
 
   const [premiumTick, setPremiumTick] = React.useState(0);
   const [activeMedal, setActiveMedal] = React.useState<string | null>(null);

@@ -9,7 +9,7 @@ import {
   toggleCommunityLike,
   addCommunityComment,
 } from "@/lib/api";
-import { loadDemoMedia, rotateFeedMedia, rotateFeedThumbs } from "@/lib/demoMedia";
+import { loadDemoMedia, alignFeedMedia, rotateFeedThumbs } from "@/lib/demoMedia";
 import {
   forceCommunityShowcase,
   getShowcaseDetail,
@@ -46,7 +46,7 @@ export function useCommunityFeed(filter: PlazaFilter = "hot") {
 
       if (forceCommunityShowcase()) {
         if (!cancelled) {
-          setItems(rotateFeedMedia(getShowcaseFeedSorted(filter), demo.thumbs, demo.videos));
+          setItems(alignFeedMedia(getShowcaseFeedSorted(filter), demo.thumbs, demo.videos));
           setSource("showcase");
           setLoading(false);
         }
@@ -57,7 +57,7 @@ export function useCommunityFeed(filter: PlazaFilter = "hot") {
         const feed = await getCommunityFeed();
         if (cancelled) return;
         if (!feed.length) {
-          setItems(rotateFeedMedia(getShowcaseFeedSorted(filter), demo.thumbs, demo.videos));
+          setItems(alignFeedMedia(getShowcaseFeedSorted(filter), demo.thumbs, demo.videos));
           setSource("showcase");
         } else {
           // 真实 API 作品有自己的视频,只轮换缺失的封面,不动 videoUrl
@@ -66,7 +66,7 @@ export function useCommunityFeed(filter: PlazaFilter = "hot") {
         }
       } catch (err) {
         if (cancelled) return;
-        setItems(rotateFeedMedia(getShowcaseFeedSorted(filter), demo.thumbs, demo.videos));
+        setItems(alignFeedMedia(getShowcaseFeedSorted(filter), demo.thumbs, demo.videos));
         setSource("showcase");
         setError(err instanceof Error ? err.message : String(err));
       } finally {
@@ -104,10 +104,15 @@ export function useCommunityDetail(resultId: string) {
             setError("作品不存在");
             setDetail(null);
           } else {
-            // rotateFeedMedia 按 result.id 稳定哈希选视频+配对封面,
-            // 与列表卡片(同一 key)选择一致 → 点开播的就是卡片那支
-            const [rotated] = rotateFeedMedia([local.item], demo.thumbs, demo.videos);
-            setDetail({ ...local, item: rotated ?? local.item });
+            // alignFeedMedia:视频不存在的作品会被过滤成空 → 视为不存在;
+            // 存在的用作品自身视频 + 其抽帧封面,与列表卡片一致
+            const [rotated] = alignFeedMedia([local.item], demo.thumbs, demo.videos);
+            if (rotated) {
+              setDetail({ ...local, item: rotated });
+            } else {
+              setError("作品不存在");
+              setDetail(null);
+            }
           }
           setSource("showcase");
           setLoading(false);
@@ -125,7 +130,7 @@ export function useCommunityDetail(resultId: string) {
         const local = getShowcaseDetail(resultId);
         if (cancelled) return;
         if (local) {
-          const [rotated] = rotateFeedMedia([local.item], demo.thumbs, demo.videos);
+          const [rotated] = alignFeedMedia([local.item], demo.thumbs, demo.videos);
           setDetail({ ...local, item: rotated ?? local.item });
           setSource("showcase");
         } else {

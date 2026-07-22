@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { Flame, Heart, Sparkles, Star, Users, Waves, Zap } from "lucide-react";
 import { resolveMediaUrl } from "@/lib/api";
-import { pickDemoThumb, useDemoCoverPool } from "@/lib/demoMedia";
+import { alignFeedMedia, useDemoCoverPool } from "@/lib/demoMedia";
 import {
   getSimilarLessonRecommendations,
   type SimilarLessonRec,
@@ -81,14 +81,16 @@ function RecCard({
   rec,
   index,
   thumbs,
+  videos,
 }: {
   rec: SimilarLessonRec;
   index: number;
   thumbs: string[];
+  videos: string[];
 }) {
-  const thumbPath =
-    pickDemoThumb(`similar-${rec.item.result.id}`, thumbs, rec.item.previewThumbnail) ??
-    rec.item.previewThumbnail;
+  // 与详情页同一套严格对齐:封面取作品自身视频的抽帧图
+  const [aligned] = alignFeedMedia([rec.item], thumbs, videos);
+  const thumbPath = aligned?.previewThumbnail ?? rec.item.previewThumbnail;
   const thumb = thumbPath ? resolveMediaUrl(thumbPath) : null;
   const accent = index % 2 === 0 ? "#ccff00" : "#00f3ff";
 
@@ -161,8 +163,15 @@ function RecCard({
 }
 
 export function SimilarRecommendPanel({ lessonId }: { lessonId: string }) {
-  const { thumbs } = useDemoCoverPool();
-  const recs = React.useMemo(() => getSimilarLessonRecommendations(lessonId, 8), [lessonId]);
+  const { thumbs, videos } = useDemoCoverPool();
+  // 过滤掉视频不存在的假推荐(与详情页 alignFeedMedia 同一判定)
+  const recs = React.useMemo(() => {
+    const all = getSimilarLessonRecommendations(lessonId, 16);
+    if (!videos.length) return all.slice(0, 8);
+    return all
+      .filter((rec) => alignFeedMedia([rec.item], thumbs, videos).length > 0)
+      .slice(0, 8);
+  }, [lessonId, thumbs, videos]);
 
   return (
     <div className="relative">
@@ -200,7 +209,7 @@ export function SimilarRecommendPanel({ lessonId }: { lessonId: string }) {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {recs.map((rec, index) => (
-            <RecCard key={rec.item.result.id} rec={rec} index={index} thumbs={thumbs} />
+            <RecCard key={rec.item.result.id} rec={rec} index={index} thumbs={thumbs} videos={videos} />
           ))}
         </div>
       )}

@@ -98,14 +98,48 @@ export function rotateFeedMedia(
   });
 }
 
+/**
+ * 演示作品的严格对齐:只保留"自身视频文件真实存在于本机"的作品,
+ * 视频一律用作品自己的 videoUrl(不跨作品轮换),封面取该视频的抽帧图。
+ * 视频不存在的假推荐直接过滤掉——宁缺毋滥,杜绝"点开不是封面那支"。
+ * videos 池为空(后端未就绪)时不过滤,退化为只轮换封面。
+ */
+export function alignFeedMedia(
+  items: CommunityFeedItem[],
+  thumbs: string[],
+  videos: string[]
+): CommunityFeedItem[] {
+  if (!videos.length) return rotateFeedThumbs(items, thumbs);
+  const videoTails = new Set(videos.map((v) => v.split("/").pop() ?? v));
+  return items
+    .filter((item) => {
+      const tail = item.result.videoUrl?.split("?")[0].split("/").pop();
+      return Boolean(tail && videoTails.has(tail));
+    })
+    .map((item, index) => {
+      const key = item.result.id || `${item.user.username}-${index}`;
+      const paired = thumbsForVideo(item.result.videoUrl, thumbs);
+      const thumb = paired.length
+        ? paired[hashKey(key) % paired.length]
+        : item.previewThumbnail;
+      return {
+        ...item,
+        previewThumbnail: thumb ?? item.previewThumbnail,
+        result: { ...item.result },
+        user: { ...item.user, stats: { ...item.user.stats } },
+      };
+    });
+}
+
 export function clearDemoMediaCache() {
   cachedThumbs = null;
   cachedVideos = null;
 }
 
-/** 各展示页统一用：封面池 + 是否已加载 */
+/** 各展示页统一用：封面池 + 视频池 + 是否已加载 */
 export function useDemoCoverPool() {
   const [thumbs, setThumbs] = React.useState<string[]>(cachedThumbs ?? []);
+  const [videos, setVideos] = React.useState<string[]>(cachedVideos ?? []);
   const [ready, setReady] = React.useState(Boolean(cachedThumbs?.length));
 
   React.useEffect(() => {
@@ -113,6 +147,7 @@ export function useDemoCoverPool() {
     void loadDemoMedia().then((demo) => {
       if (cancelled) return;
       setThumbs(demo.thumbs);
+      setVideos(demo.videos);
       setReady(true);
     });
     return () => {
@@ -125,5 +160,5 @@ export function useDemoCoverPool() {
     [thumbs]
   );
 
-  return { thumbs, ready, coverFor };
+  return { thumbs, videos, ready, coverFor };
 }
