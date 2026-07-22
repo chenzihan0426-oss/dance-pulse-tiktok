@@ -81,8 +81,12 @@ def build_tracking_result(
 
 
 def _clip_path_from_segment_url(clip_url: str) -> Path:
-    rel = clip_url.lstrip("/").replace("/", "\\")
-    return (Path(__file__).resolve().parent.parent / "data" / rel).resolve()
+    # clip_url is a POSIX-style URL path (e.g. "/clips/lesson/seg.mp4").
+    # Split on "/" and rejoin via Path so it resolves correctly on every OS
+    # (the previous hardcoded replace("/", "\\") only worked on Windows and
+    # broke teacher-clip lookup on macOS/Linux).
+    parts = [p for p in clip_url.split("/") if p]
+    return (Path(__file__).resolve().parent.parent / "data").joinpath(*parts).resolve()
 
 
 def _motion_profile_for_video(video_path: Path) -> MotionProfile:

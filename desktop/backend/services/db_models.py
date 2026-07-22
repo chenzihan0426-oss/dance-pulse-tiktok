@@ -255,3 +255,59 @@ class CommentRow(SQLModel, table=True):
             created_at=raw.get("createdAt", ""),
             moderation_status=raw.get("moderationStatus", "none"),
         )
+
+
+# ---------------------------------------------------------------------------
+# 姿态比对会话存储（Phase 2/3）
+#   tracking_sessions        —— 一次完整随拍挑战一行
+#   segment_attempts         —— 一个(session × 动作)一行，可查询的逐动作粒度
+#   segment_difficulty_agg   —— 逐动作滚动聚合，难点检测 + 卡片回写目标
+# 均由 SQLModel.metadata.create_all 建表（create_all 为 schema-of-record）。
+# ---------------------------------------------------------------------------
+
+
+class TrackingSessionRow(SQLModel, table=True):
+    __tablename__ = "tracking_sessions"
+
+    id: str = Field(primary_key=True)  # "sess_<hex>"
+    user_id: str = Field(index=True)
+    lesson_id: str = Field(index=True)
+    created_at: str = ""
+    overall_score: int = 0  # 0-100
+    pose_source: str = ""   # e.g. "browser_mediapipe_lite_v1" —— 溯源/版本
+    frame_count: int = 0
+    video_url: Optional[str] = None
+
+
+class SegmentAttemptRow(SQLModel, table=True):
+    __tablename__ = "segment_attempts"
+
+    id: str = Field(primary_key=True)  # "att_<hex>"
+    session_id: str = Field(index=True)
+    user_id: str = Field(index=True)
+    lesson_id: str = Field(index=True)
+    segment_id: str = Field(index=True)
+    score: int = 0  # 0-100（姿态比对，非像素能量）
+    # 逐关节平均误差 [0,1]，{"leftElbow":0.42,...}
+    joint_errors: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    # 逐拍分 [88,91,55,...]，长度 == beat_count
+    beat_scores: list[Any] = Field(default_factory=list, sa_column=Column(JSON))
+    worst_joint: Optional[str] = None
+    worst_beat: Optional[int] = None
+    frame_count: int = 0
+    created_at: str = ""
+
+
+class SegmentDifficultyAggRow(SQLModel, table=True):
+    __tablename__ = "segment_difficulty_agg"
+
+    # 复合主键 (lesson_id, segment_id, scope)
+    lesson_id: str = Field(primary_key=True)
+    segment_id: str = Field(primary_key=True)
+    scope: str = Field(primary_key=True)  # 'global' | 'user:<id>'
+    attempts: int = 0
+    avg_score: float = 0.0
+    score_variance: float = 0.0
+    measured_difficulty: int = 0  # 1-5，由 avg_score/variance 推导；0=未知
+    top_worst_joint: Optional[str] = None
+    updated_at: str = ""

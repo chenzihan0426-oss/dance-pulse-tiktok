@@ -172,8 +172,9 @@ function drawDoubleRail(
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
 
-  ctx.shadowColor = `${color.halo} ${0.52 * alpha * intensity})`;
-  ctx.shadowBlur = 18 * dpr * intensity;
+  // No shadowBlur — it forces an expensive per-pixel blur pass on every stroke
+  // and is the main canvas 2D cost here. The double-rail dot pattern reads
+  // clearly without it.
   ctx.lineWidth = 11 * dpr;
   ctx.strokeStyle = `${color.halo} ${0.12 * alpha * intensity})`;
   for (const side of [-1, 1]) {
@@ -185,8 +186,6 @@ function drawDoubleRail(
     ctx.stroke();
   }
 
-  ctx.shadowColor = `${color.halo} ${0.46 * alpha * intensity})`;
-  ctx.shadowBlur = 9 * dpr * intensity;
   ctx.strokeStyle = `${color.core} ${0.24 * alpha})`;
   ctx.lineWidth = 1.5 * dpr;
   ctx.beginPath();
@@ -194,8 +193,6 @@ function drawDoubleRail(
   ctx.lineTo(b.x, b.y);
   ctx.stroke();
 
-  ctx.shadowBlur = 8 * dpr * intensity;
-  ctx.shadowColor = `${color.halo} ${0.78 * alpha * intensity})`;
   for (const side of [-1, 1]) {
     const ox = nx * railGap * side;
     const oy = ny * railGap * side;
@@ -310,37 +307,49 @@ export default function AdaptiveSkeletonOverlay({
     let raf = 0;
     let disposed = false;
     let lastDrawMs = 0;
+    // Cache the canvas rect so getBoundingClientRect() is never called inside
+    // the hot RAF loop (it forces layout). Updated by a ResizeObserver instead.
+    let cachedWidth = 0;
+    let cachedHeight = 0;
+    // Preallocate the smoothed-points array once; reuse every frame to avoid GC.
+    let pointsBuf: DrawPoint[] = [];
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const updateSize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, SKELETON_MAX_DPR);
+      const rect = canvas.getBoundingClientRect();
+      const w = Math.max(1, Math.round(rect.width * dpr));
+      const h = Math.max(1, Math.round(rect.height * dpr));
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+        previousPointsRef.current = [];
+        pointsBuf = [];
+      }
+      cachedWidth = w;
+      cachedHeight = h;
+    };
+    updateSize();
+
+    const ro = new ResizeObserver(updateSize);
+    ro.observe(canvas);
 
     const tick = () => {
       if (disposed) return;
+      raf = requestAnimationFrame(tick);
       const now = performance.now();
-      const canvas = canvasRef.current;
-      if (!canvas) {
-        raf = requestAnimationFrame(tick);
-        return;
-      }
-
-      if (now - lastDrawMs < 1000 / SKELETON_TARGET_FPS) {
-        raf = requestAnimationFrame(tick);
-        return;
-      }
+      if (now - lastDrawMs < 1000 / SKELETON_TARGET_FPS) return;
       lastDrawMs = now;
 
-      const rect = canvas.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, SKELETON_MAX_DPR);
-      const width = Math.max(1, Math.round(rect.width * dpr));
-      const height = Math.max(1, Math.round(rect.height * dpr));
-      if (canvas.width !== width || canvas.height !== height) {
-        canvas.width = width;
-        canvas.height = height;
-        previousPointsRef.current = [];
-      }
+      const width = cachedWidth;
+      const height = cachedHeight;
+      if (!width || !height) return;
 
+      const dpr = Math.min(window.devicePixelRatio || 1, SKELETON_MAX_DPR);
       const ctx = canvas.getContext("2d");
-      if (!ctx) {
-        raf = requestAnimationFrame(tick);
-        return;
-      }
+      if (!ctx) return;
       ctx.clearRect(0, 0, width, height);
 
       const frame = nearestFrame(framesRef.current, currentTimeRef?.current ?? timeRef.current);
@@ -349,36 +358,35 @@ export default function AdaptiveSkeletonOverlay({
           toCanvasPoint(point, width, height, tuningRef.current, sourceAspectRef.current)
         );
         const previous = previousPointsRef.current;
-        const points = target.map((point, index) => {
-          const prev = previous[index];
-          if (!prev) return point;
-          return {
-            x: prev.x + (point.x - prev.x) * SMOOTHING,
-            y: prev.y + (point.y - prev.y) * SMOOTHING,
-            vis: point.vis,
-          };
-        });
-        previousPointsRef.current = points;
+        // Reuse pointsBuf to avoid allocating a new array every frame.
+        if (pointsBuf.length !== target.length) pointsBuf = new Array(target.length);
+        for (let i = 0; i < target.length; i++) {
+          const t = target[i];
+          const prev = previous[i];
+          pointsBuf[i] = prev
+            ? { x: prev.x + (t.x - prev.x) * SMOOTHING, y: prev.y + (t.y - prev.y) * SMOOTHING, vis: t.vis }
+            : t;
+        }
+        previousPointsRef.current = pointsBuf.slice();
 
+        // Use source-over instead of "lighter" — lighter forces an expensive
+        // compositing pass and causes colour blowout; plain strokes look cleaner.
         ctx.save();
-        ctx.globalCompositeOperation = "lighter";
         const intensity = Math.max(0.55, Math.min(1.65, tuningRef.current.skeletonIntensity ?? 1.15));
         for (const [from, to] of EDGES) {
-          const a = points[from];
-          const b = points[to];
+          const a = pointsBuf[from];
+          const b = pointsBuf[to];
           if (a && b) drawDoubleRail(ctx, a, b, from, to, dpr, intensity);
         }
-        // 头环 + 关节光晕已砍 (drawHeadRing / drawJoint)，依赖 doubleRail 即可显示骨骼
         ctx.restore();
       }
-
-      raf = requestAnimationFrame(tick);
     };
 
     raf = requestAnimationFrame(tick);
     return () => {
       disposed = true;
       cancelAnimationFrame(raf);
+      ro.disconnect();
     };
   }, [active, currentTimeRef, framesRef]);
 

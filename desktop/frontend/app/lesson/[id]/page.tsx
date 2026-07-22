@@ -10,11 +10,12 @@ import {
   Music,
   Play,
   Sparkles,
+  TrendingDown,
   Video,
   X,
   Zap,
 } from "lucide-react";
-import { getLesson, regenerateTeaching } from "@/lib/api";
+import { getLesson, getTrackingDifficulty, regenerateTeaching, type DifficultyAggregate } from "@/lib/api";
 import { getLastViewedSegmentId } from "@/lib/storage";
 import type { Lesson, Segment } from "@/lib/types";
 import { useLearningProgress } from "@/hooks/useLearningProgress";
@@ -26,6 +27,18 @@ function formatDuration(sec: number): string {
   const s = Math.floor(sec);
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 }
+
+// 关节英文名 -> 中文,用于卡片"难点"提示
+const JOINT_LABELS: Record<string, string> = {
+  leftElbow: "左肘",
+  rightElbow: "右肘",
+  leftShoulder: "左肩",
+  rightShoulder: "右肩",
+  leftKnee: "左膝",
+  rightKnee: "右膝",
+  leftHip: "左胯",
+  rightHip: "右胯",
+};
 
 function ParticleBackground({ mouseRef }: { mouseRef: React.MutableRefObject<{ x: number; y: number }> }) {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
@@ -150,6 +163,8 @@ export default function LessonPageDesktop() {
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [lastViewedSegmentId, setLastSegId] = React.useState<string | null>(null);
+  // 逐动作难度聚合(随拍比对得出的机器测量难点),segmentId -> agg
+  const [difficultyMap, setDifficultyMap] = React.useState<Map<string, DifficultyAggregate>>(new Map());
 
   const [mousePos, setMousePos] = React.useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = React.useState(false);
@@ -193,6 +208,24 @@ export default function LessonPageDesktop() {
       cancelled = true;
     };
   }, [lessonId, setTotal]);
+
+  // 拉取该课的逐动作难度聚合(global scope),用于在卡片上标注难点。
+  // 失败静默(功能未产生数据时后端返回空数组即可)。
+  React.useEffect(() => {
+    if (!lessonId) return;
+    let cancelled = false;
+    getTrackingDifficulty(lessonId, "global")
+      .then((aggs) => {
+        if (cancelled) return;
+        setDifficultyMap(new Map(aggs.map((a) => [a.segmentId, a])));
+      })
+      .catch(() => {
+        /* 难度聚合是增强信息,拉取失败不影响页面 */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [lessonId]);
 
   React.useEffect(() => {
     if (!lesson) return;
@@ -657,6 +690,17 @@ export default function LessonPageDesktop() {
                       <span>{seg.duration.toFixed(1)}s</span>
                       <span>{seg.beat_count} 拍</span>
                     </div>
+                    {(() => {
+                      const agg = difficultyMap.get(seg.id);
+                      if (!agg || agg.attempts <= 0 || agg.measuredDifficulty < 4) return null;
+                      const jointLabel = agg.topWorstJoint ? JOINT_LABELS[agg.topWorstJoint] : null;
+                      return (
+                        <div className="mt-1.5 inline-flex items-center gap-1 rounded-full border border-[#ff5c8a]/40 bg-[#ff0055]/15 px-2 py-0.5 text-[9px] font-semibold text-[#ff9cbb]">
+                          <TrendingDown className="h-2.5 w-2.5" />
+                          <span>难点{jointLabel ? ` · ${jointLabel}` : ""}</span>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </Link>
 
