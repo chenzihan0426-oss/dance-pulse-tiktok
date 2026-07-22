@@ -27,6 +27,62 @@ def get_lesson_path(lesson_id: str) -> Path:
     return LESSONS_DIR / f"{lesson_id}.json"
 
 
+def delete_lesson(lesson_id: str) -> dict:
+    """删除一门课及其全部落盘文件:原视频、切片、缩略图、姿态、matte、粒子。
+
+    返回 {"deleted": true, "freedBytes": <释放字节数>, "removed": <文件/目录数>}。
+    lesson_id 会先做白名单校验,防止路径穿越。
+    """
+    # 只允许字母/数字/下划线/连字符,杜绝 ../ 之类的路径注入
+    if not lesson_id or not all(c.isalnum() or c in "_-" for c in lesson_id):
+        raise HTTPException(status_code=400, detail="非法的课程 ID")
+
+    lesson_path = get_lesson_path(lesson_id)
+    if not lesson_path.exists():
+        raise HTTPException(status_code=404, detail=f"课程 {lesson_id} 不存在")
+
+    import shutil
+
+    freed = 0
+    removed = 0
+
+    def _size_of(path: Path) -> int:
+        if path.is_file():
+            return path.stat().st_size
+        if path.is_dir():
+            return sum(f.stat().st_size for f in path.rglob("*") if f.is_file())
+        return 0
+
+    def _remove(path: Path) -> None:
+        nonlocal freed, removed
+        if not path.exists():
+            return
+        freed += _size_of(path)
+        if path.is_dir():
+            shutil.rmtree(path, ignore_errors=True)
+        else:
+            path.unlink(missing_ok=True)
+        removed += 1
+
+    with _lock_for(lesson_id):
+        # 目录类派生数据(整目录删)
+        for sub in ("pose", "pose_full", "matte", "particles"):
+            _remove(DATA_DIR / sub / lesson_id)
+        # 原视频(可能有多种扩展名)
+        for f in (DATA_DIR / "videos").glob(f"{lesson_id}.*"):
+            _remove(f)
+        # 切片与缩略图(文件名前缀匹配 lesson_id_*)
+        for sub in ("clips", "thumbs"):
+            d = DATA_DIR / sub
+            if d.exists():
+                for f in d.glob(f"{lesson_id}*"):
+                    _remove(f)
+        # 最后删课程 JSON 本体
+        _remove(lesson_path)
+
+    return {"deleted": True, "freedBytes": freed, "removed": removed}
+
+
 def load_lesson(lesson_id: str) -> Lesson:
     path = get_lesson_path(lesson_id)
     if not path.exists():

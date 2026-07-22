@@ -1,0 +1,10 @@
+{
+  "job_id": "job_db84d7493947",
+  "status": "failed",
+  "url": "https://v.douyin.com/DCcFjBp2PS4/",
+  "lesson_id": null,
+  "error": "下载失败: ERROR: [generic] DCcFjBp2PS4: Unable to download webpage: HTTPSConnection(host='v.douyin.com', port=443): Failed to resolve 'v.douyin.com' ([Errno 8] nodename nor servname provided, or not known) (caused by TransportError(\"HTTPSConnection(host='v.douyin.com', port=443): Failed to resolve 'v.douyin.com' ([Errno 8] nodename nor servname provided, or not known)\"))\n[generic] Extracting URL: https://v.douyin.com/DCcFjBp2PS4/\n[generic] DCcFjBp2PS4: Downloading webpage",
+  "progress": 15,
+  "phase": "download",
+  "fallback_hint": "正在下载视频资源..."
+}
