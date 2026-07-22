@@ -19,6 +19,8 @@ fi
 
 # 2. Python venv + 后端依赖
 PYTHON_BIN="${ROOT}/.venv/bin/python"
+# 国内镜像源(清华),比 PyPI 官方源快得多;如需换回官方源删掉这个变量即可
+PIP_MIRROR="-i https://pypi.tuna.tsinghua.edu.cn/simple"
 if [ ! -x "$PYTHON_BIN" ]; then
   echo "==> 创建虚拟环境 .venv ..."
   python3 -m venv "$ROOT/.venv"
@@ -26,14 +28,20 @@ fi
 
 if ! "$PYTHON_BIN" -c "import fastapi, uvicorn, sqlmodel" >/dev/null 2>&1; then
   echo "==> 安装后端依赖（首次较慢，需要联网）..."
-  "$PYTHON_BIN" -m pip install --upgrade pip
-  "$PYTHON_BIN" -m pip install -r "$ROOT/backend/requirements.txt"
+  "$PYTHON_BIN" -m pip install --upgrade pip $PIP_MIRROR
+  "$PYTHON_BIN" -m pip install -r "$ROOT/backend/requirements.txt" $PIP_MIRROR
 fi
 
 # pipeline 依赖(librosa/mediapipe 等，抖音导入的节拍检测/切片必需)
 if ! "$PYTHON_BIN" -c "import librosa, mediapipe" >/dev/null 2>&1; then
   echo "==> 安装 pipeline 依赖（librosa/mediapipe 等，首次较慢，需要联网）..."
-  "$PYTHON_BIN" -m pip install -r "$ROOT/pipeline/requirements.txt"
+  "$PYTHON_BIN" -m pip install -r "$ROOT/pipeline/requirements.txt" $PIP_MIRROR
+fi
+
+# matte 抠像依赖(torch,剪影/光影模式需要;体积大,单独装)
+if ! "$PYTHON_BIN" -c "import torch" >/dev/null 2>&1; then
+  echo "==> 安装 matte 依赖 torch（首次较慢约 110MB，需要联网）..."
+  "$PYTHON_BIN" -m pip install torch torchvision $PIP_MIRROR
 fi
 
 # 3. 前端依赖

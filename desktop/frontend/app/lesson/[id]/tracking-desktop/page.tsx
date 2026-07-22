@@ -781,6 +781,23 @@ export default function TrackingDesktopPage() {
     throw new Error(teacherVideoErrorMessage());
   }, [lesson?.duration, setTeacherPlayheadNow, teacherMuted]);
 
+  // 空格 = 暂停/继续(与底部按钮同一逻辑);输入框聚焦时不拦截。
+  // 摄像头未开时不响应,避免误启动挑战。
+  React.useEffect(() => {
+    const onSpace = (e: KeyboardEvent) => {
+      if (e.key !== " " && e.code !== "Space") return;
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      e.preventDefault(); // 防止页面滚动/聚焦按钮被空格误触发
+      if (playing) {
+        setPlaying(false);
+      } else if (cameraReady) {
+        void startTeacherPlayback(false, teacherMuted).catch(() => setPlaying(false));
+      }
+    };
+    window.addEventListener("keydown", onSpace);
+    return () => window.removeEventListener("keydown", onSpace);
+  }, [playing, cameraReady, startTeacherPlayback, teacherMuted]);
+
   const handleTeacherVideoError = React.useCallback(() => {
     const sources = teacherVideoSourcesRef.current;
     const nextIndex = teacherVideoIndexRef.current + 1;
