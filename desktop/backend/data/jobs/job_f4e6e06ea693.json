@@ -1,0 +1,10 @@
+{
+  "job_id": "job_f4e6e06ea693",
+  "status": "failed",
+  "url": "https://www.iesdouyin.com/share/video/7378076784027274548/?region=CN&mid=7351393454797096962&u_code=19cciei06&did=MS4wLjABAAAA67PxFCRX78Vud4VEHBkJ0DklmzhecEt28V5R7XGWCno&iid=MS4wLjABAAAADfmhorSG3wEXCw2psdE4tLygQJFTO6fSykSzokbX9l9ea3p8X0PnNLJ7SFFOnaW_&with_sec_did=1&video_share_track_ver=&titleType=title&share_sign=UbWFhRGL2NaRKi3.HDGFxcAF9_hG1zZ41pQ_GwhS_o4-&share_version=380400&ts=1776492368&from_aid=1128&from_ssr=1&share_track_info=%7B%22link_description_type%22%3A%22%22%7D&utm_source=copy&utm_campaign=client_share&utm_medium=android&app=aweme&ug_share_id=1116e363094fa_1776509769572&activity_info=%7B%22social_author_id%22%3A%22100077047905%22%2C%22social_share_id%22%3A%222221476656718103_1776509769572%22%2C%22social_share_time%22%3A%221776509769%22%2C%22social_share_user_id%22%3A%222221476656718103%22%7D&share_extra_params=%7B%22schema_type%22%3A%221%22%7D",
+  "lesson_id": "les_fb9cfa6cc365",
+  "error": "No module named 'librosa'",
+  "progress": 35,
+  "phase": "beat",
+  "fallback_hint": "视频下载完成，正在切片和生成课程..."
+}

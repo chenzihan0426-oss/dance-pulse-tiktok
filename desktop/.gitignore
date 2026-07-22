@@ -12,6 +12,7 @@
 *.swo
 
 # ===== Environment / secrets =====
+# .env 含真实 API key，绝不入库（community 分支曾误提交，已在 main 移除跟踪）
 .env
 .env.local
 .env.development
@@ -19,6 +20,11 @@
 .env.*.local
 *.pem
 *.key
+
+# SQLite 运行时数据库（含用户数据，不入库）
+backend/data/app.db
+backend/data/app.db-shm
+backend/data/app.db-wal
 
 # ===== Node / Next.js =====
 node_modules/
@@ -52,25 +58,8 @@ htmlcov/
 .coverage
 .coverage.*
 
-# ===== Runtime / data (kept out of public repo) =====
-backend/data/auth/
-backend/data/clips/
-backend/data/jobs/
-backend/data/lessons/
-backend/data/matte/
-backend/data/particles/
-backend/data/pose/
-backend/data/pose_full/
-backend/data/social/
-backend/data/thumbs/
-backend/data/tracking/
-backend/data/videos/
-backend/data/**/*.json
-backend/data/**/*.mp4
-backend/data/**/*.webm
-backend/data/**/*.png
-backend/data/**/*.jpg
-!backend/data/.gitkeep
+# ===== Runtime / data =====
+# community 全量同步：backend/data 演示媒体与 lesson JSON 入库，不再忽略。
 
 # ===== Logs =====
 *.log

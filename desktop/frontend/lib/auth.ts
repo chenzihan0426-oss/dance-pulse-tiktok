@@ -44,6 +44,10 @@ export function getAuthToken(): string | null {
   return getAuthSession()?.token ?? null;
 }
 
+export function isDemoAuthToken(token: string | null | undefined): boolean {
+  return Boolean(token && token.startsWith("demo_token_"));
+}
+
 export function setAuthSession(session: AuthSession): void {
   if (!canUseBrowserStorage()) return;
   window.localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(session));

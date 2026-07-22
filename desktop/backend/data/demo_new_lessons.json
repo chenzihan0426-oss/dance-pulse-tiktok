@@ -1,0 +1,18 @@
+[
+  {
+    "lesson_id": "harry_dp",
+    "title": "HARRY · Demo 同舞",
+    "thumbnail": "/thumbs/harry_dp_seg_000.jpg",
+    "video_url": "/videos/harry_dp.mp4",
+    "segments": 8,
+    "teaching_ready": 8
+  },
+  {
+    "lesson_id": "qlx_dp",
+    "title": "QLX · Demo 同舞",
+    "thumbnail": "/thumbs/qlx_dp_seg_000.jpg",
+    "video_url": "/videos/qlx_dp.mp4",
+    "segments": 9,
+    "teaching_ready": 7
+  }
+]

@@ -29,8 +29,11 @@ import {
   applyLocalProgressSnapshot,
   buildLocalProgressSnapshot,
   clearAuthSession,
+  getAuthSession,
   getAuthToken,
+  isDemoAuthToken,
 } from "./auth";
+import { getActivity, getAllLearnedByLesson, getUnlockedBadges } from "./storage";
 
 // Default to real backend mode once the app is integrated.
 // Explicitly set NEXT_PUBLIC_USE_MOCK=true when you want local mock data.
@@ -228,7 +231,8 @@ async function http<T>(
 
     if (!res.ok) {
       const text = await res.text().catch(() => "");
-      if (res.status === 401 && authToken) {
+      // 演示登录 token 非真实 JWT，401 时不要清掉本地会话
+      if (res.status === 401 && authToken && !isDemoAuthToken(authToken)) {
         clearAuthSession();
       }
       throw new Error(`${res.status} ${res.statusText}: ${text}`);
@@ -252,6 +256,36 @@ async function http<T>(
     clearApiOverride();
     return runRequest(DEFAULT_API_BASE_NORMALIZED);
   }
+}
+
+function buildDemoMeResponse(): MeResponse {
+  const session = getAuthSession();
+  const user = session?.user;
+  if (!user) {
+    throw new Error("未找到演示登录会话");
+  }
+  const learnedByLesson = getAllLearnedByLesson();
+  const learnedSegments = Object.values(learnedByLesson).reduce(
+    (sum, ids) => sum + ids.length,
+    0
+  );
+  const badges = getUnlockedBadges();
+  const activity = getActivity();
+  const thisWeek = Array.from({ length: 7 }, (_, i) => i < (activity.currentStreak || 0));
+  return {
+    user,
+    streak: {
+      currentDays: activity.currentStreak || 0,
+      thisWeek,
+    },
+    stats: {
+      learnedSegments,
+      totalStudyMinutes: Math.max(learnedSegments * 2, 0),
+      badgesCount: badges.length,
+      lessonsCount: Object.keys(learnedByLesson).length,
+    },
+    badges,
+  };
 }
 
 function createMockJob(): ImportResponse {
@@ -359,6 +393,10 @@ export async function getMe(): Promise<MeResponse> {
       badges: ["first_learned", "three_day_streak", "half_done"],
     };
   }
+  if (isDemoAuthToken(getAuthToken())) {
+    await sleep(80);
+    return buildDemoMeResponse();
+  }
   return http<MeResponse>("/api/me");
 }
 
@@ -367,13 +405,17 @@ export async function getMyBadges(): Promise<BadgesResponse> {
     await sleep(120);
     return { badges: ["first_learned", "three_day_streak", "half_done"] };
   }
+  if (isDemoAuthToken(getAuthToken())) {
+    await sleep(80);
+    return { badges: getUnlockedBadges() };
+  }
   return http<BadgesResponse>("/api/me/badges");
 }
 
 export async function migrateLocalSnapshot(
   snapshot: LocalProgressSnapshot
 ): Promise<MigrateLocalSnapshotResponse> {
-  if (USE_MOCK) {
+  if (USE_MOCK || isDemoAuthToken(getAuthToken())) {
     await sleep(120);
     return { ok: true, snapshot };
   }
@@ -387,6 +429,7 @@ let syncTimer: number | null = null;
 
 export function requestLocalSnapshotSync(): void {
   if (USE_MOCK) return;
+  if (isDemoAuthToken(getAuthToken())) return;
   if (!getAuthToken() || typeof window === "undefined") return;
 
   if (syncTimer !== null) {
@@ -618,7 +661,7 @@ export async function submitTrackingVideo(
   });
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    if (res.status === 401 && authToken) {
+    if (res.status === 401 && authToken && !isDemoAuthToken(authToken)) {
       clearAuthSession();
     }
     throw new Error(`${res.status} ${res.statusText}: ${text}`);
@@ -760,7 +803,7 @@ export async function getCommunityFeed(): Promise<CommunityFeedItem[]> {
           username: "local_guest",
           displayName: "本机访客",
           avatar: null,
-          bio: "未登录发布的测试作品",
+          bio: "跳舞的人",
           isVerified: false,
           createdAt: item.createdAt,
           isFollowing: false,
@@ -780,6 +823,18 @@ export async function getCommunityFeed(): Promise<CommunityFeedItem[]> {
   }
   const response = await http<CommunityFeedResponse>("/api/community/feed");
   return response.items.map(normalizeCommunityFeedItem);
+}
+
+/** 扫描本机 backend/data 下的 demo 视频与封面（不入库，丢文件即出现） */
+export async function getDemoMedia(): Promise<{ videos: string[]; thumbs: string[] }> {
+  if (USE_MOCK) {
+    return { videos: [], thumbs: [] };
+  }
+  try {
+    return await http<{ videos: string[]; thumbs: string[] }>("/api/demo-media");
+  } catch {
+    return { videos: [], thumbs: [] };
+  }
 }
 
 export async function getCommunityTrackingDetail(
@@ -849,7 +904,7 @@ export async function getCommunityUserProfile(
         username,
         displayName: "本机访客",
         avatar: null,
-        bio: "未登录发布的测试作品",
+        bio: "跳舞的人",
         isVerified: false,
         createdAt: new Date().toISOString(),
         isFollowing: false,

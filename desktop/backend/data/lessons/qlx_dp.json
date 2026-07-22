@@ -1,0 +1,670 @@
+{
+  "id": "qlx_dp",
+  "title": "QLX · Demo 同舞",
+  "source_url": "",
+  "duration": 34.09,
+  "bpm": 143.55,
+  "video_url": "/videos/qlx_dp.mp4",
+  "thumbnail": "/thumbs/qlx_dp_seg_000.jpg",
+  "confirmed": true,
+  "beat_quality": "high",
+  "beats": [
+    0.49,
+    0.93,
+    1.35,
+    1.79,
+    2.21,
+    2.62,
+    3.02,
+    3.46,
+    3.88,
+    4.3,
+    4.71,
+    5.15,
+    5.57,
+    5.99,
+    6.41,
+    6.8,
+    7.2,
+    7.62,
+    8.06,
+    8.52,
+    8.94,
+    9.38,
+    9.8,
+    10.22,
+    10.63,
+    11.05,
+    11.47,
+    11.91,
+    12.33,
+    12.75,
+    13.17,
+    13.61,
+    14.02,
+    14.44,
+    14.86,
+    15.28,
+    15.7,
+    16.11,
+    16.51,
+    16.95,
+    17.37,
+    17.81,
+    18.23,
+    18.65,
+    19.04,
+    19.48,
+    19.9,
+    20.32,
+    20.76,
+    21.18,
+    21.62,
+    22.01,
+    22.43,
+    22.87,
+    23.29,
+    23.71,
+    24.15,
+    24.54,
+    24.96,
+    25.38,
+    25.8,
+    26.22,
+    26.66,
+    27.07,
+    27.49,
+    27.93,
+    28.33,
+    28.77,
+    29.21,
+    29.63,
+    30.05,
+    30.46,
+    30.88,
+    31.3,
+    31.72,
+    32.16,
+    32.55,
+    32.97,
+    33.34,
+    33.72
+  ],
+  "sections": [
+    {
+      "id": "intro",
+      "label": "前奏",
+      "start": 0.0,
+      "end": 24.98
+    },
+    {
+      "id": "chorus_1",
+      "label": "副歌 1",
+      "start": 24.98,
+      "end": 26.19
+    },
+    {
+      "id": "chorus_2",
+      "label": "副歌 2",
+      "start": 26.19,
+      "end": 30.46
+    },
+    {
+      "id": "outro",
+      "label": "尾声",
+      "start": 30.46,
+      "end": 34.09
+    }
+  ],
+  "segments": [
+    {
+      "id": "seg_000",
+      "lesson_id": "qlx_dp",
+      "index": 0,
+      "section": "intro",
+      "section_label": "前奏",
+      "start": 0.49,
+      "end": 3.88,
+      "duration": 3.39,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/qlx_dp_seg_000.jpg",
+      "clip_url": "/clips/qlx_dp_seg_000.mp4",
+      "pose_url": "/pose/qlx_dp/seg_000.json",
+      "matte_rgb_url": "",
+      "matte_mask_url": "",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 1,
+      "is_still": true,
+      "ai_description": "前奏·静止定格,保持姿态",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "前奏部分以步伐移动和肩部动作为主",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左脚向前迈步 右肩微动"
+          },
+          {
+            "beats": "3-4",
+            "content": "重心下沉 双臂自然摆动"
+          },
+          {
+            "beats": "5-6",
+            "content": "右脚向侧迈步 肩部发力"
+          },
+          {
+            "beats": "7-8",
+            "content": "左脚跟进 双臂伸展"
+          }
+        ],
+        "tips": [
+          "保持身体重心稳定",
+          "肩部动作要轻快",
+          "注意脚步与节奏配合"
+        ],
+        "beat_cues": [
+          "左脚迈步",
+          null,
+          "重心下沉",
+          null,
+          "右脚侧迈",
+          null,
+          "左脚跟进",
+          null
+        ],
+        "generated_at": "2026-07-22T11:26:10Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_001",
+      "lesson_id": "qlx_dp",
+      "index": 1,
+      "section": "intro",
+      "section_label": "前奏",
+      "start": 3.88,
+      "end": 7.2,
+      "duration": 3.32,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/qlx_dp_seg_001.jpg",
+      "clip_url": "/clips/qlx_dp_seg_001.mp4",
+      "pose_url": "/pose/qlx_dp/seg_001.json",
+      "matte_rgb_url": "",
+      "matte_mask_url": "",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 3,
+      "is_still": false,
+      "ai_description": "前奏·常规节奏,动作清晰",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "前奏段落，身体波浪与脚步移动结合",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手胸前交叉，身体微下沉"
+          },
+          {
+            "beats": "3-4",
+            "content": "右手向上推胯，左脚点地"
+          },
+          {
+            "beats": "5-6",
+            "content": "身体向右转，左肩上提"
+          },
+          {
+            "beats": "7-8",
+            "content": "重心转移，右脚向前迈步"
+          }
+        ],
+        "tips": [
+          "注意手部动作与身体波浪的连贯性",
+          "转身后保持重心稳定，避免晃动",
+          "脚步移动时膝盖微屈，增加流畅感"
+        ],
+        "beat_cues": [
+          "交叉手",
+          null,
+          "推胯",
+          null,
+          "转肩",
+          null,
+          "迈步",
+          null
+        ],
+        "generated_at": "2026-07-22T08:48:16Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_002",
+      "lesson_id": "qlx_dp",
+      "index": 2,
+      "section": "intro",
+      "section_label": "前奏",
+      "start": 7.2,
+      "end": 10.63,
+      "duration": 3.43,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/qlx_dp_seg_002.jpg",
+      "clip_url": "/clips/qlx_dp_seg_002.mp4",
+      "pose_url": "/pose/qlx_dp/seg_002.json",
+      "matte_rgb_url": "",
+      "matte_mask_url": "",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 2,
+      "is_still": false,
+      "ai_description": "前奏·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双人舞者同步完成手臂上举、交叉与重心转移动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂向上举过头顶，掌心相对"
+          },
+          {
+            "beats": "3-4",
+            "content": "双手在胸前交叉，身体重心下沉"
+          },
+          {
+            "beats": "5-6",
+            "content": "左脚向左侧迈出一大步，同时右手向前推出"
+          },
+          {
+            "beats": "7-8",
+            "content": "重心回到中间，双手收回至胸前，准备下一动作"
+          }
+        ],
+        "tips": [
+          "保持手臂伸直，动作流畅",
+          "重心转移时注意膝盖微屈缓冲",
+          "练习时可先慢速分解动作"
+        ],
+        "beat_cues": [
+          "双臂上举",
+          null,
+          "双手交叉",
+          null,
+          "左脚跨步",
+          "右手前推",
+          null,
+          "双手收回"
+        ],
+        "generated_at": "2026-07-22T08:48:21Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_003",
+      "lesson_id": "qlx_dp",
+      "index": 3,
+      "section": "intro",
+      "section_label": "前奏",
+      "start": 10.63,
+      "end": 14.02,
+      "duration": 3.39,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/qlx_dp_seg_003.jpg",
+      "clip_url": "/clips/qlx_dp_seg_003.mp4",
+      "pose_url": "/pose/qlx_dp/seg_003.json",
+      "matte_rgb_url": "",
+      "matte_mask_url": "",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 4,
+      "is_still": false,
+      "ai_description": "前奏·节奏紧凑,动作幅度大",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "前奏8拍，蹲下起身转肩戴帽",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左脚点地右膝下沉"
+          },
+          {
+            "beats": "3-4",
+            "content": "起身同时右肩上提"
+          },
+          {
+            "beats": "5-6",
+            "content": "转身推胯腰发力"
+          },
+          {
+            "beats": "7-8",
+            "content": "抬手扶帽保持造型"
+          }
+        ],
+        "tips": [
+          "注意膝盖下沉时重心放低",
+          "转身后推胯要流畅衔接",
+          "扶帽动作定格保持稳定"
+        ],
+        "beat_cues": [
+          "左脚点",
+          null,
+          "右肩上",
+          null,
+          "推胯",
+          null,
+          "扶帽",
+          null
+        ],
+        "generated_at": "2026-07-22T08:48:26Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_004",
+      "lesson_id": "qlx_dp",
+      "index": 4,
+      "section": "intro",
+      "section_label": "前奏",
+      "start": 14.02,
+      "end": 17.37,
+      "duration": 3.35,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/qlx_dp_seg_004.jpg",
+      "clip_url": "/clips/qlx_dp_seg_004.mp4",
+      "pose_url": "/pose/qlx_dp/seg_004.json",
+      "matte_rgb_url": "",
+      "matte_mask_url": "",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 1,
+      "is_still": false,
+      "ai_description": "前奏·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双手胸前交叉，身体左右摆动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手胸前交叉，头部微晃"
+          },
+          {
+            "beats": "3-4",
+            "content": "右手向上推，左手向下拉，身体右转"
+          },
+          {
+            "beats": "5-6",
+            "content": "双手收回胸前交叉，身体下沉"
+          },
+          {
+            "beats": "7-8",
+            "content": "双臂向外打开，身体左转"
+          }
+        ],
+        "tips": [
+          "保持动作流畅，避免僵硬",
+          "注意重心转移，身体跟随节奏摆动",
+          "面部表情可配合动作增强表现力"
+        ],
+        "beat_cues": [
+          "交叉双臂",
+          null,
+          "推拉手臂",
+          null,
+          "下沉摆动",
+          null,
+          "打开双臂",
+          null
+        ],
+        "generated_at": "2026-07-22T08:48:31Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_005",
+      "lesson_id": "qlx_dp",
+      "index": 5,
+      "section": "intro",
+      "section_label": "前奏",
+      "start": 17.37,
+      "end": 20.76,
+      "duration": 3.39,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/qlx_dp_seg_005.jpg",
+      "clip_url": "/clips/qlx_dp_seg_005.mp4",
+      "pose_url": "/pose/qlx_dp/seg_005.json",
+      "matte_rgb_url": "",
+      "matte_mask_url": "",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 1,
+      "is_still": false,
+      "ai_description": "前奏·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双手胸前推胯，右肩上摆臂，左脚点地",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手胸前推胯"
+          },
+          {
+            "beats": "3-4",
+            "content": "右肩上摆臂，身体微侧"
+          },
+          {
+            "beats": "5-6",
+            "content": "左脚点地，重心下沉"
+          },
+          {
+            "beats": "7-8",
+            "content": "双臂向前伸展，膝盖微屈"
+          }
+        ],
+        "tips": [
+          "保持核心收紧，动作流畅",
+          "注意节奏感，拍子要准",
+          "肩膀放松，避免僵硬"
+        ],
+        "beat_cues": [
+          "推胯",
+          null,
+          "右肩上",
+          null,
+          "左脚点",
+          null,
+          "伸展",
+          null
+        ],
+        "generated_at": "2026-07-22T08:48:36Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_006",
+      "lesson_id": "qlx_dp",
+      "index": 6,
+      "section": "intro",
+      "section_label": "前奏",
+      "start": 20.76,
+      "end": 24.15,
+      "duration": 3.39,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/qlx_dp_seg_006.jpg",
+      "clip_url": "/clips/qlx_dp_seg_006.mp4",
+      "pose_url": "/pose/qlx_dp/seg_006.json",
+      "matte_rgb_url": "",
+      "matte_mask_url": "",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 1,
+      "is_still": true,
+      "ai_description": "前奏·静止定格,保持姿态",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双手举过头顶，身体下沉并转身",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手举过头顶，掌心相对"
+          },
+          {
+            "beats": "3-4",
+            "content": "身体下沉，重心放低"
+          },
+          {
+            "beats": "5-6",
+            "content": "向右侧转身，左脚点地"
+          },
+          {
+            "beats": "7-8",
+            "content": "双臂伸展，完成动作"
+          }
+        ],
+        "tips": [
+          "保持核心收紧，下沉时膝盖微屈",
+          "转身时注意重心转移，避免晃动",
+          "手臂伸展要流畅，与身体协调一致"
+        ],
+        "beat_cues": [
+          "双手过顶",
+          null,
+          "下沉",
+          null,
+          "转身",
+          null,
+          "伸展",
+          null
+        ],
+        "generated_at": "2026-07-22T11:26:10Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_007",
+      "lesson_id": "qlx_dp",
+      "index": 7,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 24.15,
+      "end": 27.49,
+      "duration": 3.34,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/qlx_dp_seg_007.jpg",
+      "clip_url": "/clips/qlx_dp_seg_007.mp4",
+      "pose_url": "/pose/qlx_dp/seg_007.json",
+      "matte_rgb_url": "",
+      "matte_mask_url": "",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 5,
+      "is_still": false,
+      "ai_description": "副歌 1·爆发段落,快速连续移动",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "转身甩手，身体波浪律动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左脚点地转身"
+          },
+          {
+            "beats": "3-4",
+            "content": "右肩上摆手臂"
+          },
+          {
+            "beats": "5-6",
+            "content": "腰发力身体波浪"
+          },
+          {
+            "beats": "7-8",
+            "content": "左脚点地甩手"
+          }
+        ],
+        "tips": [
+          "注意腰部发力带动身体流动",
+          "手臂动作与身体波浪同步",
+          "保持重心稳定完成转身"
+        ],
+        "beat_cues": [
+          "左脚点转",
+          null,
+          "右肩上摆",
+          null,
+          "腰发力波",
+          null,
+          "左脚点甩",
+          null
+        ],
+        "generated_at": "2026-07-22T08:48:41Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_008",
+      "lesson_id": "qlx_dp",
+      "index": 8,
+      "section": "chorus_2",
+      "section_label": "副歌 2",
+      "start": 27.49,
+      "end": 30.88,
+      "duration": 3.39,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/qlx_dp_seg_008.jpg",
+      "clip_url": "/clips/qlx_dp_seg_008.mp4",
+      "pose_url": "/pose/qlx_dp/seg_008.json",
+      "matte_rgb_url": "",
+      "matte_mask_url": "",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 3,
+      "is_still": false,
+      "ai_description": "副歌 2·常规节奏,动作清晰",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双臂伸展后上举，身体随节奏摆动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂平伸侧展，重心下沉"
+          },
+          {
+            "beats": "3-4",
+            "content": "左肩上提，右臂回收至胸前"
+          },
+          {
+            "beats": "5-6",
+            "content": "转身同时双臂上举过头"
+          },
+          {
+            "beats": "7-8",
+            "content": "手臂下压至腰间，身体微蹲"
+          }
+        ],
+        "tips": [
+          "保持核心收紧，动作流畅衔接",
+          "注意肩膀和手臂的层次感",
+          "利用腰部发力带动整体节奏"
+        ],
+        "beat_cues": [
+          "侧展",
+          null,
+          "肩上",
+          null,
+          "转身",
+          "上举",
+          null,
+          "下压"
+        ],
+        "generated_at": "2026-07-22T08:48:48Z"
+      },
+      "deleted": false
+    }
+  ]
+}

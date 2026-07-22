@@ -21,7 +21,10 @@ import type { Lesson, Segment } from "@/lib/types";
 import { useLearningProgress } from "@/hooks/useLearningProgress";
 import { lessonIsDemoReady, segmentIsReady } from "@/lib/demoReady";
 import { TeachingPanelKpop } from "@/components/TeachingPanelKpop";
+import { SimilarRecommendPanel } from "@/components/lesson/SimilarRecommendPanel";
 import { cn } from "@/lib/utils";
+
+type LessonBottomTab = "similar" | "segments";
 
 function formatDuration(sec: number): string {
   const s = Math.floor(sec);
@@ -174,6 +177,7 @@ export default function LessonPageDesktop() {
   // AI 图文教学：当前展开的 segment id + 重生成中的 segment id
   const [activeTeachingSegId, setActiveTeachingSegId] = React.useState<string | null>(null);
   const [regeneratingSegId, setRegeneratingSegId] = React.useState<string | null>(null);
+  const [bottomTab, setBottomTab] = React.useState<LessonBottomTab>("segments");
   const detailRef = React.useRef<HTMLDivElement | null>(null);
 
   const { setTotal, isLearned, learnedCount, total } = useLearningProgress(lessonId);
@@ -440,7 +444,7 @@ export default function LessonPageDesktop() {
         .marquee-container {
           display: flex;
           white-space: nowrap;
-          font-family: "Black Han Sans", sans-serif;
+          font-family: "Black Han Sans", "Noto Sans SC", sans-serif;
           animation: marquee 20s linear infinite;
         }
 
@@ -671,123 +675,178 @@ export default function LessonPageDesktop() {
       </div>
 
       <section id="segments" className="relative z-10 mx-auto max-w-7xl px-6 pb-10 md:px-12">
-        <div className="mb-10 flex items-end justify-between">
-          <h2 className="text-4xl font-bold uppercase tracking-tighter md:text-5xl">
-            动作
-            <br />
-            <span className="kpop-text">SEGMENTS</span>
-          </h2>
-          <span className="text-xs uppercase tracking-[0.2em] text-white/45">
-            READY {activeSegments.filter(segmentIsReady).length}/{activeSegments.length}
-          </span>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
-          {activeSegments.map((seg, idx) => {
-            const learned = isLearned(seg.id);
-            const ready = segmentIsReady(seg);
-            const cover = idx % 2 === 0 ? "#00f3ff" : "#ff0055";
-            const teachingStatus = seg.teaching?.status;
-            const isExpanded = activeTeachingSegId === seg.id;
-            const showTeachingBtn = !seg.is_still && !!seg.teaching;
-
-            return (
-              <div
-                key={seg.id}
-                className="neon-card group relative overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] p-1"
-                style={{ "--hover-color": cover } as React.CSSProperties}
-              >
-                <Link
-                  href={`/player/${seg.id}?lesson=${lesson.id}`}
-                  className="block"
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <div className="inline-flex border border-white/12 bg-black/50 p-1">
+            {(
+              [
+                { id: "segments" as const, label: "详细解析", en: "Segments" },
+                { id: "similar" as const, label: "相似推荐", en: "Similar" },
+              ] as const
+            ).map((tab) => {
+              const active = bottomTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => {
+                    setBottomTab(tab.id);
+                    if (tab.id !== "segments") setActiveTeachingSegId(null);
+                  }}
                   onMouseEnter={() => setIsHovering(true)}
                   onMouseLeave={() => setIsHovering(false)}
+                  className={cn(
+                    "relative px-5 py-2.5 text-left transition",
+                    active ? "bg-white text-black" : "text-white/65 hover:text-white"
+                  )}
+                  style={{ transform: "skewX(-6deg)" }}
                 >
-                  <div
-                    className="aspect-[9/16] w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-[1.04]"
-                    style={{ backgroundImage: `url("${seg.thumbnail}")` }}
-                  />
-                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0)_45%,rgba(0,0,0,0.85)_100%)]" />
-                  <div className="absolute left-3 top-3 rounded-full border border-white/20 bg-black/55 px-2 py-0.5 text-[10px] uppercase tracking-wider text-white/85">
-                    #{seg.index + 1}
-                  </div>
-                  {ready ? (
-                    <div className="absolute right-3 top-3 rounded-full bg-amber-400/95 px-2 py-0.5 text-[9px] font-bold text-amber-950">
-                      READY
-                    </div>
-                  ) : null}
-                  {learned ? (
-                    <div className="absolute right-3 top-9 rounded-full bg-emerald-400/95 px-2 py-0.5 text-[9px] font-bold text-emerald-950">
-                      LEARNED
-                    </div>
-                  ) : null}
-                  <div
-                    className={cn(
-                      "absolute inset-x-0 px-3",
-                      showTeachingBtn ? "bottom-[58px]" : "bottom-3"
-                    )}
-                  >
-                    <div className="line-clamp-1 text-[13px] font-semibold text-white">{seg.section_label}</div>
-                    <div className="mt-1 flex items-center justify-between text-[10px] text-white/55">
-                      <span>{seg.duration.toFixed(1)}s</span>
-                      <span>{seg.beat_count} 拍</span>
-                    </div>
-                    {(() => {
-                      const agg = difficultyMap.get(seg.id);
-                      if (!agg || agg.attempts <= 0 || agg.measuredDifficulty < 4) return null;
-                      const jointLabel = agg.topWorstJoint ? JOINT_LABELS[agg.topWorstJoint] : null;
-                      return (
-                        <div className="mt-1.5 inline-flex items-center gap-1 rounded-full border border-[#ff5c8a]/40 bg-[#ff0055]/15 px-2 py-0.5 text-[9px] font-semibold text-[#ff9cbb]">
-                          <TrendingDown className="h-2.5 w-2.5" />
-                          <span>难点{jointLabel ? ` · ${jointLabel}` : ""}</span>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                </Link>
+                  <span className="block" style={{ transform: "skewX(6deg)" }}>
+                    <span className="block text-[14px] font-black tracking-wide">{tab.label}</span>
+                    <span
+                      className={cn(
+                        "mt-0.5 block text-[10px] font-semibold uppercase tracking-[0.2em]",
+                        active ? "text-black/45" : "text-white/30"
+                      )}
+                    >
+                      {tab.en}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          {bottomTab === "segments" ? (
+            <span className="text-xs uppercase tracking-[0.2em] text-white/45">
+              READY {activeSegments.filter(segmentIsReady).length}/{activeSegments.length}
+            </span>
+          ) : null}
+        </div>
 
-                {showTeachingBtn && (
-                  <div className="absolute inset-x-1 bottom-1 z-10 rounded-b-xl border-t border-[#00f3ff]/20 bg-black/85 px-3 py-2 backdrop-blur-sm">
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="line-clamp-2 flex-1 text-[10px] leading-snug text-white/70">
-                        {teachingStatus === "ready"
-                          ? seg.teaching!.summary
-                          : teachingStatus === "pending"
-                            ? "教学生成中..."
-                            : "教学未就绪"}
-                      </p>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleToggleTeaching(seg.id);
-                        }}
-                        onMouseEnter={() => setIsHovering(true)}
-                        onMouseLeave={() => setIsHovering(false)}
+        {bottomTab === "similar" ? <SimilarRecommendPanel lessonId={lesson.id} /> : null}
+
+        {bottomTab === "segments" ? (
+          <>
+            <div className="mb-10 flex items-end justify-between">
+              <h2 className="text-4xl font-bold uppercase tracking-tighter md:text-5xl">
+                动作
+                <br />
+                <span className="kpop-text">SEGMENTS</span>
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+              {activeSegments.map((seg, idx) => {
+                const learned = isLearned(seg.id);
+                const ready = segmentIsReady(seg);
+                const cover = idx % 2 === 0 ? "#00f3ff" : "#ff0055";
+                const teachingStatus = seg.teaching?.status;
+                const isExpanded = activeTeachingSegId === seg.id;
+                const showTeachingBtn = !seg.is_still && !!seg.teaching;
+
+                return (
+                  <div
+                    key={seg.id}
+                    className="neon-card group relative overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] p-1"
+                    style={{ "--hover-color": cover } as React.CSSProperties}
+                  >
+                    <Link
+                      href={`/player/${seg.id}?lesson=${lesson.id}`}
+                      className="block"
+                      onMouseEnter={() => setIsHovering(true)}
+                      onMouseLeave={() => setIsHovering(false)}
+                    >
+                      <div
+                        className="aspect-[9/16] w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-[1.04]"
+                        style={{ backgroundImage: `url("${seg.thumbnail}")` }}
+                      />
+                      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0)_45%,rgba(0,0,0,0.85)_100%)]" />
+                      <div className="absolute left-3 top-3 rounded-full border border-white/20 bg-black/55 px-2 py-0.5 text-[10px] uppercase tracking-wider text-white/85">
+                        #{seg.index + 1}
+                      </div>
+                      {ready ? (
+                        <div className="absolute right-3 top-3 rounded-full bg-amber-400/95 px-2 py-0.5 text-[9px] font-bold text-amber-950">
+                          READY
+                        </div>
+                      ) : null}
+                      {learned ? (
+                        <div className="absolute right-3 top-9 rounded-full bg-emerald-400/95 px-2 py-0.5 text-[9px] font-bold text-emerald-950">
+                          LEARNED
+                        </div>
+                      ) : null}
+                      <div
                         className={cn(
-                          "inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider transition",
-                          isExpanded
-                            ? "border-[#ccff00] bg-[#ccff00] text-[#050505]"
-                            : "border-[#00f3ff]/60 bg-[#00f3ff]/10 text-[#00f3ff] hover:bg-[#00f3ff]/20"
+                          "absolute inset-x-0 px-3",
+                          showTeachingBtn ? "bottom-[58px]" : "bottom-3"
                         )}
                       >
-                        <Sparkles className="h-3 w-3" />
-                        <span>教学</span>
-                        <ChevronDown
-                          className={cn("h-3 w-3 transition-transform", isExpanded && "rotate-180")}
-                        />
-                      </button>
-                    </div>
+                        <div className="line-clamp-1 text-[13px] font-semibold text-white">
+                          {seg.section_label}
+                        </div>
+                        <div className="mt-1 flex items-center justify-between text-[10px] text-white/55">
+                          <span>{seg.duration.toFixed(1)}s</span>
+                          <span>{seg.beat_count} 拍</span>
+                        </div>
+                        {(() => {
+                          const agg = difficultyMap.get(seg.id);
+                          if (!agg || agg.attempts <= 0 || agg.measuredDifficulty < 4) return null;
+                          const jointLabel = agg.topWorstJoint ? JOINT_LABELS[agg.topWorstJoint] : null;
+                          return (
+                            <div className="mt-1.5 inline-flex items-center gap-1 rounded-full border border-[#ff5c8a]/40 bg-[#ff0055]/15 px-2 py-0.5 text-[9px] font-semibold text-[#ff9cbb]">
+                              <TrendingDown className="h-2.5 w-2.5" />
+                              <span>难点{jointLabel ? ` · ${jointLabel}` : ""}</span>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </Link>
+
+                    {showTeachingBtn && (
+                      <div className="absolute inset-x-1 bottom-1 z-10 rounded-b-xl border-t border-[#00f3ff]/20 bg-black/85 px-3 py-2 backdrop-blur-sm">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="line-clamp-2 flex-1 text-[10px] leading-snug text-white/70">
+                            {teachingStatus === "ready"
+                              ? seg.teaching!.summary
+                              : teachingStatus === "pending"
+                                ? "教学生成中..."
+                                : "教学未就绪"}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleToggleTeaching(seg.id);
+                            }}
+                            onMouseEnter={() => setIsHovering(true)}
+                            onMouseLeave={() => setIsHovering(false)}
+                            className={cn(
+                              "inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider transition",
+                              isExpanded
+                                ? "border-[#ccff00] bg-[#ccff00] text-[#050505]"
+                                : "border-[#00f3ff]/60 bg-[#00f3ff]/10 text-[#00f3ff] hover:bg-[#00f3ff]/20"
+                            )}
+                          >
+                            <Sparkles className="h-3 w-3" />
+                            <span>教学</span>
+                            <ChevronDown
+                              className={cn(
+                                "h-3 w-3 transition-transform",
+                                isExpanded && "rotate-180"
+                              )}
+                            />
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
+          </>
+        ) : null}
       </section>
 
-      {activeTeachingSegId
+      {bottomTab === "segments" && activeTeachingSegId
         ? (() => {
             const activeSeg = activeSegments.find((s) => s.id === activeTeachingSegId);
             if (!activeSeg) return null;

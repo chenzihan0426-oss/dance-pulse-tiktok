@@ -1,0 +1,10 @@
+{
+  "job_id": "job_2fb770b59d5d",
+  "status": "failed",
+  "url": "https://www.bilibili.com/video/BV1pnJ3zTECa/?share_source=copy_web&vd_source=ef8a55c65204891def5341a507f97334",
+  "lesson_id": null,
+  "error": "下载失败: ERROR: [BiliBili] 1pnJ3zTECa: Unable to download webpage: HTTP Error 412: Precondition Failed (caused by <HTTPError 412: Precondition Failed>)\n[BiliBili] Extracting URL: https://www.bilibili.com/video/BV1pnJ3zTECa/?share_source=copy_web&vd_source=ef8a55c65204891def5341a507f97334\n[BiliBili] 1pnJ3zTECa: Downloading webpage",
+  "progress": 15,
+  "phase": "download",
+  "fallback_hint": "正在下载视频资源..."
+}

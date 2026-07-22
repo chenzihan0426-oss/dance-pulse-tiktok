@@ -4,7 +4,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Camera, Pause, Play, Maximize2, Minimize2, Volume2, VolumeX } from "lucide-react";
 
 import AdaptiveSkeletonOverlay from "@/components/tracking/AdaptiveSkeletonOverlay";
@@ -286,11 +286,13 @@ function DotFieldBackground({ mouseRef }: { mouseRef: React.MutableRefObject<{ x
 
 export default function TrackingDesktopPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const lessonId = params?.id ?? "";
 
   const [lesson, setLesson] = React.useState<Lesson | null>(null);
   const [loadError, setLoadError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [challengeDone, setChallengeDone] = React.useState(false);
 
   const [cameraReady, setCameraReady] = React.useState(false);
   const [cameraError, setCameraError] = React.useState<string | null>(null);
@@ -817,7 +819,16 @@ export default function TrackingDesktopPage() {
     // 整支跳完:停止播放并结算本次挑战。
     setPlaying(false);
     void finishChallenge();
+    setChallengeDone(true);
   }, [finishChallenge, setTeacherPlayheadNow, startTeacherPlayback, teacherMuted]);
+
+  React.useEffect(() => {
+    if (!challengeDone || !lessonId) return;
+    const timer = window.setTimeout(() => {
+      router.push(`/lesson/${lessonId}/for-you`);
+    }, 1600);
+    return () => window.clearTimeout(timer);
+  }, [challengeDone, lessonId, router]);
 
   const toggleTeacherSound = React.useCallback(async () => {
     const nextMuted = !teacherMuted;
@@ -842,6 +853,7 @@ export default function TrackingDesktopPage() {
     teacherVideoIndexRef.current = 0;
     setTeacherVideoIndex(0);
     setTeacherPlayheadNow(0);
+    setChallengeDone(false);
   }, [setTeacherPlayheadNow]);
 
   const handleStart = async () => {
@@ -879,6 +891,40 @@ export default function TrackingDesktopPage() {
       className="relative flex h-screen w-screen flex-col overflow-hidden bg-[#050505] text-white selection:bg-[#ff0055] selection:text-white"
     >
       <DotFieldBackground mouseRef={mouseRef} />
+
+      {challengeDone ? (
+        <div className="absolute inset-0 z-[60] flex items-center justify-center bg-black/75 px-6 backdrop-blur-sm">
+          <div className="max-w-md border border-white/15 bg-[#0a0a0a] px-6 py-7 text-center">
+            <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#ccff00]">Challenge Complete</div>
+            <h2
+              className="mt-3 text-[32px] font-black tracking-tight"
+              style={{ fontFamily: "'Black Han Sans', 'Noto Sans SC', sans-serif" }}
+            >
+              跟练完成
+            </h2>
+            <p className="mt-2 text-[13px] text-white/50">即将进入猜你喜欢…</p>
+            <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
+              <Link
+                href={`/lesson/${lessonId}/for-you`}
+                className="bg-[#ccff00] px-5 py-2.5 text-[13px] font-bold text-black transition hover:bg-white"
+                style={{ transform: "skewX(-6deg)" }}
+              >
+                <span style={{ transform: "skewX(6deg)", display: "inline-block" }}>立即查看推荐</span>
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setChallengeDone(false);
+                  void handleStart();
+                }}
+                className="border border-white/20 px-5 py-2.5 text-[13px] text-white/75 transition hover:border-white/40 hover:text-white"
+              >
+                再练一次
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <style jsx global>{`
         @import url("https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Michroma&family=Noto+Sans+SC:wght@500;700;900&display=swap");

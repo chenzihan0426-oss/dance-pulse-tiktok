@@ -1,0 +1,10 @@
+{
+  "job_id": "job_901a5707001b",
+  "status": "failed",
+  "url": null,
+  "lesson_id": "les_e6cdcf60916a",
+  "error": "No module named 'librosa'",
+  "progress": 35,
+  "phase": "beat",
+  "fallback_hint": "本地视频上传完成，正在切片和生成课程..."
+}

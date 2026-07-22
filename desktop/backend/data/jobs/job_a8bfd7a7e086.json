@@ -1,0 +1,10 @@
+{
+  "job_id": "job_a8bfd7a7e086",
+  "status": "failed",
+  "url": "https://www.bilibili.com/video/BV1xx411c7TEST",
+  "lesson_id": null,
+  "error": "下载失败: ERROR: [BiliBili] 1xx411c7TEST: Unable to download webpage: HTTP Error 412: Precondition Failed (caused by <HTTPError 412: Precondition Failed>)\n[BiliBili] Extracting URL: https://www.bilibili.com/video/BV1xx411c7TEST\n[BiliBili] 1xx411c7TEST: Downloading webpage",
+  "progress": 15,
+  "phase": "download",
+  "fallback_hint": "正在下载视频资源..."
+}

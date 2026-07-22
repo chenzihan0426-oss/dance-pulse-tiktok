@@ -1,0 +1,10 @@
+{
+  "job_id": "job_1e7df3e27e13",
+  "status": "failed",
+  "url": "https://v.kuaishou.com/TESTabc",
+  "lesson_id": null,
+  "error": "下载失败：当前链接无法被 yt-dlp 识别，请确认粘贴的是抖音分享链接。\n原始错误摘录：WARNING: [generic] Falling back on generic information extractor\nERROR: Unsupported URL: https://www.kuaishou.com/new-reco\n[generic] Extracting URL: https://v.kuaishou.com/TESTabc\n[generic] TESTabc: Downloading webpage\n[redirect] Following redirect to https://www.kuaishou.com/new-reco\n[generic] Extracting URL: https://www.kuaishou.com/new-reco\n[generic] new-reco: Downloading webpage\n[generic] new-reco: Extracting information",
+  "progress": 15,
+  "phase": "download",
+  "fallback_hint": "正在下载视频资源..."
+}

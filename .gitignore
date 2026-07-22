@@ -2,6 +2,8 @@
 .env
 .env.*
 !.env.example
+# community 分支：desktop 演示环境（含千问 key）主动入库
+!desktop/.env
 
 # Python
 .venv/
@@ -76,6 +78,18 @@ desktop.ini
 !dancepulse/backend/data/videos/.gitkeep
 !dancepulse/backend/data/videos/antifragile.mp4
 !dancepulse/backend/data/videos/les_122ea874306b.mp4
+
+# Desktop 全量演示资产（community 同步：代码可跑即入库）
+!desktop/backend/data/
+!desktop/backend/data/**
+!desktop/backend/data/**/*.mp4
+!desktop/backend/data/**/*.webm
+!desktop/backend/data/**/*.mov
+!desktop/backend/data/**/*.jpg
+!desktop/backend/data/**/*.jpeg
+!desktop/backend/data/**/*.png
+!desktop/backend/data/**/*.json
+
 !dancepulse/pipeline/models/
 !dancepulse/pipeline/models/**
 !dancepulse/pipeline/rvm_weights/
@@ -90,3 +104,4 @@ dancepulse/backend/data/social/*.json
 dancepulse/backend/data/app.db
 dancepulse/backend/data/app.db-wal
 dancepulse/backend/data/app.db-shm
+desktop/.env

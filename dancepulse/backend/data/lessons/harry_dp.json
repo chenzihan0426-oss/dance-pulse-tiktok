@@ -1,0 +1,600 @@
+{
+  "id": "harry_dp",
+  "title": "HARRY · Demo 同舞",
+  "source_url": "",
+  "duration": 40.3,
+  "bpm": 103.36,
+  "video_url": "/videos/harry_dp.mp4",
+  "thumbnail": "/thumbs/harry_dp_seg_000.jpg",
+  "confirmed": true,
+  "beat_quality": "high",
+  "beats": [
+    0.51,
+    1.09,
+    1.7,
+    2.28,
+    2.86,
+    3.46,
+    4.04,
+    4.64,
+    5.2,
+    5.78,
+    6.39,
+    6.97,
+    7.57,
+    8.15,
+    8.73,
+    9.36,
+    9.91,
+    10.5,
+    11.1,
+    11.68,
+    12.28,
+    12.86,
+    13.44,
+    14.05,
+    14.61,
+    15.21,
+    15.79,
+    16.39,
+    16.97,
+    17.58,
+    18.16,
+    18.76,
+    19.32,
+    19.92,
+    20.5,
+    20.99,
+    21.48,
+    21.97,
+    22.57,
+    23.15,
+    23.75,
+    24.33,
+    24.92,
+    25.5,
+    26.08,
+    26.68,
+    27.28,
+    27.86,
+    28.44,
+    29.02,
+    29.63,
+    30.23,
+    30.81,
+    31.39,
+    32.0,
+    32.55,
+    33.16,
+    33.74,
+    34.34,
+    34.92,
+    35.5,
+    36.08,
+    36.69,
+    37.27,
+    37.85
+  ],
+  "sections": [
+    {
+      "id": "intro",
+      "label": "前奏",
+      "start": 0.0,
+      "end": 10.45
+    },
+    {
+      "id": "chorus_1",
+      "label": "副歌 1",
+      "start": 10.45,
+      "end": 18.11
+    },
+    {
+      "id": "chorus_2",
+      "label": "副歌 2",
+      "start": 18.11,
+      "end": 18.97
+    },
+    {
+      "id": "verse_1",
+      "label": "主歌 1",
+      "start": 18.97,
+      "end": 19.74
+    },
+    {
+      "id": "outro",
+      "label": "尾声",
+      "start": 19.74,
+      "end": 40.3
+    }
+  ],
+  "segments": [
+    {
+      "id": "seg_000",
+      "lesson_id": "harry_dp",
+      "index": 0,
+      "section": "intro",
+      "section_label": "前奏",
+      "start": 0.51,
+      "end": 5.2,
+      "duration": 4.69,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/harry_dp_seg_000.jpg",
+      "clip_url": "/clips/harry_dp_seg_000.mp4",
+      "pose_url": "/pose/harry_dp/seg_000.json",
+      "matte_rgb_url": "",
+      "matte_mask_url": "",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 2,
+      "is_still": false,
+      "ai_description": "前奏·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "前奏部分以步伐移动和肩部动作为主",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "右脚向前迈步，同时右手向前伸出"
+          },
+          {
+            "beats": "3-4",
+            "content": "左脚跟进，身体下沉，双肩抖动"
+          },
+          {
+            "beats": "5-6",
+            "content": "重心移至右脚，左脚点地，头部微摆"
+          },
+          {
+            "beats": "7-8",
+            "content": "双膝微屈，双手于胸前做小幅度波动"
+          }
+        ],
+        "tips": [
+          "保持步伐轻盈，避免过大动作",
+          "肩部动作要与节奏同步，不要僵硬",
+          "注意眼神跟随手部方向，增强表现力"
+        ],
+        "beat_cues": [
+          "迈步伸臂",
+          null,
+          "下沉抖肩",
+          null,
+          "重心转移",
+          null,
+          "屈膝波动",
+          null
+        ],
+        "generated_at": "2026-07-22T08:46:19Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_001",
+      "lesson_id": "harry_dp",
+      "index": 1,
+      "section": "intro",
+      "section_label": "前奏",
+      "start": 5.2,
+      "end": 9.91,
+      "duration": 4.71,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/harry_dp_seg_001.jpg",
+      "clip_url": "/clips/harry_dp_seg_001.mp4",
+      "pose_url": "/pose/harry_dp/seg_001.json",
+      "matte_rgb_url": "",
+      "matte_mask_url": "",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 1,
+      "is_still": false,
+      "ai_description": "前奏·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双臂上举后下压，配合胯部摆动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂向上举过头顶"
+          },
+          {
+            "beats": "3-4",
+            "content": "手臂带动身体下沉，重心放低"
+          },
+          {
+            "beats": "5-6",
+            "content": "腰胯发力左右摆动"
+          },
+          {
+            "beats": "7-8",
+            "content": "双手胸前交叠，保持姿态"
+          }
+        ],
+        "tips": [
+          "注意手臂动作与身体下沉的协调",
+          "胯部摆动时保持核心收紧",
+          "最后定格时眼神要到位"
+        ],
+        "beat_cues": [
+          "双臂上举",
+          null,
+          "下沉摆胯",
+          null,
+          "腰胯发力",
+          null,
+          "胸前交叠",
+          null
+        ],
+        "generated_at": "2026-07-22T08:46:51Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_002",
+      "lesson_id": "harry_dp",
+      "index": 2,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 9.91,
+      "end": 14.61,
+      "duration": 4.7,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/harry_dp_seg_002.jpg",
+      "clip_url": "/clips/harry_dp_seg_002.mp4",
+      "pose_url": "/pose/harry_dp/seg_002.json",
+      "matte_rgb_url": "",
+      "matte_mask_url": "",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 3,
+      "is_still": false,
+      "ai_description": "副歌 1·常规节奏,动作清晰",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双臂展开后收拢，伴随身体波浪和定点动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂平展向外打开"
+          },
+          {
+            "beats": "3-4",
+            "content": "双手合十于胸前，身体微下沉"
+          },
+          {
+            "beats": "5-6",
+            "content": "左肩上提，右手轻点地面"
+          },
+          {
+            "beats": "7-8",
+            "content": "右臂高举过头，左手拇指向上"
+          }
+        ],
+        "tips": [
+          "保持核心收紧，动作流畅衔接",
+          "注意肩膀和手臂的线条感",
+          "眼神跟随手部移动，增强表现力"
+        ],
+        "beat_cues": [
+          "双臂开",
+          null,
+          "合十下",
+          null,
+          "左肩上",
+          "右手点",
+          "右臂举",
+          "左手拇"
+        ],
+        "generated_at": "2026-07-22T08:47:18Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_003",
+      "lesson_id": "harry_dp",
+      "index": 3,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 14.61,
+      "end": 19.32,
+      "duration": 4.71,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/harry_dp_seg_003.jpg",
+      "clip_url": "/clips/harry_dp_seg_003.mp4",
+      "pose_url": "/pose/harry_dp/seg_003.json",
+      "matte_rgb_url": "",
+      "matte_mask_url": "",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 1,
+      "is_still": false,
+      "ai_description": "副歌 1·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双手交叉胸前，右臂上举，转身摆胯。",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手于胸前交叉，身体微侧"
+          },
+          {
+            "beats": "3-4",
+            "content": "右臂向上伸展，左手轻推"
+          },
+          {
+            "beats": "5-6",
+            "content": "身体向右侧转，左肩前送"
+          },
+          {
+            "beats": "7-8",
+            "content": "重心移至左腿，右脚点地"
+          }
+        ],
+        "tips": [
+          "保持核心收紧，动作流畅",
+          "手臂伸展时注意肩部放松",
+          "转身时眼睛跟随手部移动"
+        ],
+        "beat_cues": [
+          "交叉手",
+          null,
+          "右臂上举",
+          null,
+          "转腰",
+          null,
+          "右脚点",
+          null
+        ],
+        "generated_at": "2026-07-22T08:47:24Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_004",
+      "lesson_id": "harry_dp",
+      "index": 4,
+      "section": "outro",
+      "section_label": "尾声",
+      "start": 19.32,
+      "end": 23.75,
+      "duration": 4.43,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/harry_dp_seg_004.jpg",
+      "clip_url": "/clips/harry_dp_seg_004.mp4",
+      "pose_url": "/pose/harry_dp/seg_004.json",
+      "matte_rgb_url": "",
+      "matte_mask_url": "",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 2,
+      "is_still": false,
+      "ai_description": "尾声·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "单腿站立，手臂波浪摆动，转身定格",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左腿支撑，右腿微屈，双手自然下垂"
+          },
+          {
+            "beats": "3-4",
+            "content": "重心移至右腿，左腿向后点地，手臂随身体摆动"
+          },
+          {
+            "beats": "5-6",
+            "content": "左腿保持点地，身体向右转，右手向上挥动"
+          },
+          {
+            "beats": "7-8",
+            "content": "完成转身，左腿收回，双手在胸前定点"
+          }
+        ],
+        "tips": [
+          "保持核心收紧，动作流畅连贯",
+          "注意手臂波浪的节奏感",
+          "转身后重心要稳，眼神跟随手部移动"
+        ],
+        "beat_cues": [
+          null,
+          null,
+          "点地摆臂",
+          null,
+          "挥手转体",
+          null,
+          "收腿",
+          "定点"
+        ],
+        "generated_at": "2026-07-22T08:47:30Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_005",
+      "lesson_id": "harry_dp",
+      "index": 5,
+      "section": "outro",
+      "section_label": "尾声",
+      "start": 23.75,
+      "end": 28.44,
+      "duration": 4.69,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/harry_dp_seg_005.jpg",
+      "clip_url": "/clips/harry_dp_seg_005.mp4",
+      "pose_url": "/pose/harry_dp/seg_005.json",
+      "matte_rgb_url": "",
+      "matte_mask_url": "",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 4,
+      "is_still": false,
+      "ai_description": "尾声·节奏紧凑,动作幅度大",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "尾声部分的快速身体波浪与甩头动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "从弯腰姿势开始，快速起身"
+          },
+          {
+            "beats": "3-4",
+            "content": "身体做S形波浪，同时甩动长发"
+          },
+          {
+            "beats": "5-6",
+            "content": "继续波浪动作，头部向后仰甩"
+          },
+          {
+            "beats": "7-8",
+            "content": "完成最后一个甩头动作定住"
+          }
+        ],
+        "tips": [
+          "注意波浪动作的流畅性，像水流一样连贯",
+          "甩头时利用腰部力量带动，避免单纯晃动脖子",
+          "保持眼神跟随动作方向，增强表现力"
+        ],
+        "beat_cues": [
+          "起身",
+          null,
+          "波浪",
+          "甩头",
+          "波浪",
+          "甩头",
+          null,
+          "定住"
+        ],
+        "generated_at": "2026-07-22T08:47:36Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_006",
+      "lesson_id": "harry_dp",
+      "index": 6,
+      "section": "outro",
+      "section_label": "尾声",
+      "start": 28.44,
+      "end": 33.16,
+      "duration": 4.72,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/harry_dp_seg_006.jpg",
+      "clip_url": "/clips/harry_dp_seg_006.mp4",
+      "pose_url": "/pose/harry_dp/seg_006.json",
+      "matte_rgb_url": "",
+      "matte_mask_url": "",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 4,
+      "is_still": false,
+      "ai_description": "尾声·节奏紧凑,动作幅度大",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "单膝跪地，甩外套，身体波浪",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "右腿后撤单膝跪地，左臂伸展"
+          },
+          {
+            "beats": "3-4",
+            "content": "身体向右侧波浪下沉，甩动外套"
+          },
+          {
+            "beats": "5-6",
+            "content": "保持跪姿，头部随波浪转动"
+          },
+          {
+            "beats": "7-8",
+            "content": "继续波浪动作，完成定格"
+          }
+        ],
+        "tips": [
+          "注意膝盖与地面的接触点",
+          "甩外套时利用腰部力量",
+          "波浪动作要流畅连贯"
+        ],
+        "beat_cues": [
+          "跪地",
+          null,
+          "甩衣",
+          null,
+          "波浪",
+          null,
+          "转动",
+          "定格"
+        ],
+        "generated_at": "2026-07-22T08:47:41Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_007",
+      "lesson_id": "harry_dp",
+      "index": 7,
+      "section": "outro",
+      "section_label": "尾声",
+      "start": 33.16,
+      "end": 37.85,
+      "duration": 4.69,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/harry_dp_seg_007.jpg",
+      "clip_url": "/clips/harry_dp_seg_007.mp4",
+      "pose_url": "/pose/harry_dp/seg_007.json",
+      "matte_rgb_url": "",
+      "matte_mask_url": "",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 5,
+      "is_still": false,
+      "ai_description": "尾声·爆发段落,快速连续移动",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "地面起身后跪地扭胯起身",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左膝跪地右手撑地"
+          },
+          {
+            "beats": "3-4",
+            "content": "右脚向后点地腰发力扭胯"
+          },
+          {
+            "beats": "5-6",
+            "content": "重心前移左膝向前跨一步"
+          },
+          {
+            "beats": "7-8",
+            "content": "双腿蹬地起身同时甩头"
+          }
+        ],
+        "tips": [
+          "保持上身稳定扭胯时用腰发力",
+          "起身动作要干脆有力",
+          "注意头部甩动的节奏感"
+        ],
+        "beat_cues": [
+          "跪地撑",
+          null,
+          "扭胯",
+          null,
+          "跨步",
+          null,
+          "蹬地",
+          "起身"
+        ],
+        "generated_at": "2026-07-22T08:47:46Z"
+      },
+      "deleted": false
+    }
+  ]
+}

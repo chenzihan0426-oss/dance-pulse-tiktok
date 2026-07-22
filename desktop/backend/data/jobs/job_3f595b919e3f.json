@@ -1,0 +1,10 @@
+{
+  "job_id": "job_3f595b919e3f",
+  "status": "failed",
+  "url": "https://v.douyin.com/qzGA10T1I-g/",
+  "lesson_id": "les_03ff824ceaa6",
+  "error": "No module named 'librosa'",
+  "progress": 35,
+  "phase": "beat",
+  "fallback_hint": "视频下载完成，正在切片和生成课程..."
+}
