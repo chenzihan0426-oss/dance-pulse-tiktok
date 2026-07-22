@@ -20,6 +20,19 @@ logger = logging.getLogger(__name__)
 
 # 关键帧 JPEG 质量。85 是质量 / 体积的经验甜点。
 _JPEG_QUALITY = 85
+# 送 VLM 前把最长边压到该尺寸:VLM 耗时与分辨率强相关(按 tile 切分计算),
+# 720x1280 原图对"识别舞蹈动作"是浪费,512 足够看清肢体,单次调用明显提速。
+_MAX_SIDE = 512
+
+
+def _downscale_for_vlm(frame):
+    """最长边压到 _MAX_SIDE(仅缩小,不放大)。"""
+    h, w = frame.shape[:2]
+    longest = max(h, w)
+    if longest <= _MAX_SIDE:
+        return frame
+    scale = _MAX_SIDE / longest
+    return cv2.resize(frame, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_AREA)
 
 
 def extract_keyframes_base64(
@@ -129,6 +142,9 @@ def _extract_with_ffmpeg(clip_file: Path, n_frames: int) -> List[str]:
                 str(clip_file),
                 "-frames:v",
                 "1",
+                # 与 opencv 路径一致:最长边压到 _MAX_SIDE 再送 VLM
+                "-vf",
+                f"scale='if(gt(iw,ih),{_MAX_SIDE},-2)':'if(gt(iw,ih),-2,{_MAX_SIDE})'",
                 "-q:v",
                 "2",
                 "-y",
@@ -220,6 +236,7 @@ def _probe_duration_seconds(clip_file: Path) -> float:
 
 def _encode_frame_jpeg_base64(frame) -> str:
     """把 BGR numpy 帧编码为 base64 JPEG 字符串（不带 data: 前缀）。"""
+    frame = _downscale_for_vlm(frame)
     ok, buf = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, _JPEG_QUALITY])
     if not ok:
         raise RuntimeError("cv2.imencode failed")

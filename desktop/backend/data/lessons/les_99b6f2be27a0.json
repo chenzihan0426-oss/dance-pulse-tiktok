@@ -1,0 +1,457 @@
+{
+  "id": "les_99b6f2be27a0",
+  "title": "kpop舞蹈",
+  "source_url": "https://v.douyin.com/jtryI8E9S2I/",
+  "duration": 30.07,
+  "bpm": 103.36,
+  "video_url": "/videos/les_99b6f2be27a0.mp4",
+  "thumbnail": "/thumbs/les_99b6f2be27a0_seg_000.jpg",
+  "confirmed": false,
+  "beat_quality": "high",
+  "beats": [
+    0.26,
+    0.86,
+    1.46,
+    2.07,
+    2.65,
+    3.23,
+    3.81,
+    4.39,
+    4.99,
+    5.57,
+    6.18,
+    6.76,
+    7.34,
+    7.94,
+    8.5,
+    9.1,
+    9.68,
+    10.29,
+    10.87,
+    11.45,
+    12.05,
+    12.63,
+    13.24,
+    13.82,
+    14.4,
+    14.98,
+    15.58,
+    16.16,
+    16.74,
+    17.35,
+    17.95,
+    18.51,
+    19.09,
+    19.69,
+    20.27,
+    20.87,
+    21.46,
+    22.04,
+    22.64,
+    23.22,
+    23.8,
+    24.4,
+    24.98,
+    25.57,
+    26.17,
+    26.75,
+    27.35,
+    27.91,
+    28.51,
+    29.09
+  ],
+  "sections": [
+    {
+      "id": "intro",
+      "label": "前奏",
+      "start": 0.0,
+      "end": 1.7
+    },
+    {
+      "id": "chorus_1",
+      "label": "副歌 1",
+      "start": 1.7,
+      "end": 8.59
+    },
+    {
+      "id": "chorus_2",
+      "label": "副歌 2",
+      "start": 8.59,
+      "end": 19.04
+    },
+    {
+      "id": "outro",
+      "label": "尾声",
+      "start": 19.04,
+      "end": 30.07
+    }
+  ],
+  "segments": [
+    {
+      "id": "seg_000",
+      "lesson_id": "les_99b6f2be27a0",
+      "index": 0,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 0.26,
+      "end": 4.99,
+      "duration": 4.73,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_99b6f2be27a0_seg_000.jpg",
+      "clip_url": "/clips/les_99b6f2be27a0_seg_000.mp4",
+      "pose_url": "/pose/les_99b6f2be27a0/seg_000.json",
+      "matte_rgb_url": "",
+      "matte_mask_url": "",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 3,
+      "is_still": false,
+      "ai_description": "副歌 1·常规节奏,动作清晰",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "屈膝下蹲，甩头转身，动作流畅",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左脚点地，双手胸前交叠"
+          },
+          {
+            "beats": "3-4",
+            "content": "屈膝下蹲，甩头向右看"
+          },
+          {
+            "beats": "5-6",
+            "content": "起身同时转身背对镜头"
+          },
+          {
+            "beats": "7-8",
+            "content": "双臂自然摆动，重心稳定"
+          }
+        ],
+        "tips": [
+          "注意甩头时利用腰部力量带动",
+          "下蹲时膝盖不要超过脚尖",
+          "转身时保持身体平衡"
+        ],
+        "beat_cues": [
+          "左脚点",
+          null,
+          "甩头",
+          null,
+          "起身",
+          null,
+          "摆臂",
+          null
+        ],
+        "generated_at": "2026-07-22T17:35:03Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_001",
+      "lesson_id": "les_99b6f2be27a0",
+      "index": 1,
+      "section": "chorus_1",
+      "section_label": "副歌 1",
+      "start": 4.99,
+      "end": 9.68,
+      "duration": 4.69,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_99b6f2be27a0_seg_001.jpg",
+      "clip_url": "/clips/les_99b6f2be27a0_seg_001.mp4",
+      "pose_url": "/pose/les_99b6f2be27a0/seg_001.json",
+      "matte_rgb_url": "",
+      "matte_mask_url": "",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 5,
+      "is_still": false,
+      "ai_description": "副歌 1·爆发段落,快速连续移动",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "大幅度弯腰起身，伴随胯部摆动和转身",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "快速弯腰至最低点，头发甩动"
+          },
+          {
+            "beats": "3-4",
+            "content": "迅速起身，同时右肩上提，头部转向一侧"
+          },
+          {
+            "beats": "5-6",
+            "content": "身体下沉，重心放低，左脚点地"
+          },
+          {
+            "beats": "7-8",
+            "content": "转身背对镜头，右手扶把杆，保持蹲姿"
+          }
+        ],
+        "tips": [
+          "第一拍弯腰时注意核心收紧",
+          "起身时利用腰部发力带动上半身",
+          "转身时保持重心稳定，避免晃动"
+        ],
+        "beat_cues": [
+          "弯腰甩发",
+          null,
+          "起身甩头",
+          null,
+          "下沉左点",
+          null,
+          "转身扶杆",
+          null
+        ],
+        "generated_at": "2026-07-22T17:35:03Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_002",
+      "lesson_id": "les_99b6f2be27a0",
+      "index": 2,
+      "section": "chorus_2",
+      "section_label": "副歌 2",
+      "start": 9.68,
+      "end": 14.4,
+      "duration": 4.72,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_99b6f2be27a0_seg_002.jpg",
+      "clip_url": "/clips/les_99b6f2be27a0_seg_002.mp4",
+      "pose_url": "/pose/les_99b6f2be27a0/seg_002.json",
+      "matte_rgb_url": "",
+      "matte_mask_url": "",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 4,
+      "is_still": false,
+      "ai_description": "副歌 2·节奏紧凑,动作幅度大",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "弯腰起身，双臂展开，单腿点地",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "前倾弯腰，头发甩动"
+          },
+          {
+            "beats": "3-4",
+            "content": "直立抬头，双臂外展"
+          },
+          {
+            "beats": "5-6",
+            "content": "右肩上提，左手叉腰"
+          },
+          {
+            "beats": "7-8",
+            "content": "双臂下压，左腿点地"
+          }
+        ],
+        "tips": [
+          "弯腰时重心放低，甩头要干脆",
+          "起身抬头时眼神配合动作",
+          "点地腿注意保持平衡"
+        ],
+        "beat_cues": [
+          "弯腰甩头",
+          null,
+          "直立外展",
+          null,
+          "右肩上提",
+          null,
+          "双臂下压",
+          "左腿点地"
+        ],
+        "generated_at": "2026-07-22T17:35:03Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_003",
+      "lesson_id": "les_99b6f2be27a0",
+      "index": 3,
+      "section": "chorus_2",
+      "section_label": "副歌 2",
+      "start": 14.4,
+      "end": 19.09,
+      "duration": 4.69,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_99b6f2be27a0_seg_003.jpg",
+      "clip_url": "/clips/les_99b6f2be27a0_seg_003.mp4",
+      "pose_url": "/pose/les_99b6f2be27a0/seg_003.json",
+      "matte_rgb_url": "",
+      "matte_mask_url": "",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 2,
+      "is_still": false,
+      "ai_description": "副歌 2·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "肩部带动身体律动，配合胯部摆动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左肩上提，右手轻抚头发"
+          },
+          {
+            "beats": "3-4",
+            "content": "身体向右扭动，左手叉腰"
+          },
+          {
+            "beats": "5-6",
+            "content": "重心下沉，双手胸前交叠"
+          },
+          {
+            "beats": "7-8",
+            "content": "右腿点地，身体转向左侧"
+          }
+        ],
+        "tips": [
+          "注意肩部动作的流畅性",
+          "胯部摆动时保持节奏感",
+          "眼神跟随动作方向变化"
+        ],
+        "beat_cues": [
+          "肩上提",
+          null,
+          "身体扭动",
+          null,
+          "重心下沉",
+          null,
+          "右腿点地",
+          null
+        ],
+        "generated_at": "2026-07-22T17:35:03Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_004",
+      "lesson_id": "les_99b6f2be27a0",
+      "index": 4,
+      "section": "outro",
+      "section_label": "尾声",
+      "start": 19.09,
+      "end": 23.8,
+      "duration": 4.71,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_99b6f2be27a0_seg_004.jpg",
+      "clip_url": "/clips/les_99b6f2be27a0_seg_004.mp4",
+      "pose_url": "/pose/les_99b6f2be27a0/seg_004.json",
+      "matte_rgb_url": "",
+      "matte_mask_url": "",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 1,
+      "is_still": false,
+      "ai_description": "尾声·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "单腿点地，手臂交叉胸前，双手上举",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左脚点地，右手向上"
+          },
+          {
+            "beats": "3-4",
+            "content": "双臂交叉于胸前，身体微侧"
+          },
+          {
+            "beats": "5-6",
+            "content": "重心下沉，双手握拳置于腰间"
+          },
+          {
+            "beats": "7-8",
+            "content": "双手上举至头顶，指尖相对"
+          }
+        ],
+        "tips": [
+          "保持膝盖微屈，动作流畅",
+          "注意手部位置变化，避免僵硬",
+          "眼神跟随手指方向，增加表现力"
+        ],
+        "beat_cues": [
+          "右脚点",
+          null,
+          "交叉胸",
+          null,
+          "下沉握拳",
+          null,
+          "双手上举",
+          null
+        ],
+        "generated_at": "2026-07-22T17:35:07Z"
+      },
+      "deleted": false
+    },
+    {
+      "id": "seg_005",
+      "lesson_id": "les_99b6f2be27a0",
+      "index": 5,
+      "section": "outro",
+      "section_label": "尾声",
+      "start": 23.8,
+      "end": 28.51,
+      "duration": 4.71,
+      "beat_count": 8,
+      "thumbnail": "/thumbs/les_99b6f2be27a0_seg_005.jpg",
+      "clip_url": "/clips/les_99b6f2be27a0_seg_005.mp4",
+      "pose_url": "/pose/les_99b6f2be27a0/seg_005.json",
+      "matte_rgb_url": "",
+      "matte_mask_url": "",
+      "pose_full_url": "",
+      "particle_url": "",
+      "difficulty": 1,
+      "is_still": false,
+      "ai_description": "尾声·动作平缓,幅度较小",
+      "user_edited": false,
+      "teaching": {
+        "status": "ready",
+        "summary": "双手胸前交叠后向上伸展再下沉",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手于胸前交叠，指尖相对"
+          },
+          {
+            "beats": "3-4",
+            "content": "双臂向上伸展过头顶，手指张开"
+          },
+          {
+            "beats": "5-6",
+            "content": "身体向右侧倾斜，左臂下压"
+          },
+          {
+            "beats": "7-8",
+            "content": "重心下沉，双手放于大腿前侧"
+          }
+        ],
+        "tips": [
+          "保持核心收紧，动作流畅",
+          "手臂伸展时注意肩部放松",
+          "下沉时膝盖微屈，保持弹性"
+        ],
+        "beat_cues": [
+          "交叠手",
+          null,
+          "伸展手",
+          null,
+          "侧身",
+          null,
+          "下沉",
+          null
+        ],
+        "generated_at": "2026-07-22T17:35:08Z"
+      },
+      "deleted": false
+    }
+  ]
+}
