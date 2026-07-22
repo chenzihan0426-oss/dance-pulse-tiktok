@@ -133,21 +133,42 @@
       "ai_description": "副歌 1·常规节奏,动作清晰",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "行走转身，单手叉腰，另一手伸展",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "右脚向前走两步"
+          },
+          {
+            "beats": "3-4",
+            "content": "转身，左肩朝前，右手叉腰"
+          },
+          {
+            "beats": "5-6",
+            "content": "重心下沉，左手自然摆动"
+          },
+          {
+            "beats": "7-8",
+            "content": "左臂伸展指侧方，保持姿态"
+          }
+        ],
+        "tips": [
+          "注意步伐轻盈，避免拖沓",
+          "转身时核心收紧，保持身体稳定",
+          "手臂伸展时肩部放松，动作流畅"
+        ],
         "beat_cues": [
+          "走两步",
           null,
+          "转身叉腰",
           null,
-          null,
-          null,
-          null,
-          null,
+          "重心下沉",
+          "左臂伸展",
           null,
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:43:15Z"
       },
       "deleted": false
     },
@@ -173,21 +194,42 @@
       "ai_description": "副歌 1·动作平缓,幅度较小",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "副歌1段落，包含转身和手势动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手胸前交叉，身体微侧"
+          },
+          {
+            "beats": "3-4",
+            "content": "右脚点地，左手向上举"
+          },
+          {
+            "beats": "5-6",
+            "content": "转身背对镜头，右手下垂"
+          },
+          {
+            "beats": "7-8",
+            "content": "左脚点地，右手向后摆动"
+          }
+        ],
+        "tips": [
+          "注意手部动作的流畅性",
+          "转身时保持重心稳定",
+          "眼神跟随动作方向"
+        ],
         "beat_cues": [
+          "交叉手",
           null,
+          "点右脚",
           null,
+          "转身",
           null,
-          null,
-          null,
-          null,
-          null,
+          "点左脚",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:43:21Z"
       },
       "deleted": false
     },
@@ -213,21 +255,42 @@
       "ai_description": "副歌 2·动作平缓,幅度较小",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "副歌2段，身体波浪与侧步结合",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "重心下沉，右肩前送"
+          },
+          {
+            "beats": "3-4",
+            "content": "左脚点地，身体向左侧波浪"
+          },
+          {
+            "beats": "5-6",
+            "content": "重心转回，右肩后拉"
+          },
+          {
+            "beats": "7-8",
+            "content": "左脚点地，身体向右侧波浪"
+          }
+        ],
+        "tips": [
+          "保持核心收紧，动作流畅",
+          "注意肩膀和胯部的协调运动",
+          "节奏可先慢练再加速"
+        ],
         "beat_cues": [
+          "下沉右肩",
           null,
+          "左脚点地",
           null,
+          "转回右肩",
           null,
-          null,
-          null,
-          null,
-          null,
+          "左脚点地",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:43:21Z"
       },
       "deleted": false
     },
@@ -253,21 +316,42 @@
       "ai_description": "副歌 2·节奏紧凑,动作幅度大",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "副歌2：扭胯下蹲，身体流动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左肩上提，重心转移"
+          },
+          {
+            "beats": "3-4",
+            "content": "腰发力扭胯，向后转身"
+          },
+          {
+            "beats": "5-6",
+            "content": "下蹲，双手放膝"
+          },
+          {
+            "beats": "7-8",
+            "content": "起身，右肩前送"
+          }
+        ],
+        "tips": [
+          "注意腰部发力带动扭胯",
+          "下蹲时膝盖不要超过脚尖",
+          "起身时保持核心收紧"
+        ],
         "beat_cues": [
+          "左肩上",
           null,
+          "扭胯转",
           null,
+          "下蹲",
           null,
-          null,
-          null,
-          null,
-          null,
+          "起身",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:43:21Z"
       },
       "deleted": false
     },
@@ -293,21 +377,42 @@
       "ai_description": "副歌 2·常规节奏,动作清晰",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
-        "beat_cues": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
+        "status": "ready",
+        "summary": "副歌2：扭胯下沉，身体波浪",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "右肩上提，左脚点地"
+          },
+          {
+            "beats": "3-4",
+            "content": "扭胯下沉，双手放膝"
+          },
+          {
+            "beats": "5-6",
+            "content": "起身推胯，重心后移"
+          },
+          {
+            "beats": "7-8",
+            "content": "转身后蹲，腰发力定住"
+          }
         ],
-        "generated_at": ""
+        "tips": [
+          "注意肩部和胯部的协调动作",
+          "下沉时膝盖微屈保持弹性",
+          "转身要流畅，重心平稳过渡"
+        ],
+        "beat_cues": [
+          "右肩上",
+          null,
+          "扭胯下",
+          null,
+          "推胯后",
+          "转身后",
+          null,
+          "定住"
+        ],
+        "generated_at": "2026-07-22T18:43:21Z"
       },
       "deleted": false
     },
@@ -333,21 +438,42 @@
       "ai_description": "尾声·爆发段落,快速连续移动",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
-        "beat_cues": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
+        "status": "ready",
+        "summary": "尾声段落，流畅身体波浪与手部定点动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左肩上提，右手胸前划弧"
+          },
+          {
+            "beats": "3-4",
+            "content": "腰胯发力带动身体波浪，左手点地"
+          },
+          {
+            "beats": "5-6",
+            "content": "右手胸前交叉，指尖轻点"
+          },
+          {
+            "beats": "7-8",
+            "content": "双臂回收至胸前，指尖相对定点"
+          }
         ],
-        "generated_at": ""
+        "tips": [
+          "注意腰部流动感，像水波一样连贯",
+          "手部动作轻盈，指尖控制力度",
+          "保持眼神跟随动作方向，增强表现力"
+        ],
+        "beat_cues": [
+          "左肩上",
+          null,
+          "腰胯波",
+          null,
+          "右手上",
+          null,
+          "双臂收",
+          "指尖定"
+        ],
+        "generated_at": "2026-07-22T18:43:40Z"
       },
       "deleted": false
     },
@@ -373,21 +499,42 @@
       "ai_description": "尾声·静止定格,保持姿态",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "双手举过头顶后放腰间，身体微摆动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手举过头顶"
+          },
+          {
+            "beats": "3-4",
+            "content": "放下双手至腰部"
+          },
+          {
+            "beats": "5-6",
+            "content": "身体左右微摆动"
+          },
+          {
+            "beats": "7-8",
+            "content": "保持姿势稳定"
+          }
+        ],
+        "tips": [
+          "注意手部动作流畅过渡",
+          "腰部发力带动身体摆动",
+          "保持重心稳定"
+        ],
         "beat_cues": [
+          "举手过头",
           null,
+          "放腰",
           null,
-          null,
-          null,
-          null,
+          "左右摆",
           null,
           null,
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:43:42Z"
       },
       "deleted": false
     },
@@ -413,21 +560,42 @@
       "ai_description": "尾声·动作平缓,幅度较小",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "双臂伸展后收于胸前，配合腰胯动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂平伸展开"
+          },
+          {
+            "beats": "3-4",
+            "content": "手臂收回至胸前交叉"
+          },
+          {
+            "beats": "5-6",
+            "content": "身体重心下沉，腰胯发力"
+          },
+          {
+            "beats": "7-8",
+            "content": "双手举过头顶指向上方"
+          }
+        ],
+        "tips": [
+          "保持手臂线条流畅",
+          "腰胯动作要与手臂配合",
+          "注意节奏感和身体控制"
+        ],
         "beat_cues": [
+          "双臂平展",
           null,
+          "手臂交叉",
           null,
+          "腰胯发力",
           null,
-          null,
-          null,
-          null,
-          null,
+          "双手上指",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:43:42Z"
       },
       "deleted": false
     },
@@ -453,21 +621,42 @@
       "ai_description": "尾声·静止定格,保持姿态",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "尾声段落，手臂与身体波浪动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂胸前交叉，指尖相对"
+          },
+          {
+            "beats": "3-4",
+            "content": "右臂上举指向上方，左臂下放"
+          },
+          {
+            "beats": "5-6",
+            "content": "身体向右侧波浪下沉，重心转移"
+          },
+          {
+            "beats": "7-8",
+            "content": "回正身体，双手轻抚腹部"
+          }
+        ],
+        "tips": [
+          "保持动作流畅，像水流一样",
+          "注意肩部和手臂的连贯性",
+          "重心移动时膝盖微屈保持稳定"
+        ],
         "beat_cues": [
+          "交叉双臂",
           null,
+          "右臂上举",
           null,
+          "身体下沉",
           null,
-          null,
-          null,
-          null,
-          null,
+          "回正身体",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:43:43Z"
       },
       "deleted": false
     }

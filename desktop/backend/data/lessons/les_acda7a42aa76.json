@@ -99,21 +99,42 @@
       "ai_description": "副歌 1·爆发段落,快速连续移动",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "后转甩头，双手叉腰定住",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "右后转身甩头"
+          },
+          {
+            "beats": "3-4",
+            "content": "左脚点地，重心下沉"
+          },
+          {
+            "beats": "5-6",
+            "content": "双手叉腰，身体微晃"
+          },
+          {
+            "beats": "7-8",
+            "content": "保持姿势定点"
+          }
+        ],
+        "tips": [
+          "注意后转时头部甩动的力度",
+          "下沉时膝盖微屈保持弹性",
+          "双手叉腰要挺胸抬头"
+        ],
         "beat_cues": [
+          "后转甩头",
           null,
+          "左脚点地",
           null,
+          "双手叉腰",
           null,
-          null,
-          null,
-          null,
-          null,
+          "保持定住",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:42:04Z"
       },
       "deleted": false
     },
@@ -139,21 +160,42 @@
       "ai_description": "主歌 1·节奏紧凑,动作幅度大",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "双臂波浪摆动，身体轻微扭动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂从胸前向外展开"
+          },
+          {
+            "beats": "3-4",
+            "content": "手臂上举至头顶两侧"
+          },
+          {
+            "beats": "5-6",
+            "content": "身体向右侧扭动，左臂下压"
+          },
+          {
+            "beats": "7-8",
+            "content": "恢复站立，双臂自然垂放"
+          }
+        ],
+        "tips": [
+          "保持肩膀放松，动作流畅",
+          "注意腰部跟随手臂做小幅度扭动",
+          "重心放在前脚掌，膝盖微屈"
+        ],
         "beat_cues": [
+          "展开",
           null,
+          "上举",
           null,
+          "扭动",
           null,
-          null,
-          null,
-          null,
-          null,
+          "还原",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:42:04Z"
       },
       "deleted": false
     },
@@ -179,21 +221,42 @@
       "ai_description": "主歌 1·动作平缓,幅度较小",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
-        "beat_cues": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
+        "status": "ready",
+        "summary": "小幅度转身与胯部律动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "右手挥手，身体微侧"
+          },
+          {
+            "beats": "3-4",
+            "content": "重心下沉，双手放腰"
+          },
+          {
+            "beats": "5-6",
+            "content": "向右转身，左肩前送"
+          },
+          {
+            "beats": "7-8",
+            "content": "回正身体，胯部定点"
+          }
         ],
-        "generated_at": ""
+        "tips": [
+          "保持上半身稳定，重点在胯部",
+          "转身时用腰部带动，避免大动作",
+          "注意节奏，拍子清晰"
+        ],
+        "beat_cues": [
+          "挥手",
+          null,
+          "下沉",
+          null,
+          "转身",
+          null,
+          "回正",
+          "定点"
+        ],
+        "generated_at": "2026-07-22T18:42:05Z"
       },
       "deleted": false
     },
@@ -219,21 +282,42 @@
       "ai_description": "副歌 2·动作平缓,幅度较小",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "双手叉腰，身体左右摆动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "重心左移，右肩前送"
+          },
+          {
+            "beats": "3-4",
+            "content": "重心右移，左肩前送"
+          },
+          {
+            "beats": "5-6",
+            "content": "重心左移，臀部外摆"
+          },
+          {
+            "beats": "7-8",
+            "content": "重心右移，臀部外摆"
+          }
+        ],
+        "tips": [
+          "保持上身稳定，动作主要靠胯部带动",
+          "注意节奏感，每个动作点清晰",
+          "面部表情跟随动作自然变化"
+        ],
         "beat_cues": [
+          "右肩前",
           null,
+          "左肩前",
           null,
+          "臀外摆",
           null,
-          null,
-          null,
-          null,
-          null,
+          "臀外摆",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:42:07Z"
       },
       "deleted": false
     }

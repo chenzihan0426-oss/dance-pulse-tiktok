@@ -286,6 +286,26 @@ export function danceKeyOf(lessonId: string): string | null {
   return DANCE_KEY_BY_LESSON[lessonId] ?? null;
 }
 
+// ---------------------------------------------------------------------------
+// BGM 音频指纹分组(后端 librosa 计算,自动识别"标题不同但同一首歌")。
+// 与手工 danceKey 取并集:任一判定同舞即视为同一支舞。
+// ---------------------------------------------------------------------------
+
+let BGM_GROUPS: Record<string, string> = {};
+
+export function setBgmGroups(groups: Record<string, string>): void {
+  BGM_GROUPS = groups ?? {};
+}
+
+/** 两门课是否同一支舞:手工 danceKey 相同 或 BGM 指纹同组 */
+export function sameDance(lessonA: string, lessonB: string): boolean {
+  if (!lessonA || !lessonB || lessonA === lessonB) return false;
+  const ka = danceKeyOf(lessonA);
+  if (ka !== null && ka === danceKeyOf(lessonB)) return true;
+  const ga = BGM_GROUPS[lessonA];
+  return Boolean(ga && ga === BGM_GROUPS[lessonB]);
+}
+
 function daysAgo(n: number): string {
   // 固定锚点，避免 SSR/CSR 因 Date.now() 不一致导致 hydration 报错
   const d = new Date(Date.UTC(2026, 6, 22, 12, 0, 0));
@@ -1064,27 +1084,33 @@ export interface ForYouRecommendation {
  * → 热门 → 穿插探索。跳完 what is love 就优先推其他人跳 what is love 的。
  */
 export function getForYouRecommendations(fromLessonId: string, limit = 12): ForYouRecommendation[] {
-  const fromDanceKey = danceKeyOf(fromLessonId);
   const fromMetaTags = new Set(
     SHOWCASE_FEED.filter((item) => item.result.lessonId === fromLessonId)
       .flatMap((item) => SHOWCASE_WORK_META[item.result.id]?.tags ?? [])
   );
 
-  const ranked = SHOWCASE_FEED.map((item) => {
+  // 同一门课(同一个视频)只留一个作品:按分数最高去重,避免满屏同一支视频的多个"版本"
+  const bestPerLesson = new Map<string, CommunityFeedItem>();
+  for (const item of SHOWCASE_FEED) {
+    const cur = bestPerLesson.get(item.result.lessonId);
+    if (!cur || item.result.score > cur.result.score) bestPerLesson.set(item.result.lessonId, item);
+  }
+  const candidates = Array.from(bestPerLesson.values());
+
+  const ranked = candidates.map((item) => {
     const meta = SHOWCASE_WORK_META[item.result.id];
     const tags = meta?.tags ?? [];
     const tagOverlap = tags.filter((t) => fromMetaTags.has(t)).length;
     const sameLesson = item.result.lessonId === fromLessonId;
-    // 同一支舞(不同视频/不同课):whatislove 推 whatislove,nonono 推 nonono
-    const sameDance =
-      !sameLesson && fromDanceKey !== null && danceKeyOf(item.result.lessonId) === fromDanceKey;
+    // 同一支舞(不同视频/不同课):手工 danceKey ∪ BGM 音频指纹
+    const isSameDance = sameDance(fromLessonId, item.result.lessonId);
     const isNewbie = tags.some((t) => /新人|入门/.test(t)) || item.result.likeCount < 160;
     const isHot = item.result.likeCount >= 400 || item.result.score >= 92;
 
     let score = item.result.likeCount * 0.35 + item.result.score * 8;
     let reason: ForYouReason = "猜你也喜欢";
 
-    if (sameDance) {
+    if (isSameDance) {
       score += 5200;
       reason = "同舞挑战";
     } else if (sameLesson) {

@@ -233,6 +233,9 @@ async def run_import_job(
         await teaching_queue.enqueue(lesson.id, seg_ids)
         # 后台补 matte 抠像(光影/剪影模式数据),不阻塞导入完成
         schedule_matte_generation(lesson.id)
+        # 新课加入 → 后台重算 BGM 同舞分组
+        from services.bgm_groups import refresh_dance_groups_async
+        refresh_dance_groups_async()
     except FetchError as exc:
         update_job(job_id, status="failed", error=str(exc))
     except Exception as exc:
@@ -279,6 +282,9 @@ async def run_upload_job(job_id: str, upload_file_path: str, filename: str) -> N
         await teaching_queue.enqueue(lesson.id, seg_ids)
         # 后台补 matte 抠像(光影/剪影模式数据),不阻塞导入完成
         schedule_matte_generation(lesson.id)
+        # 新课加入 → 后台重算 BGM 同舞分组
+        from services.bgm_groups import refresh_dance_groups_async
+        refresh_dance_groups_async()
     except Exception as exc:
         update_job(job_id, status="failed", error=str(exc))
     finally:

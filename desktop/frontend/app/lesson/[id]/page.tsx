@@ -672,7 +672,7 @@ export default function LessonPageDesktop() {
                 </Link>
               ) : null}
 
-              {demoReady && allLearned ? (
+              {demoReady ? (
                 <Link
                   href={`/lesson/${lesson.id}/tracking-desktop`}
                   className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#ff0055] via-[#9d4edd] to-[#00f3ff] px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110"
@@ -685,11 +685,9 @@ export default function LessonPageDesktop() {
               ) : (
                 <span
                   className="rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm text-white/40"
-                  title={!demoReady ? "缺少切片或姿态数据" : "先学完所有动作卡再来挑战"}
+                  title="缺少切片或姿态数据"
                 >
-                  {!demoReady
-                    ? "跟拍挑战未就绪"
-                    : `先学完动作卡 (${learnedCount}/${total || activeSegments.length})`}
+                  跟拍挑战未就绪
                 </span>
               )}
             </div>

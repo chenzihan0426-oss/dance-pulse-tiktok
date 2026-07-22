@@ -1048,7 +1048,7 @@ export function DesktopPlayer({
             </div>
 
             <div className="border-t border-white/10 p-5">
-              {demoReady && allLearned ? (
+              {demoReady ? (
                 <Link
                   href={`/lesson/${lesson.id}/tracking-desktop`}
                   className="group flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#ff0055] via-[#9d4edd] to-[#00f3ff] px-6 py-3 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(157,78,221,0.32)] transition hover:brightness-110"
@@ -1059,14 +1059,10 @@ export function DesktopPlayer({
               ) : (
                 <div
                   className="flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-medium text-white/45"
-                  title={!demoReady ? "缺少切片或姿态数据" : "先学完所有动作卡再来挑战"}
+                  title="缺少切片或姿态数据"
                 >
                   <Sparkles className="h-4 w-4" />
-                  <span>
-                    {!demoReady
-                      ? "整支跟拍挑战未就绪"
-                      : `先学完所有动作卡 (${learnedCount}/${total || practiceSegments.length})`}
-                  </span>
+                  <span>整支跟拍挑战未就绪</span>
                 </div>
               )}
             </div>

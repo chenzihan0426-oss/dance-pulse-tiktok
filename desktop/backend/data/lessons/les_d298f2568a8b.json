@@ -125,21 +125,42 @@
       "ai_description": "前奏·爆发段落,快速连续移动",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "转身抬臂，单腿点地，定格造型",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左脚点地，右手叉腰，身体微侧"
+          },
+          {
+            "beats": "3-4",
+            "content": "快速转身，右臂上举，左臂胸前"
+          },
+          {
+            "beats": "5-6",
+            "content": "重心下沉，左臂伸展，右臂上举"
+          },
+          {
+            "beats": "7-8",
+            "content": "定格姿势，右臂高举，左臂侧平"
+          }
+        ],
+        "tips": [
+          "注意转身时眼神跟随手部移动",
+          "点地动作要轻快，保持节奏感",
+          "定格时核心收紧，姿态挺拔"
+        ],
         "beat_cues": [
+          "点地",
           null,
+          "转身",
           null,
-          null,
-          null,
-          null,
-          null,
+          "下沉",
+          "定格",
           null,
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:41:55Z"
       },
       "deleted": false
     },
@@ -165,21 +186,42 @@
       "ai_description": "副歌 1·常规节奏,动作清晰",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
-        "beat_cues": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
+        "status": "ready",
+        "summary": "右肩上推胯转身，左脚点地定点",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "右手举过头顶，左肩上推胯"
+          },
+          {
+            "beats": "3-4",
+            "content": "身体向右转，重心下沉"
+          },
+          {
+            "beats": "5-6",
+            "content": "左脚向左侧点地，腰发力"
+          },
+          {
+            "beats": "7-8",
+            "content": "面向前方，双手放于胸前定点"
+          }
         ],
-        "generated_at": ""
+        "tips": [
+          "注意右肩上推胯时保持上半身稳定",
+          "转身时眼睛跟随手部移动",
+          "左脚点地要轻快，重心保持在右腿"
+        ],
+        "beat_cues": [
+          "右肩上",
+          null,
+          "转身",
+          null,
+          "左脚点",
+          null,
+          null,
+          "定点"
+        ],
+        "generated_at": "2026-07-22T18:41:56Z"
       },
       "deleted": false
     },
@@ -205,21 +247,42 @@
       "ai_description": "副歌 2·节奏紧凑,动作幅度大",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
-        "beat_cues": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
+        "status": "ready",
+        "summary": "副歌2：扭胯甩头，活力定格",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左肩上提，右手叉腰"
+          },
+          {
+            "beats": "3-4",
+            "content": "扭胯下沉，甩头向后"
+          },
+          {
+            "beats": "5-6",
+            "content": "转身面向镜头，重心前移"
+          },
+          {
+            "beats": "7-8",
+            "content": "双腿分开，双手叉腰定格"
+          }
         ],
-        "generated_at": ""
+        "tips": [
+          "注意扭胯时腰部发力",
+          "甩头动作要干净利落",
+          "定格时保持微笑眼神"
+        ],
+        "beat_cues": [
+          "左肩上",
+          null,
+          "扭胯甩头",
+          null,
+          "转身",
+          null,
+          "分腿",
+          "定格"
+        ],
+        "generated_at": "2026-07-22T18:41:59Z"
       },
       "deleted": false
     },
@@ -245,21 +308,42 @@
       "ai_description": "副歌 2·动作平缓,幅度较小",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "双手上举，身体左右摆动，右脚点地",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手胸前交叠后向外打开"
+          },
+          {
+            "beats": "3-4",
+            "content": "身体向右侧摆动，左脚点地"
+          },
+          {
+            "beats": "5-6",
+            "content": "双手向上举过头顶，身体转向左侧"
+          },
+          {
+            "beats": "7-8",
+            "content": "右脚点地，重心回到中间"
+          }
+        ],
+        "tips": [
+          "保持肩膀放松，动作流畅",
+          "注意节奏感，拍子要准",
+          "眼神跟随手部动作移动"
+        ],
         "beat_cues": [
+          "双手打开",
           null,
+          "侧身摆动",
           null,
+          "双手上举",
           null,
-          null,
-          null,
-          null,
-          null,
+          "右脚点地",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:42:00Z"
       },
       "deleted": false
     },
@@ -285,21 +369,42 @@
       "ai_description": "副歌 2·动作平缓,幅度较小",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "身体波浪与胯部流动，手臂随动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "身体前倾后仰做波浪"
+          },
+          {
+            "beats": "3-4",
+            "content": "重心移至右腿，左胯向前推"
+          },
+          {
+            "beats": "5-6",
+            "content": "重心移至左腿，右胯向前推"
+          },
+          {
+            "beats": "7-8",
+            "content": "双臂跟随胯部流动摆动"
+          }
+        ],
+        "tips": [
+          "注意腰部发力带动胯部",
+          "手臂动作轻柔跟随身体",
+          "保持节奏稳定流畅"
+        ],
         "beat_cues": [
+          "波浪",
           null,
+          "推胯",
           null,
+          "推胯",
           null,
-          null,
-          null,
-          null,
-          null,
+          "摆臂",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:42:00Z"
       },
       "deleted": false
     },
@@ -325,21 +430,42 @@
       "ai_description": "副歌 2·常规节奏,动作清晰",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
-        "beat_cues": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
+        "status": "ready",
+        "summary": "走廊中完成转身与定点造型",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左脚点地 右手向后甩发"
+          },
+          {
+            "beats": "3-4",
+            "content": "身体下沉 转身面向镜头"
+          },
+          {
+            "beats": "5-6",
+            "content": "重心前移 左肩上提"
+          },
+          {
+            "beats": "7-8",
+            "content": "双腿并拢 双手叉腰定点"
+          }
         ],
-        "generated_at": ""
+        "tips": [
+          "注意甩发时眼神配合",
+          "转身要流畅自然",
+          "定点时保持核心收紧"
+        ],
+        "beat_cues": [
+          "点地甩发",
+          null,
+          "转身下沉",
+          null,
+          "左肩上提",
+          null,
+          "双腿并拢",
+          "双手叉腰"
+        ],
+        "generated_at": "2026-07-22T18:42:00Z"
       },
       "deleted": false
     },
@@ -365,21 +491,42 @@
       "ai_description": "尾声·动作平缓,幅度较小",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
-        "beat_cues": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
+        "status": "ready",
+        "summary": "双手插兜扭胯转身，完成尾声动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手插兜，身体微前倾"
+          },
+          {
+            "beats": "3-4",
+            "content": "腰胯发力向右扭动"
+          },
+          {
+            "beats": "5-6",
+            "content": "左脚点地，身体重心转移"
+          },
+          {
+            "beats": "7-8",
+            "content": "转身面向左侧，保持造型"
+          }
         ],
-        "generated_at": ""
+        "tips": [
+          "注意腰部发力带动胯部",
+          "转身时眼睛跟随方向移动",
+          "保持双手插兜姿势稳定"
+        ],
+        "beat_cues": [
+          "插兜",
+          null,
+          "扭胯",
+          null,
+          "点地",
+          "转身",
+          null,
+          "定住"
+        ],
+        "generated_at": "2026-07-22T18:42:04Z"
       },
       "deleted": false
     }

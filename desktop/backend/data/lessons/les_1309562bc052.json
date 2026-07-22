@@ -131,21 +131,42 @@
       "ai_description": "前奏·静止定格,保持姿态",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "双手叉腰，身体左右摆动，小幅度转身。",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手叉腰，重心放低"
+          },
+          {
+            "beats": "3-4",
+            "content": "右肩上提，身体向右摆动"
+          },
+          {
+            "beats": "5-6",
+            "content": "左肩上提，身体向左摆动"
+          },
+          {
+            "beats": "7-8",
+            "content": "小幅度转身，恢复原位"
+          }
+        ],
+        "tips": [
+          "保持重心稳定，动作流畅",
+          "肩膀动作轻柔，不要耸肩",
+          "注意节奏，跟随音乐律动"
+        ],
         "beat_cues": [
+          "叉腰放低",
           null,
+          "右肩上提",
           null,
+          "左肩上提",
           null,
-          null,
-          null,
-          null,
-          null,
+          "小转",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:42:16Z"
       },
       "deleted": false
     },
@@ -171,21 +192,42 @@
       "ai_description": "尾声·常规节奏,动作清晰",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
-        "beat_cues": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
+        "status": "ready",
+        "summary": "双手交叉后展开，伴随身体轻摆",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂胸前交叉，掌心相对"
+          },
+          {
+            "beats": "3-4",
+            "content": "双臂向外打开，指尖上扬"
+          },
+          {
+            "beats": "5-6",
+            "content": "身体向右侧轻摆，重心转移"
+          },
+          {
+            "beats": "7-8",
+            "content": "左臂伸展，右臂回收，完成定格"
+          }
         ],
-        "generated_at": ""
+        "tips": [
+          "保持核心收紧，动作流畅",
+          "注意手部线条优美",
+          "眼神跟随动作变化"
+        ],
+        "beat_cues": [
+          "交叉",
+          null,
+          "展开",
+          null,
+          "侧摆",
+          null,
+          "伸展",
+          "定格"
+        ],
+        "generated_at": "2026-07-22T18:42:16Z"
       },
       "deleted": false
     },
@@ -211,21 +253,42 @@
       "ai_description": "尾声·静止定格,保持姿态",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
-        "beat_cues": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
+        "status": "ready",
+        "summary": "双手胸前交叠，身体微摆动，最后定格",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂交叉于胸前，轻轻晃动"
+          },
+          {
+            "beats": "3-4",
+            "content": "右手抬起至脸侧，左手保持胸前"
+          },
+          {
+            "beats": "5-6",
+            "content": "双手上举过头，身体微转"
+          },
+          {
+            "beats": "7-8",
+            "content": "左手下压，右手轻抚头发定住"
+          }
         ],
-        "generated_at": ""
+        "tips": [
+          "注意手臂线条流畅",
+          "重心放低增加稳定性",
+          "眼神跟随手部移动"
+        ],
+        "beat_cues": [
+          "交叉双臂",
+          null,
+          "右手上抬",
+          null,
+          "双手上举",
+          null,
+          "下压右手",
+          "抚发定格"
+        ],
+        "generated_at": "2026-07-22T18:42:33Z"
       },
       "deleted": false
     },
@@ -251,21 +314,42 @@
       "ai_description": "尾声·动作平缓,幅度较小",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
-        "beat_cues": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
+        "status": "ready",
+        "summary": "手部轻柔摆动，身体随节奏微摆",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手从两侧抬起至胸前"
+          },
+          {
+            "beats": "3-4",
+            "content": "右手向前推出，左手向后拉伸"
+          },
+          {
+            "beats": "5-6",
+            "content": "双手收回胸前，身体轻微下沉"
+          },
+          {
+            "beats": "7-8",
+            "content": "双手在脸前轻点，保持微笑"
+          }
         ],
-        "generated_at": ""
+        "tips": [
+          "注意手部动作的流畅性",
+          "保持身体重心稳定",
+          "面部表情自然跟随节奏"
+        ],
+        "beat_cues": [
+          "双手上",
+          null,
+          "推手",
+          null,
+          "下沉",
+          "定点",
+          null,
+          "轻点"
+        ],
+        "generated_at": "2026-07-22T18:42:33Z"
       },
       "deleted": false
     },
@@ -291,21 +375,42 @@
       "ai_description": "尾声·常规节奏,动作清晰",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
-        "beat_cues": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
+        "status": "ready",
+        "summary": "单腿站立，手臂波浪摆动，转身完成",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左腿独立，右腿弯曲抬起，双手胸前交叠"
+          },
+          {
+            "beats": "3-4",
+            "content": "身体向右侧转，右手向外伸展，左手轻点"
+          },
+          {
+            "beats": "5-6",
+            "content": "重心转移，左腿点地，双臂自然下垂"
+          },
+          {
+            "beats": "7-8",
+            "content": "快速转身，双臂随身展开，定格姿态"
+          }
         ],
-        "generated_at": ""
+        "tips": [
+          "保持核心稳定，避免晃动",
+          "手臂动作流畅，跟随身体转动",
+          "注意节奏，拍子清晰"
+        ],
+        "beat_cues": [
+          "抬腿",
+          null,
+          "转体",
+          null,
+          "点地",
+          "转身",
+          null,
+          "定格"
+        ],
+        "generated_at": "2026-07-22T18:42:34Z"
       },
       "deleted": false
     },
@@ -331,21 +436,42 @@
       "ai_description": "尾声·爆发段落,快速连续移动",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
-        "beat_cues": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
+        "status": "ready",
+        "summary": "尾声段落，完成转身与定点动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂展开，身体微晃"
+          },
+          {
+            "beats": "3-4",
+            "content": "头部后仰，身体向右转"
+          },
+          {
+            "beats": "5-6",
+            "content": "左臂上举，右臂下压"
+          },
+          {
+            "beats": "7-8",
+            "content": "双臂交叉于胸前，定住"
+          }
         ],
-        "generated_at": ""
+        "tips": [
+          "注意头部后仰时保持颈部舒展",
+          "转身时重心放低更稳定",
+          "最后定点要干净利落"
+        ],
+        "beat_cues": [
+          "双臂展开",
+          null,
+          "头部后仰",
+          null,
+          "左臂上举",
+          "右臂下压",
+          null,
+          "双臂交叉"
+        ],
+        "generated_at": "2026-07-22T18:42:35Z"
       },
       "deleted": false
     },
@@ -371,21 +497,42 @@
       "ai_description": "尾声·节奏紧凑,动作幅度大",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "双手胸前交叠后展开至侧方再收回",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂胸前交叠"
+          },
+          {
+            "beats": "3-4",
+            "content": "向两侧打开双臂"
+          },
+          {
+            "beats": "5-6",
+            "content": "手臂上举过头顶"
+          },
+          {
+            "beats": "7-8",
+            "content": "收回双臂至胸前交叠"
+          }
+        ],
+        "tips": [
+          "保持肩部放松，动作流畅",
+          "注意手臂高度变化，避免僵硬",
+          "重心稳定，配合呼吸完成动作"
+        ],
         "beat_cues": [
           null,
           null,
+          "展臂",
           null,
+          "举臂",
           null,
-          null,
-          null,
-          null,
+          "收臂",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:42:37Z"
       },
       "deleted": false
     },
@@ -411,21 +558,42 @@
       "ai_description": "尾声·动作平缓,幅度较小",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "双手胸前交叠，伴随肩部和头部小幅度摆动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手胸前交叠，右肩上提"
+          },
+          {
+            "beats": "3-4",
+            "content": "右手轻点左肩，头部微晃"
+          },
+          {
+            "beats": "5-6",
+            "content": "双手合十于胸前，身体下沉"
+          },
+          {
+            "beats": "7-8",
+            "content": "双臂向外打开，指尖轻点"
+          }
+        ],
+        "tips": [
+          "保持动作轻柔流畅",
+          "注意肩部带动小幅度摇摆",
+          "眼神跟随手部移动"
+        ],
         "beat_cues": [
+          "右肩上",
           null,
+          "点肩",
           null,
+          "合十",
           null,
-          null,
-          null,
-          null,
-          null,
+          "外开",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:42:37Z"
       },
       "deleted": false
     },
@@ -451,21 +619,42 @@
       "ai_description": "尾声·动作平缓,幅度较小",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "尾声段落，轻快转身与手部定点动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左脚点地 右肩上提"
+          },
+          {
+            "beats": "3-4",
+            "content": "转身推胯 身体下沉"
+          },
+          {
+            "beats": "5-6",
+            "content": "双手胸前定点 左脚点地"
+          },
+          {
+            "beats": "7-8",
+            "content": "腰发力转身后定住"
+          }
+        ],
+        "tips": [
+          "注意右肩上提时保持肩膀放松",
+          "转身推胯要流畅自然",
+          "最后定点时重心放稳"
+        ],
         "beat_cues": [
+          "左脚点",
           null,
+          "转身",
           null,
+          "双手点",
           null,
-          null,
-          null,
-          null,
-          null,
+          "腰发力",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:42:38Z"
       },
       "deleted": false
     }

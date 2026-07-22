@@ -127,21 +127,42 @@
       "ai_description": "主歌 1·动作平缓,幅度较小",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "右臂上举，身体转向，左肩点动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "右臂向上伸直，掌心向前"
+          },
+          {
+            "beats": "3-4",
+            "content": "身体向右转，重心移至右腿"
+          },
+          {
+            "beats": "5-6",
+            "content": "左肩向前点动，手臂自然摆动"
+          },
+          {
+            "beats": "7-8",
+            "content": "恢复站立，双臂自然垂放"
+          }
+        ],
+        "tips": [
+          "保持上半身稳定，重心在右腿",
+          "左肩点动时注意节奏感",
+          "面部表情跟随动作变化"
+        ],
         "beat_cues": [
+          "右臂上举",
           null,
+          "身体转向",
           null,
+          "左肩点动",
           null,
-          null,
-          null,
-          null,
-          null,
+          "恢复站立",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:42:08Z"
       },
       "deleted": false
     },
@@ -167,21 +188,42 @@
       "ai_description": "副歌 1·节奏紧凑,动作幅度大",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "副歌1段落，包含肩部动作与转身",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "右肩上提左臂微屈"
+          },
+          {
+            "beats": "3-4",
+            "content": "右手举过头顶左手叉腰"
+          },
+          {
+            "beats": "5-6",
+            "content": "身体向右转重心移右脚"
+          },
+          {
+            "beats": "7-8",
+            "content": "左脚点地右脚碾步"
+          }
+        ],
+        "tips": [
+          "注意肩部动作的流畅性",
+          "转身时保持身体平衡",
+          "点地动作轻快有弹性"
+        ],
         "beat_cues": [
+          "右肩上",
           null,
+          "举手过头",
           null,
+          "转身",
           null,
-          null,
-          null,
-          null,
-          null,
+          "左脚点",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:42:08Z"
       },
       "deleted": false
     },
@@ -207,21 +249,42 @@
       "ai_description": "副歌 2·爆发段落,快速连续移动",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
-        "beat_cues": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
+        "status": "ready",
+        "summary": "转身甩发，推胯摆动，活力定格",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左转身后甩发，右肩上提"
+          },
+          {
+            "beats": "3-4",
+            "content": "推胯下沉，左脚点地"
+          },
+          {
+            "beats": "5-6",
+            "content": "转身甩发，腰发力摆动"
+          },
+          {
+            "beats": "7-8",
+            "content": "双手叉腰定点，微笑定格"
+          }
         ],
-        "generated_at": ""
+        "tips": [
+          "注意甩发时机与身体转动配合",
+          "推胯时保持膝盖微屈增加动感",
+          "最后定点要自信饱满展现表情"
+        ],
+        "beat_cues": [
+          "转甩发",
+          null,
+          "推胯",
+          null,
+          "转甩发",
+          null,
+          "叉腰",
+          "定格"
+        ],
+        "generated_at": "2026-07-22T18:42:09Z"
       },
       "deleted": false
     },
@@ -247,21 +310,42 @@
       "ai_description": "副歌 2·动作平缓,幅度较小",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "双手上举划弧，身体左右摆动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手从腰间上举至头顶上方"
+          },
+          {
+            "beats": "3-4",
+            "content": "手臂向两侧打开，身体重心移向右侧"
+          },
+          {
+            "beats": "5-6",
+            "content": "手臂收回至胸前，身体重心移向左侧"
+          },
+          {
+            "beats": "7-8",
+            "content": "双臂再次上举，完成动作循环"
+          }
+        ],
+        "tips": [
+          "注意手臂动作流畅，避免僵硬",
+          "重心转移时保持核心稳定",
+          "面部表情跟随动作自然变化"
+        ],
         "beat_cues": [
+          "上举",
           null,
+          "打开",
           null,
+          "收回",
           null,
-          null,
-          null,
-          null,
-          null,
+          "上举",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:42:11Z"
       },
       "deleted": false
     },
@@ -287,21 +371,42 @@
       "ai_description": "副歌 2·常规节奏,动作清晰",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "副歌2段落，身体左右摆动，甩头",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手叉腰，重心左移"
+          },
+          {
+            "beats": "3-4",
+            "content": "右肩上提，甩头向右"
+          },
+          {
+            "beats": "5-6",
+            "content": "重心右移，左肩上提"
+          },
+          {
+            "beats": "7-8",
+            "content": "甩头向左，恢复姿势"
+          }
+        ],
+        "tips": [
+          "注意肩膀动作与甩头同步",
+          "保持腰部稳定，避免过度晃动",
+          "利用头发甩动增加动感"
+        ],
         "beat_cues": [
+          "叉腰左移",
           null,
+          "右肩甩头",
           null,
+          "左肩甩头",
           null,
-          null,
-          null,
-          null,
-          null,
+          "甩头回位",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:42:11Z"
       },
       "deleted": false
     },
@@ -327,21 +432,42 @@
       "ai_description": "副歌 2·常规节奏,动作清晰",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
-        "beat_cues": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
+        "status": "ready",
+        "summary": "副歌2段落，身体波浪与定点动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "右肩上提，左手叉腰"
+          },
+          {
+            "beats": "3-4",
+            "content": "身体下沉，重心放低"
+          },
+          {
+            "beats": "5-6",
+            "content": "腰发力带动身体左右摆动"
+          },
+          {
+            "beats": "7-8",
+            "content": "左脚点地，右手定点"
+          }
         ],
-        "generated_at": ""
+        "tips": [
+          "注意肩膀动作的流畅性",
+          "下沉时膝盖微屈保持弹性",
+          "腰部发力要连贯有节奏"
+        ],
+        "beat_cues": [
+          "右肩上",
+          null,
+          "下沉",
+          null,
+          "腰发力",
+          null,
+          "左脚点",
+          "右手定"
+        ],
+        "generated_at": "2026-07-22T18:42:16Z"
       },
       "deleted": false
     },
@@ -367,21 +493,42 @@
       "ai_description": "尾声·动作平缓,幅度较小",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "右腿点地转身，摆动裙摆结束动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手叉腰站立"
+          },
+          {
+            "beats": "3-4",
+            "content": "左脚点地，身体重心转移"
+          },
+          {
+            "beats": "5-6",
+            "content": "右腿点地，完成转身"
+          },
+          {
+            "beats": "7-8",
+            "content": "摆动裙摆，定住姿势"
+          }
+        ],
+        "tips": [
+          "注意重心在点地时保持稳定",
+          "转身时用腰部带动身体",
+          "裙摆摆动要自然流畅"
+        ],
         "beat_cues": [
           null,
           null,
+          "左脚点",
           null,
+          "右脚点",
+          "转身",
           null,
-          null,
-          null,
-          null,
-          null
+          "摆裙"
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:42:16Z"
       },
       "deleted": false
     }

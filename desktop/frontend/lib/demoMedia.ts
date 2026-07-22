@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { getDemoMedia, getLessons } from "@/lib/api";
+import { getDanceGroups, getDemoMedia, getLessons } from "@/lib/api";
 import type { CommunityFeedItem } from "@/lib/types";
+import { setBgmGroups } from "@/lib/communityShowcase";
 
 let cachedThumbs: string[] | null = null;
 let cachedVideos: string[] | null = null;
@@ -27,6 +28,7 @@ export async function loadDemoMedia(): Promise<{ videos: string[]; thumbs: strin
     inflight = Promise.all([
       getDemoMedia().catch(() => ({ videos: [], thumbs: [] })),
       getLessons().catch(() => []),
+      getDanceGroups().then((g) => setBgmGroups(g)).catch(() => undefined),
     ])
       .then(([data, lessons]) => {
         const videos = data.videos ?? [];

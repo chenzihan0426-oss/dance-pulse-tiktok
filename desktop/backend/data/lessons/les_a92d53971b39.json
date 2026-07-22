@@ -119,21 +119,42 @@
       "ai_description": "前奏·动作平缓,幅度较小",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "双手胸前交叠，身体轻微摆动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手交叠于胸前，身体微晃"
+          },
+          {
+            "beats": "3-4",
+            "content": "右手轻抚腹部，左臂自然摆动"
+          },
+          {
+            "beats": "5-6",
+            "content": "双臂展开，身体转向一侧"
+          },
+          {
+            "beats": "7-8",
+            "content": "恢复原位，手臂交叠胸前"
+          }
+        ],
+        "tips": [
+          "保持动作流畅，避免僵硬",
+          "重心放在双脚，膝盖微屈",
+          "面部表情跟随动作自然变化"
+        ],
         "beat_cues": [
+          "手交叠",
           null,
+          "抚腹",
           null,
+          "转体",
           null,
-          null,
-          null,
-          null,
-          null,
+          "回原位",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:42:50Z"
       },
       "deleted": false
     },
@@ -159,21 +180,42 @@
       "ai_description": "副歌 1·动作平缓,幅度较小",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "双手叉腰，身体左右摆动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手叉腰，重心移右"
+          },
+          {
+            "beats": "3-4",
+            "content": "重心移左，轻微下沉"
+          },
+          {
+            "beats": "5-6",
+            "content": "重心移右，转头看右"
+          },
+          {
+            "beats": "7-8",
+            "content": "重心移左，恢复原位"
+          }
+        ],
+        "tips": [
+          "保持上半身稳定，重心移动在下半身",
+          "转头时下巴微收，动作更流畅",
+          "注意节奏，拍子清晰"
+        ],
         "beat_cues": [
+          "重心移右",
           null,
+          "重心移左",
           null,
-          null,
-          null,
-          null,
-          null,
-          null,
+          "重心移右",
+          "转头",
+          "重心移左",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:42:51Z"
       },
       "deleted": false
     },
@@ -199,21 +241,42 @@
       "ai_description": "副歌 1·爆发段落,快速连续移动",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
-        "beat_cues": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
+        "status": "ready",
+        "summary": "上肢波浪与腰部律动结合",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂从两侧向上举至头顶"
+          },
+          {
+            "beats": "3-4",
+            "content": "手臂放下，同时身体向右侧倾斜"
+          },
+          {
+            "beats": "5-6",
+            "content": "双手叉腰，身体重心下沉"
+          },
+          {
+            "beats": "7-8",
+            "content": "左肩上提，右臂向外伸展"
+          }
         ],
-        "generated_at": ""
+        "tips": [
+          "注意手臂动作的流畅性",
+          "腰部发力带动身体律动",
+          "保持头部稳定跟随节奏"
+        ],
+        "beat_cues": [
+          "举手过头",
+          null,
+          "侧身倾斜",
+          null,
+          "重心下沉",
+          "双手叉腰",
+          "左肩上提",
+          "右臂伸展"
+        ],
+        "generated_at": "2026-07-22T18:42:53Z"
       },
       "deleted": false
     },
@@ -239,21 +302,42 @@
       "ai_description": "副歌 1·常规节奏,动作清晰",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "双手交叉胸前，随后双臂展开跳跃",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手交叉于胸前"
+          },
+          {
+            "beats": "3-4",
+            "content": "双臂向两侧打开"
+          },
+          {
+            "beats": "5-6",
+            "content": "双腿小跳，手臂上举"
+          },
+          {
+            "beats": "7-8",
+            "content": "落地，手臂自然摆动"
+          }
+        ],
+        "tips": [
+          "保持核心收紧，动作轻盈",
+          "注意手臂线条流畅",
+          "跳跃时膝盖微屈缓冲"
+        ],
         "beat_cues": [
           null,
           null,
+          "开臂",
           null,
+          "跳起",
           null,
-          null,
-          null,
-          null,
+          "落地",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:42:53Z"
       },
       "deleted": false
     },
@@ -279,21 +363,42 @@
       "ai_description": "尾声·常规节奏,动作清晰",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
-        "beat_cues": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
+        "status": "ready",
+        "summary": "尾声部分轻快转身与手部动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂展开，身体微晃"
+          },
+          {
+            "beats": "3-4",
+            "content": "左脚点地，右手向上"
+          },
+          {
+            "beats": "5-6",
+            "content": "转身同时手臂交叉于胸前"
+          },
+          {
+            "beats": "7-8",
+            "content": "定住姿势，目光跟随手部"
+          }
         ],
-        "generated_at": ""
+        "tips": [
+          "保持上半身稳定，重心放低",
+          "转身后注意站稳，避免晃动",
+          "手部动作与眼神配合，增强表现力"
+        ],
+        "beat_cues": [
+          "双臂展开",
+          null,
+          "左脚点地",
+          null,
+          "转身交叉",
+          null,
+          null,
+          "定住"
+        ],
+        "generated_at": "2026-07-22T18:42:54Z"
       },
       "deleted": false
     },
@@ -319,21 +424,42 @@
       "ai_description": "尾声·动作平缓,幅度较小",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
-        "beat_cues": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
+        "status": "ready",
+        "summary": "手臂伸展后收于腰间，身体微摆",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂向前伸展"
+          },
+          {
+            "beats": "3-4",
+            "content": "收回手臂至胸前交叉"
+          },
+          {
+            "beats": "5-6",
+            "content": "左肩上提，右手轻点"
+          },
+          {
+            "beats": "7-8",
+            "content": "双臂自然下放，身体微摆"
+          }
         ],
-        "generated_at": ""
+        "tips": [
+          "保持手臂线条流畅",
+          "注意肩膀放松",
+          "重心平稳移动"
+        ],
+        "beat_cues": [
+          "伸展",
+          null,
+          "收臂",
+          null,
+          "肩上",
+          "点手",
+          null,
+          "微摆"
+        ],
+        "generated_at": "2026-07-22T18:42:56Z"
       },
       "deleted": false
     },
@@ -359,21 +485,42 @@
       "ai_description": "尾声·节奏紧凑,动作幅度大",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "挥手转身，配合发光爱心特效",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "右手向上挥手，左脚点地"
+          },
+          {
+            "beats": "3-4",
+            "content": "身体向右转，重心下沉"
+          },
+          {
+            "beats": "5-6",
+            "content": "双臂向前推出，同时右肩上提"
+          },
+          {
+            "beats": "7-8",
+            "content": "左脚点地，身体转向左侧"
+          }
+        ],
+        "tips": [
+          "注意转身后保持眼神方向",
+          "推胯动作要腰发力",
+          "手臂推出时肩膀放松"
+        ],
         "beat_cues": [
           null,
           null,
           null,
           null,
+          "推肩",
           null,
-          null,
-          null,
+          "点地",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:42:57Z"
       },
       "deleted": false
     }

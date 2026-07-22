@@ -725,6 +725,17 @@ export interface DifficultyAggregate {
   updatedAt: string;
 }
 
+// BGM 音频指纹分组:lessonId -> 组键(后端算好,同组=同一首歌/同一支舞)
+export async function getDanceGroups(): Promise<Record<string, string>> {
+  if (USE_MOCK) return {};
+  try {
+    const res = await http<{ groups: Record<string, string> }>("/api/lessons/meta/dance-groups");
+    return res.groups ?? {};
+  } catch {
+    return {};
+  }
+}
+
 export async function getTrackingDifficulty(
   lessonId: string,
   scope: "global" | "me" = "global"

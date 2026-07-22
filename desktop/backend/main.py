@@ -130,6 +130,10 @@ _log_vlm_mode()
 async def lifespan(_: FastAPI):
     recover_interrupted_jobs()
     await teaching_queue.start()
+    # 启动时后台预热 BGM 同舞分组(音频指纹,课程集合没变则直接命中缓存)
+    from services.bgm_groups import refresh_dance_groups_async
+
+    refresh_dance_groups_async()
     yield
 
 

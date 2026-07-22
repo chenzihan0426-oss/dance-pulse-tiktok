@@ -109,21 +109,42 @@
       "ai_description": "副歌 1·动作平缓,幅度较小",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
-        "beat_cues": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
+        "status": "ready",
+        "summary": "双臂上举后侧摆，身体随节奏扭动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂由两侧向上举过头顶"
+          },
+          {
+            "beats": "3-4",
+            "content": "手臂向身体右侧水平摆动，同时重心移向右腿"
+          },
+          {
+            "beats": "5-6",
+            "content": "左臂回收至胸前，身体重心回正并下沉"
+          },
+          {
+            "beats": "7-8",
+            "content": "右臂向前伸出，同时身体转向左侧完成定点"
+          }
         ],
-        "generated_at": ""
+        "tips": [
+          "保持手臂线条流畅，避免僵硬",
+          "重心转移时注意膝盖微屈缓冲",
+          "转身时用腰带动，不要只晃动头部"
+        ],
+        "beat_cues": [
+          "双臂上举",
+          null,
+          "手臂侧摆",
+          null,
+          "手臂回收",
+          null,
+          "手臂前伸",
+          "身体定点"
+        ],
+        "generated_at": "2026-07-22T18:41:43Z"
       },
       "deleted": false
     },
@@ -149,21 +170,42 @@
       "ai_description": "尾声·爆发段落,快速连续移动",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "尾声部分，完成转身与重心移动",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂上举至头顶，身体微仰"
+          },
+          {
+            "beats": "3-4",
+            "content": "重心下沉，同时向右转身"
+          },
+          {
+            "beats": "5-6",
+            "content": "左脚向前点地，右肩上提"
+          },
+          {
+            "beats": "7-8",
+            "content": "腰发力带动身体转向左侧"
+          }
+        ],
+        "tips": [
+          "保持核心收紧，避免转身时晃动",
+          "点地动作轻快，重心始终在主力腿",
+          "肩部动作跟随身体转动，不要僵硬"
+        ],
         "beat_cues": [
+          "双臂上举",
           null,
+          "转身下沉",
           null,
+          "左脚点地",
           null,
-          null,
-          null,
-          null,
-          null,
+          "腰发力转",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:41:43Z"
       },
       "deleted": false
     },
@@ -189,21 +231,42 @@
       "ai_description": "尾声·节奏紧凑,动作幅度大",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "尾声段落，完成转身与定格动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左脚点地，右手向上"
+          },
+          {
+            "beats": "3-4",
+            "content": "身体下沉，重心放低"
+          },
+          {
+            "beats": "5-6",
+            "content": "快速转身，双臂展开"
+          },
+          {
+            "beats": "7-8",
+            "content": "定住姿势，双手叉腰"
+          }
+        ],
+        "tips": [
+          "注意重心下移时膝盖微屈",
+          "转身时利用腰部带动上半身",
+          "定格时保持眼神向前"
+        ],
         "beat_cues": [
+          "左脚点",
           null,
+          "下沉",
           null,
+          "转身",
           null,
-          null,
-          null,
-          null,
-          null,
+          "定格",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:41:43Z"
       },
       "deleted": false
     },
@@ -229,21 +292,42 @@
       "ai_description": "尾声·常规节奏,动作清晰",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "双手上举后两侧摆动，双腿微屈",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双臂向上举过头顶"
+          },
+          {
+            "beats": "3-4",
+            "content": "手臂向两侧打开，掌心向前"
+          },
+          {
+            "beats": "5-6",
+            "content": "膝盖微屈，重心下沉"
+          },
+          {
+            "beats": "7-8",
+            "content": "双臂收回至胸前，指尖相对"
+          }
+        ],
+        "tips": [
+          "保持核心收紧，动作流畅",
+          "注意手臂伸展的幅度",
+          "重心转移时膝盖微屈缓冲"
+        ],
         "beat_cues": [
+          "举手",
           null,
+          "侧摆",
           null,
+          "下蹲",
           null,
-          null,
-          null,
-          null,
-          null,
+          "收臂",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:41:43Z"
       },
       "deleted": false
     },
@@ -269,21 +353,42 @@
       "ai_description": "尾声·动作平缓,幅度较小",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
-        "beat_cues": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
+        "status": "ready",
+        "summary": "尾声部分，身体左右摆动，手部配合定点动作。",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左脚点地，双手向两侧打开"
+          },
+          {
+            "beats": "3-4",
+            "content": "重心移至右脚，左肩上提，右手轻点前方"
+          },
+          {
+            "beats": "5-6",
+            "content": "重心移至左脚，右肩上提，左手轻点前方"
+          },
+          {
+            "beats": "7-8",
+            "content": "双脚并拢，双手收回至腰间定点"
+          }
         ],
-        "generated_at": ""
+        "tips": [
+          "注意肩膀的起伏与手臂动作的协调",
+          "重心转移时保持身体稳定，避免晃动",
+          "最后定点动作要清晰有力"
+        ],
+        "beat_cues": [
+          "左脚点",
+          null,
+          "左肩上",
+          "右肩上",
+          null,
+          null,
+          "收手",
+          "定点"
+        ],
+        "generated_at": "2026-07-22T18:41:55Z"
       },
       "deleted": false
     },
@@ -309,21 +414,42 @@
       "ai_description": "尾声·动作平缓,幅度较小",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "转身亮相，双手叉腰定格姿势",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "背对镜头站立"
+          },
+          {
+            "beats": "3-4",
+            "content": "转身面向镜头"
+          },
+          {
+            "beats": "5-6",
+            "content": "双臂自然下垂后抬起"
+          },
+          {
+            "beats": "7-8",
+            "content": "双手叉腰定住"
+          }
+        ],
+        "tips": [
+          "转身时保持上半身稳定",
+          "手臂动作轻柔流畅",
+          "最后姿势要自信有力"
+        ],
         "beat_cues": [
           null,
           null,
+          "转身",
           null,
+          "抬臂",
           null,
-          null,
-          null,
-          null,
+          "叉腰",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:41:55Z"
       },
       "deleted": false
     }

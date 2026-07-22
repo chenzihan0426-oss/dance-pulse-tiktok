@@ -28,6 +28,15 @@ def get_lesson(lesson_id: str) -> Lesson:
     return load_lesson(lesson_id)
 
 
+@router.get("/meta/dance-groups")
+def get_dance_groups_api() -> dict:
+    """lessonId -> BGM 组键(音频指纹判定的"同一支舞")。前端推荐用。"""
+    from services.bgm_groups import get_dance_groups, refresh_dance_groups_async
+
+    refresh_dance_groups_async()  # 缓存过期时后台重算,本次先返回现有缓存
+    return {"groups": get_dance_groups()}
+
+
 @router.post("/{lesson_id}/confirm", response_model=ConfirmLessonResponse)
 async def confirm_lesson(lesson_id: str) -> ConfirmLessonResponse:
     lesson = load_lesson(lesson_id)

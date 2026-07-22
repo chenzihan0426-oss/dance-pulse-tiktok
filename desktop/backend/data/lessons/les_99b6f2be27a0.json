@@ -109,21 +109,42 @@
       "ai_description": "副歌 1·常规节奏,动作清晰",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "下蹲转身，配合甩头和身体波浪",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "左脚点地，右手扶把"
+          },
+          {
+            "beats": "3-4",
+            "content": "快速下蹲，甩头向后"
+          },
+          {
+            "beats": "5-6",
+            "content": "起身同时转身，右肩上提"
+          },
+          {
+            "beats": "7-8",
+            "content": "继续转身，身体波浪至结束"
+          }
+        ],
+        "tips": [
+          "注意甩头力度和时机",
+          "转身时重心放低保持稳定",
+          "身体波浪要流畅连贯"
+        ],
         "beat_cues": [
+          "点地扶把",
           null,
+          "下蹲甩头",
           null,
+          "起身转肩",
           null,
-          null,
-          null,
-          null,
-          null,
+          "转身波浪",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:43:11Z"
       },
       "deleted": false
     },
@@ -149,21 +170,42 @@
       "ai_description": "副歌 1·爆发段落,快速连续移动",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "前屈后蹲，扭胯甩头，完成副歌动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "前屈下腰，头发扫地"
+          },
+          {
+            "beats": "3-4",
+            "content": "起身扭胯，甩头向后看"
+          },
+          {
+            "beats": "5-6",
+            "content": "深蹲，双手叉腰"
+          },
+          {
+            "beats": "7-8",
+            "content": "起身转向前，定住姿势"
+          }
+        ],
+        "tips": [
+          "前屈时注意膝盖微弯保护",
+          "扭胯发力要靠腰部带动",
+          "甩头动作干净利落"
+        ],
         "beat_cues": [
+          "前屈",
           null,
+          "扭胯",
           null,
+          "深蹲",
           null,
-          null,
-          null,
-          null,
-          null,
+          "转身",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:43:11Z"
       },
       "deleted": false
     },
@@ -189,21 +231,42 @@
       "ai_description": "副歌 2·节奏紧凑,动作幅度大",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "弯腰起身，双臂展开，单腿点地",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "身体前倾弯腰，头发甩动"
+          },
+          {
+            "beats": "3-4",
+            "content": "直立起身，双臂向两侧打开"
+          },
+          {
+            "beats": "5-6",
+            "content": "重心移至左腿，右腿膝盖抬起"
+          },
+          {
+            "beats": "7-8",
+            "content": "保持右腿点地姿势，头部微摆"
+          }
+        ],
+        "tips": [
+          "弯腰时注意核心收紧",
+          "起身时配合呼吸发力",
+          "点地腿注意控制平衡"
+        ],
         "beat_cues": [
+          "弯腰甩头",
           null,
+          "起身开臂",
           null,
+          "左腿抬膝",
           null,
-          null,
-          null,
-          null,
-          null,
+          "右腿点地",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:43:11Z"
       },
       "deleted": false
     },
@@ -229,21 +292,42 @@
       "ai_description": "副歌 2·动作平缓,幅度较小",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "副歌2段，身体波浪与胯部推拉动作",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手撩发后向下波浪"
+          },
+          {
+            "beats": "3-4",
+            "content": "腰胯左右推拉，手臂随动"
+          },
+          {
+            "beats": "5-6",
+            "content": "身体下沉，重心放低"
+          },
+          {
+            "beats": "7-8",
+            "content": "膝盖微弹，恢复站立"
+          }
+        ],
+        "tips": [
+          "注意腰部发力带动胯部",
+          "保持眼神跟随手部移动",
+          "下蹲时膝盖不要超过脚尖"
+        ],
         "beat_cues": [
+          "撩发",
           null,
+          "推胯",
           null,
+          "下沉",
           null,
-          null,
-          null,
-          null,
-          null,
+          "弹膝",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:43:15Z"
       },
       "deleted": false
     },
@@ -269,10 +353,31 @@
       "ai_description": "尾声·动作平缓,幅度较小",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
+        "status": "ready",
+        "summary": "尾声动作：手部定点与身体律动结合",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手胸前交叠，左脚点地"
+          },
+          {
+            "beats": "3-4",
+            "content": "右手向外伸展，身体微侧转"
+          },
+          {
+            "beats": "5-6",
+            "content": "双手上举至头顶，指尖相对"
+          },
+          {
+            "beats": "7-8",
+            "content": "双臂放下，恢复初始姿势"
+          }
+        ],
+        "tips": [
+          "保持手部动作流畅，避免僵硬",
+          "身体转动时注意重心稳定",
+          "眼神跟随动作方向，增强表现力"
+        ],
         "beat_cues": [
           null,
           null,
@@ -280,10 +385,10 @@
           null,
           null,
           null,
-          null,
+          "放双臂",
           null
         ],
-        "generated_at": ""
+        "generated_at": "2026-07-22T18:43:15Z"
       },
       "deleted": false
     },
@@ -309,21 +414,42 @@
       "ai_description": "尾声·动作平缓,幅度较小",
       "user_edited": false,
       "teaching": {
-        "status": "pending",
-        "summary": "",
-        "steps": [],
-        "tips": [],
-        "beat_cues": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
+        "status": "ready",
+        "summary": "尾声动作：手部上举转身，下蹲定点",
+        "steps": [
+          {
+            "beats": "1-2",
+            "content": "双手胸前交叠，抬头看上方"
+          },
+          {
+            "beats": "3-4",
+            "content": "右手高举过头，身体微转"
+          },
+          {
+            "beats": "5-6",
+            "content": "左脚点地，重心下沉"
+          },
+          {
+            "beats": "7-8",
+            "content": "双腿分开下蹲，双手放于大腿"
+          }
         ],
-        "generated_at": ""
+        "tips": [
+          "保持头部稳定，眼神跟随手部移动",
+          "下蹲时膝盖不要超过脚尖",
+          "注意节奏感，拍子要清晰"
+        ],
+        "beat_cues": [
+          "交叠手",
+          null,
+          "右手上举",
+          null,
+          "左脚点",
+          "重心下",
+          null,
+          "下蹲定"
+        ],
+        "generated_at": "2026-07-22T18:43:15Z"
       },
       "deleted": false
     }
