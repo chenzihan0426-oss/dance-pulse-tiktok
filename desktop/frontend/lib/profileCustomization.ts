@@ -52,10 +52,10 @@ export const COVER_PRESETS: CoverPreset[] = [
     preview: "/thumbs/antifragile.jpg",
   },
   {
-    id: "cover_night0",
-    label: "夜练 · 段1",
-    value: "/thumbs/les_122ea874306b_seg_000.jpg",
-    preview: "/thumbs/les_122ea874306b_seg_000.jpg",
+    id: "cover_wil0",
+    label: "What is Love",
+    value: "/thumbs/les_1309562bc052_seg_000.jpg",
+    preview: "/thumbs/les_1309562bc052_seg_000.jpg",
   },
   {
     id: "cover_harry",

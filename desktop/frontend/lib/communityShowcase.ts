@@ -151,35 +151,140 @@ export interface WeeklyScoreDuel {
   challenger: ScoreDuelSide;
 }
 
-const LESSON_A = {
-  id: "antifragile_dp",
-  title: "ANTIFRAGILE - LE SSERAFIM",
-  thumb: "/thumbs/antifragile.jpg",
-  video: "/videos/antifragile.mp4",
+// ---------------------------------------------------------------------------
+// 真实课程表:全部对应本机 data/lessons 里真实存在的课(视频/封面可播可点)。
+// danceKey 标记"同一支舞":跟拍完成后的猜你喜欢、相似推荐都按它分组优先。
+// ---------------------------------------------------------------------------
+
+const LESSON_WIL_A = {
+  id: "les_1309562bc052",
+  title: "What is Love? · 练习室版",
+  thumb: "/thumbs/les_1309562bc052_seg_000.jpg",
+  video: "/videos/les_1309562bc052.mp4",
+  danceKey: "whatislove",
 } as const;
 
-const LESSON_B = {
-  id: "les_122ea874306b",
-  title: "夜练精选 · 抖音同舞挑战",
-  thumb: "/thumbs/les_122ea874306b_seg_000.jpg",
-  video: "/videos/les_122ea874306b.mp4",
+const LESSON_WIL_B = {
+  id: "les_05f402625586",
+  title: "What is Love? · 户外露营版",
+  thumb: "/thumbs/les_05f402625586_seg_000.jpg",
+  video: "/videos/les_05f402625586.mp4",
+  danceKey: "whatislove",
 } as const;
 
-const LESSON_C = {
+const LESSON_NNN_A = {
+  id: "les_447df39da659",
+  title: "NoNoNo · 舞室版",
+  thumb: "/thumbs/les_447df39da659_seg_000.jpg",
+  video: "/videos/les_447df39da659.mp4",
+  danceKey: "nonono",
+} as const;
+
+const LESSON_NNN_B = {
+  id: "les_acda7a42aa76",
+  title: "NoNoNo · 翻跳版",
+  thumb: "/thumbs/les_acda7a42aa76_seg_000.jpg",
+  video: "/videos/les_acda7a42aa76.mp4",
+  danceKey: "nonono",
+} as const;
+
+const LESSON_NNN_C = {
+  id: "les_5e65433a824b",
+  title: "NoNoNo · 完整版",
+  thumb: "/thumbs/les_5e65433a824b_seg_000.jpg",
+  video: "/videos/les_5e65433a824b.mp4",
+  danceKey: "nonono",
+} as const;
+
+const LESSON_RED_A = {
+  id: "les_9f8a23a5e49f",
+  title: "因为红 · 完整版",
+  thumb: "/thumbs/les_9f8a23a5e49f_seg_000.jpg",
+  video: "/videos/les_9f8a23a5e49f.mp4",
+  danceKey: "yinweihong",
+} as const;
+
+const LESSON_RED_B = {
+  id: "les_05b3ba7ffbb5",
+  title: "因为红 · 精选段",
+  thumb: "/thumbs/les_05b3ba7ffbb5_seg_000.jpg",
+  video: "/videos/les_05b3ba7ffbb5.mp4",
+  danceKey: "yinweihong",
+} as const;
+
+const LESSON_GIRL = {
+  id: "les_d298f2568a8b",
+  title: "女团编舞 · 走廊版",
+  thumb: "/thumbs/les_d298f2568a8b_seg_000.jpg",
+  video: "/videos/les_d298f2568a8b.mp4",
+  danceKey: "girlgroup",
+} as const;
+
+const LESSON_KPOP = {
+  id: "les_a92d53971b39",
+  title: "Kpop 随跳 · 公园版",
+  thumb: "/thumbs/les_a92d53971b39_seg_000.jpg",
+  video: "/videos/les_a92d53971b39.mp4",
+  danceKey: "kpop_mix",
+} as const;
+
+const LESSON_TWICE = {
+  id: "les_41e26df37e17",
+  title: "TWICE 翻跳",
+  thumb: "/thumbs/les_41e26df37e17_seg_000.jpg",
+  video: "/videos/les_41e26df37e17.mp4",
+  danceKey: "kpop_mix",
+} as const;
+
+const LESSON_KPOP2 = {
+  id: "les_99b6f2be27a0",
+  title: "Kpop 舞室练习",
+  thumb: "/thumbs/les_99b6f2be27a0_seg_000.jpg",
+  video: "/videos/les_99b6f2be27a0.mp4",
+  danceKey: "kpop_mix",
+} as const;
+
+const LESSON_HARRY = {
   id: "harry_dp",
   title: "HARRY · Demo 同舞",
   thumb: "/thumbs/harry_dp_seg_000.jpg",
   video: "/videos/harry_dp.mp4",
+  danceKey: "harry",
 } as const;
 
-const LESSON_D = {
-  id: "qlx_dp",
-  title: "QLX · Demo 同舞",
-  thumb: "/thumbs/qlx_dp_seg_000.jpg",
-  video: "/videos/qlx_dp.mp4",
-} as const;
+type ShowcaseLesson =
+  | typeof LESSON_WIL_A
+  | typeof LESSON_WIL_B
+  | typeof LESSON_NNN_A
+  | typeof LESSON_NNN_B
+  | typeof LESSON_NNN_C
+  | typeof LESSON_RED_A
+  | typeof LESSON_RED_B
+  | typeof LESSON_GIRL
+  | typeof LESSON_KPOP
+  | typeof LESSON_TWICE
+  | typeof LESSON_KPOP2
+  | typeof LESSON_HARRY;
 
-type ShowcaseLesson = typeof LESSON_A | typeof LESSON_B | typeof LESSON_C | typeof LESSON_D;
+/** lessonId -> danceKey(同一支舞的分组键),推荐系统用 */
+export const DANCE_KEY_BY_LESSON: Record<string, string> = {
+  [LESSON_WIL_A.id]: LESSON_WIL_A.danceKey,
+  [LESSON_WIL_B.id]: LESSON_WIL_B.danceKey,
+  [LESSON_NNN_A.id]: LESSON_NNN_A.danceKey,
+  [LESSON_NNN_B.id]: LESSON_NNN_B.danceKey,
+  [LESSON_NNN_C.id]: LESSON_NNN_C.danceKey,
+  [LESSON_RED_A.id]: LESSON_RED_A.danceKey,
+  [LESSON_RED_B.id]: LESSON_RED_B.danceKey,
+  [LESSON_GIRL.id]: LESSON_GIRL.danceKey,
+  [LESSON_KPOP.id]: LESSON_KPOP.danceKey,
+  [LESSON_TWICE.id]: LESSON_TWICE.danceKey,
+  [LESSON_KPOP2.id]: LESSON_KPOP2.danceKey,
+  [LESSON_HARRY.id]: LESSON_HARRY.danceKey,
+};
+
+export function danceKeyOf(lessonId: string): string | null {
+  return DANCE_KEY_BY_LESSON[lessonId] ?? null;
+}
 
 function daysAgo(n: number): string {
   // 固定锚点，避免 SSR/CSR 因 Date.now() 不一致导致 hydration 报错
@@ -259,7 +364,7 @@ export const SHOWCASE_PROFILE_META: Record<string, ShowcaseProfileMeta> = {
     thisWeekCheckins: [true, true, true, true, true, false, true],
     camp: { name: "女团副歌特训营", done: 6, total: 7 },
     role: "舞室教练",
-    coverThumb: LESSON_A.thumb,
+    coverThumb: LESSON_WIL_A.thumb,
     city: "上海",
     school: "Pulse 舞室",
     premiumActive: true,
@@ -283,7 +388,7 @@ export const SHOWCASE_PROFILE_META: Record<string, ShowcaseProfileMeta> = {
     thisWeekCheckins: [true, true, true, true, true, true, true],
     camp: { name: "校园同舞周", done: 5, total: 7 },
     role: "社团成员",
-    coverThumb: LESSON_B.thumb,
+    coverThumb: LESSON_NNN_A.thumb,
     city: "杭州",
     school: "浙大舞蹈社",
     premiumActive: false,
@@ -306,7 +411,7 @@ export const SHOWCASE_PROFILE_META: Record<string, ShowcaseProfileMeta> = {
     thisWeekCheckins: [true, true, true, true, true, true, false],
     camp: { name: "深夜 30 分钟营", done: 5, total: 7 },
     role: "上班族夜练",
-    coverThumb: LESSON_B.thumb,
+    coverThumb: LESSON_NNN_A.thumb,
     city: "北京",
     premiumActive: true,
     premiumTier: "Premium",
@@ -328,7 +433,7 @@ export const SHOWCASE_PROFILE_META: Record<string, ShowcaseProfileMeta> = {
     thisWeekCheckins: [true, true, false, true, true, true, true],
     camp: { name: "省赛冲刺营", done: 6, total: 7 },
     role: "备赛选手",
-    coverThumb: LESSON_A.thumb,
+    coverThumb: LESSON_WIL_A.thumb,
     city: "广州",
     school: "省赛集训队",
     premiumActive: true,
@@ -350,7 +455,7 @@ export const SHOWCASE_PROFILE_META: Record<string, ShowcaseProfileMeta> = {
     streakDays: 5,
     thisWeekCheckins: [true, false, true, true, true, false, true],
     role: "街舞舞者",
-    coverThumb: LESSON_A.thumb,
+    coverThumb: LESSON_WIL_A.thumb,
     city: "成都",
     premiumActive: false,
     premiumTier: "Premium",
@@ -369,7 +474,7 @@ export const SHOWCASE_PROFILE_META: Record<string, ShowcaseProfileMeta> = {
     thisWeekCheckins: [true, true, true, false, false, false, false],
     camp: { name: "零基础入门营", done: 3, total: 7 },
     role: "入门学员",
-    coverThumb: LESSON_A.thumb,
+    coverThumb: LESSON_WIL_A.thumb,
     city: "南京",
     premiumActive: false,
     premiumTier: "Premium",
@@ -388,7 +493,7 @@ export const SHOWCASE_PROFILE_META: Record<string, ShowcaseProfileMeta> = {
     thisWeekCheckins: [true, true, true, true, false, true, true],
     camp: { name: "助教陪练营", done: 4, total: 7 },
     role: "编舞助教",
-    coverThumb: LESSON_A.thumb,
+    coverThumb: LESSON_WIL_A.thumb,
     city: "深圳",
     school: "Pulse 舞室",
     premiumActive: true,
@@ -408,7 +513,7 @@ export const SHOWCASE_PROFILE_META: Record<string, ShowcaseProfileMeta> = {
     thisWeekCheckins: [true, true, true, true, true, true, true],
     camp: { name: "本周 7 日挑战", done: 7, total: 7 },
     role: "训练营常驻",
-    coverThumb: LESSON_B.thumb,
+    coverThumb: LESSON_NNN_A.thumb,
     city: "武汉",
     premiumActive: true,
     premiumTier: "Premium",
@@ -429,7 +534,7 @@ export const SHOWCASE_PROFILE_META: Record<string, ShowcaseProfileMeta> = {
     streakDays: 4,
     thisWeekCheckins: [false, true, true, true, true, false, false],
     role: "内容创作者",
-    coverThumb: LESSON_B.thumb,
+    coverThumb: LESSON_NNN_A.thumb,
     city: "重庆",
     premiumActive: false,
     premiumTier: "Premium",
@@ -448,7 +553,7 @@ export const SHOWCASE_PROFILE_META: Record<string, ShowcaseProfileMeta> = {
     thisWeekCheckins: [true, true, true, true, true, true, false],
     camp: { name: "节拍对齐营", done: 5, total: 7 },
     role: "节奏训练者",
-    coverThumb: LESSON_A.thumb,
+    coverThumb: LESSON_WIL_A.thumb,
     city: "西安",
     premiumActive: true,
     premiumTier: "Premium",
@@ -477,64 +582,37 @@ type WorkSeed = {
   thumb?: string;
 };
 
-const THUMB_POOL_A = [
-  "/thumbs/antifragile.jpg",
-  "/thumbs/harry_dp_seg_000.jpg",
-  "/thumbs/harry_dp_seg_002.jpg",
-  "/thumbs/qlx_dp_seg_001.jpg",
-] as const;
-const THUMB_POOL_B = [
-  "/thumbs/les_122ea874306b_seg_000.jpg",
-  "/thumbs/les_122ea874306b_seg_001.jpg",
-  "/thumbs/les_122ea874306b_seg_002.jpg",
-  "/thumbs/les_122ea874306b_seg_003.jpg",
-  "/thumbs/harry_dp_seg_001.jpg",
-  "/thumbs/qlx_dp_seg_002.jpg",
-] as const;
-const THUMB_POOL_C = [
-  "/thumbs/harry_dp_seg_000.jpg",
-  "/thumbs/harry_dp_seg_001.jpg",
-  "/thumbs/harry_dp_seg_002.jpg",
-  "/thumbs/harry_dp_seg_003.jpg",
-] as const;
-const THUMB_POOL_D = [
-  "/thumbs/qlx_dp_seg_000.jpg",
-  "/thumbs/qlx_dp_seg_001.jpg",
-  "/thumbs/qlx_dp_seg_002.jpg",
-  "/thumbs/qlx_dp_seg_003.jpg",
-] as const;
-
-function pickThumb(lesson: ShowcaseLesson, index: number, override?: string): string {
+function pickThumb(lesson: ShowcaseLesson, _index: number, override?: string): string {
+  // 每个作品直接用它挂的课程自己的封面(卡片=课程视频真实抽帧,点开即所见)
   if (override) return override;
-  if (lesson.id === LESSON_D.id) return THUMB_POOL_D[index % THUMB_POOL_D.length];
-  if (lesson.id === LESSON_C.id) return THUMB_POOL_C[index % THUMB_POOL_C.length];
-  if (lesson.id === LESSON_B.id) return THUMB_POOL_B[index % THUMB_POOL_B.length];
-  return THUMB_POOL_A[index % THUMB_POOL_A.length];
+  return lesson.thumb;
 }
 
+// 22 个演示作品,全部挂真实课程:同一支舞的不同视频互相构成"同舞挑战"。
+// 分布:whatislove×2课、nonono×3课、因为红×2课、女团/kpop×4课、harry×1课。
 const WORK_SEEDS: WorkSeed[] = [
-  { id: "01", userIdx: 0, lesson: LESSON_A, score: 96, segmentScores: [94, 97, 95, 98, 96, 93], likes: 842, days: 0, tags: ["周冠", "训练营高光"], caption: "副歌第二遍终于稳住下沉。录了 11 次。" },
-  { id: "02", userIdx: 3, lesson: LESSON_A, score: 94, segmentScores: [92, 95, 93, 96, 94, 91], likes: 621, days: 0, tags: ["90+ 俱乐部"], caption: "省赛指定曲。手臂线条还在抠。" },
-  { id: "03", userIdx: 7, lesson: LESSON_C, score: 92, segmentScores: [88, 93, 95, 90, 94, 91], likes: 510, days: 1, tags: ["连击破纪录"], caption: "连续第 21 天。分数不是重点，不间断才是。" },
-  { id: "04", userIdx: 4, lesson: LESSON_A, score: 89, segmentScores: [86, 90, 88, 91, 87, 85], likes: 388, days: 1, tags: ["街舞跨界"], caption: "Hip-hop 的弹性和女团干净度在打架，今天偏干净。" },
-  { id: "05", userIdx: 1, lesson: LESSON_D, score: 87, segmentScores: [84, 88, 90, 85, 86, 83], likes: 276, days: 1, tags: ["社团"], caption: "社团周练公开课。欢迎纠错。" },
-  { id: "06", userIdx: 9, lesson: LESSON_A, score: 91, segmentScores: [90, 92, 89, 93, 91, 88], likes: 402, days: 2, tags: ["拍感洁癖"], caption: "对轨到 ±40ms 以内才敢发。强迫症发作。" },
-  { id: "07", userIdx: 2, lesson: LESSON_C, score: 84, segmentScores: [80, 85, 86, 82, 84, 81], likes: 198, days: 2, tags: ["夜猫子"], caption: "23:40 录完。邻居还没投诉算赢。" },
-  { id: "08", userIdx: 6, lesson: LESSON_A, score: 90, segmentScores: [88, 91, 92, 89, 90, 87], likes: 455, days: 2, tags: ["助教示范"], caption: "示范版：注意第 3 段右胯先于肩。" },
-  { id: "09", userIdx: 8, lesson: LESSON_D, score: 83, segmentScores: [79, 84, 86, 81, 82, 80], likes: 167, days: 3, tags: ["副歌杀手"], caption: "只截了副歌。前奏下次再补。" },
-  { id: "10", userIdx: 5, lesson: LESSON_A, score: 78, segmentScores: [72, 80, 81, 76, 79, 74], likes: 124, days: 3, tags: ["新人成长"], caption: "第一次破 75！手还是慢半拍，但找到感觉了。" },
-  { id: "11", userIdx: 0, lesson: LESSON_B, score: 93, segmentScores: [91, 94, 92, 95, 93, 90], likes: 590, days: 3, tags: ["教练速通"], caption: "给学员看的「可复制版」节奏。" },
-  { id: "12", userIdx: 3, lesson: LESSON_C, score: 88, segmentScores: [85, 89, 90, 86, 87, 84], likes: 301, days: 4, tags: ["备赛"], caption: "换曲目测耐力。后半段掉速了。" },
-  { id: "13", userIdx: 1, lesson: LESSON_A, score: 81, segmentScores: [78, 82, 84, 79, 80, 77], likes: 156, days: 4, tags: ["社团"], caption: "第一次公开 ANTIFRAGILE。笑场那段已剪掉。" },
-  { id: "14", userIdx: 7, lesson: LESSON_D, score: 95, segmentScores: [93, 96, 94, 97, 95, 92], likes: 720, days: 4, tags: ["周冠候选", "连击破纪录"], caption: "训练营日更。今天状态最好。" },
-  { id: "15", userIdx: 4, lesson: LESSON_B, score: 86, segmentScores: [83, 87, 88, 84, 85, 82], likes: 210, days: 5, tags: ["跨界"], caption: "脚法还在迁就编舞，下周重录。" },
-  { id: "16", userIdx: 2, lesson: LESSON_C, score: 79, segmentScores: [75, 81, 80, 77, 78, 74], likes: 143, days: 5, tags: ["夜练"], caption: "周一加班后的 20 分钟。不完美但坚持发。" },
-  { id: "17", userIdx: 9, lesson: LESSON_D, score: 85, segmentScores: [82, 86, 87, 83, 84, 81], likes: 188, days: 5, tags: ["节拍营"], caption: "BPM 103 比想象中难咬。" },
-  { id: "18", userIdx: 6, lesson: LESSON_B, score: 82, segmentScores: [80, 83, 84, 81, 82, 79], likes: 230, days: 6, tags: ["纠错示范"], caption: "故意放慢：看膝盖不要抢拍。" },
-  { id: "19", userIdx: 5, lesson: LESSON_D, score: 71, segmentScores: [66, 73, 74, 68, 72, 65], likes: 98, days: 6, tags: ["新人"], caption: "跟丢两次。评论区求「手怎么记」。" },
-  { id: "20", userIdx: 8, lesson: LESSON_C, score: 87, segmentScores: [84, 88, 89, 85, 86, 83], likes: 245, days: 6, tags: ["剪辑眼"], caption: "成片调了对比度。动作本身 87。" },
-  { id: "21", userIdx: 0, lesson: LESSON_A, score: 97, segmentScores: [95, 98, 96, 99, 97, 94], likes: 1102, days: 7, tags: ["周冠", "认证教练"], caption: "上周周冠存档。可当对标。" },
-  { id: "22", userIdx: 3, lesson: LESSON_D, score: 92, segmentScores: [90, 93, 91, 94, 92, 89], likes: 480, days: 7, tags: ["备赛"], caption: "第二版。肩线比上一版干净。" },
+  { id: "01", userIdx: 0, lesson: LESSON_WIL_A, score: 96, segmentScores: [94, 97, 95, 98, 96, 93], likes: 842, days: 0, tags: ["周冠", "What is Love"], caption: "TWICE 这段副歌手势终于顺了。录了 11 次。" },
+  { id: "02", userIdx: 3, lesson: LESSON_WIL_B, score: 94, segmentScores: [92, 95, 93, 96, 94, 91], likes: 621, days: 0, tags: ["90+ 俱乐部", "What is Love"], caption: "露营地版 What is Love,草地跳起来是另一种感觉。" },
+  { id: "03", userIdx: 7, lesson: LESSON_HARRY, score: 92, segmentScores: [88, 93, 95, 90, 94, 91], likes: 510, days: 1, tags: ["连击破纪录"], caption: "连续第 21 天。分数不是重点，不间断才是。" },
+  { id: "04", userIdx: 4, lesson: LESSON_NNN_A, score: 89, segmentScores: [86, 90, 88, 91, 87, 85], likes: 388, days: 1, tags: ["NoNoNo", "舞室打卡"], caption: "NoNoNo 舞室版。指尖 wave 还在抠细节。" },
+  { id: "05", userIdx: 1, lesson: LESSON_GIRL, score: 87, segmentScores: [84, 88, 90, 85, 86, 83], likes: 276, days: 1, tags: ["社团"], caption: "走廊随跳女团串烧。欢迎纠错。" },
+  { id: "06", userIdx: 9, lesson: LESSON_WIL_A, score: 91, segmentScores: [90, 92, 89, 93, 91, 88], likes: 402, days: 2, tags: ["拍感洁癖", "What is Love"], caption: "对轨到 ±40ms 以内才敢发。强迫症发作。" },
+  { id: "07", userIdx: 2, lesson: LESSON_KPOP2, score: 84, segmentScores: [80, 85, 86, 82, 84, 81], likes: 198, days: 2, tags: ["夜猫子"], caption: "23:40 录完。邻居还没投诉算赢。" },
+  { id: "08", userIdx: 6, lesson: LESSON_NNN_C, score: 90, segmentScores: [88, 91, 92, 89, 90, 87], likes: 455, days: 2, tags: ["助教示范", "NoNoNo"], caption: "NoNoNo 完整版示范:注意第 3 段胯先于肩。" },
+  { id: "09", userIdx: 8, lesson: LESSON_RED_A, score: 83, segmentScores: [79, 84, 86, 81, 82, 80], likes: 167, days: 3, tags: ["因为红"], caption: "只截了副歌。前奏下次再补。" },
+  { id: "10", userIdx: 5, lesson: LESSON_TWICE, score: 78, segmentScores: [72, 80, 81, 76, 79, 74], likes: 124, days: 3, tags: ["新人成长"], caption: "第一次破 75！手还是慢半拍，但找到感觉了。" },
+  { id: "11", userIdx: 0, lesson: LESSON_NNN_B, score: 93, segmentScores: [91, 94, 92, 95, 93, 90], likes: 590, days: 3, tags: ["教练速通", "NoNoNo"], caption: "NoNoNo 翻跳「可复制版」节奏。" },
+  { id: "12", userIdx: 3, lesson: LESSON_KPOP, score: 88, segmentScores: [85, 89, 90, 86, 87, 84], likes: 301, days: 4, tags: ["备赛"], caption: "公园随跳测耐力。后半段掉速了。" },
+  { id: "13", userIdx: 1, lesson: LESSON_WIL_B, score: 81, segmentScores: [78, 82, 84, 79, 80, 77], likes: 156, days: 4, tags: ["社团", "What is Love"], caption: "第一次公开 What is Love。笑场那段已剪掉。" },
+  { id: "14", userIdx: 7, lesson: LESSON_RED_B, score: 95, segmentScores: [93, 96, 94, 97, 95, 92], likes: 720, days: 4, tags: ["周冠候选", "因为红"], caption: "因为红精选段日更。今天状态最好。" },
+  { id: "15", userIdx: 4, lesson: LESSON_GIRL, score: 86, segmentScores: [83, 87, 88, 84, 85, 82], likes: 210, days: 5, tags: ["跨界"], caption: "脚法还在迁就编舞，下周重录。" },
+  { id: "16", userIdx: 2, lesson: LESSON_NNN_A, score: 79, segmentScores: [75, 81, 80, 77, 78, 74], likes: 143, days: 5, tags: ["夜练", "NoNoNo"], caption: "周一加班后的 20 分钟。不完美但坚持发。" },
+  { id: "17", userIdx: 9, lesson: LESSON_KPOP2, score: 85, segmentScores: [82, 86, 87, 83, 84, 81], likes: 188, days: 5, tags: ["节拍营"], caption: "BPM 比想象中难咬。" },
+  { id: "18", userIdx: 6, lesson: LESSON_TWICE, score: 82, segmentScores: [80, 83, 84, 81, 82, 79], likes: 230, days: 6, tags: ["纠错示范"], caption: "故意放慢：看膝盖不要抢拍。" },
+  { id: "19", userIdx: 5, lesson: LESSON_RED_A, score: 71, segmentScores: [66, 73, 74, 68, 72, 65], likes: 98, days: 6, tags: ["新人", "因为红"], caption: "跟丢两次。评论区求「手怎么记」。" },
+  { id: "20", userIdx: 8, lesson: LESSON_KPOP, score: 87, segmentScores: [84, 88, 89, 85, 86, 83], likes: 245, days: 6, tags: ["剪辑眼"], caption: "成片调了对比度。动作本身 87。" },
+  { id: "21", userIdx: 0, lesson: LESSON_WIL_A, score: 97, segmentScores: [95, 98, 96, 99, 97, 94], likes: 1102, days: 7, tags: ["周冠", "What is Love"], caption: "上周周冠存档。可当对标。" },
+  { id: "22", userIdx: 3, lesson: LESSON_NNN_C, score: 92, segmentScores: [90, 93, 91, 94, 92, 89], likes: 480, days: 7, tags: ["备赛", "NoNoNo"], caption: "第二版。肩线比上一版干净。" },
 ];
 
 function buildResult(seed: WorkSeed): TrackingResult {
@@ -728,30 +806,30 @@ export const SHOWCASE_COMMENTS: Record<string, CommunityComment[]> = Object.from
 );
 
 export const WEEKLY_CHALLENGE: WeeklyChallenge = {
-  lessonId: LESSON_A.id,
-  lessonTitle: LESSON_A.title,
+  lessonId: LESSON_WIL_A.id,
+  lessonTitle: LESSON_WIL_A.title,
   participants: 1284,
   topScore: 97,
   topDisplayName: "米拉Mir",
   topResultId: `${SHOWCASE_ID_PREFIX}21`,
   headline: "本周同舞挑战 · ANTIFRAGILE",
   subline: "1,284 人参与 · 最高 97 分 · 跟跳即可上榜",
-  thumb: LESSON_A.thumb,
-  video: LESSON_A.video,
+  thumb: LESSON_WIL_A.thumb,
+  video: LESSON_WIL_A.video,
   daysLeft: 3,
 };
 
 export const WEEKLY_LEADERBOARD: LeaderboardRow[] = [
-  { rank: 1, username: "mira_flow", displayName: "米拉Mir", score: 97, lessonTitle: LESSON_A.title, resultId: `${SHOWCASE_ID_PREFIX}21`, delta: 0, worksThisWeek: 3 },
-  { rank: 2, username: "pulse_nova", displayName: "Nova233", score: 95, lessonTitle: LESSON_A.title, resultId: `${SHOWCASE_ID_PREFIX}14`, delta: 2, worksThisWeek: 4 },
-  { rank: 3, username: "prep_yuna", displayName: "Yuna练功中", score: 94, lessonTitle: LESSON_A.title, resultId: `${SHOWCASE_ID_PREFIX}02`, delta: -1, worksThisWeek: 2 },
-  { rank: 4, username: "mira_flow", displayName: "米拉Mir", score: 93, lessonTitle: LESSON_B.title, resultId: `${SHOWCASE_ID_PREFIX}11`, delta: 1, worksThisWeek: 3 },
-  { rank: 5, username: "beat_owen", displayName: "有点想摸鱼", score: 91, lessonTitle: LESSON_A.title, resultId: `${SHOWCASE_ID_PREFIX}06`, delta: 3, worksThisWeek: 2 },
-  { rank: 6, username: "studio_rex", displayName: "Rex不加班", score: 90, lessonTitle: LESSON_A.title, resultId: `${SHOWCASE_ID_PREFIX}08`, delta: 0, worksThisWeek: 2 },
-  { rank: 7, username: "urban_kai", displayName: "街舞Kai", score: 89, lessonTitle: LESSON_A.title, resultId: `${SHOWCASE_ID_PREFIX}04`, delta: -2, worksThisWeek: 2 },
-  { rank: 8, username: "prep_yuna", displayName: "Yuna练功中", score: 88, lessonTitle: LESSON_B.title, resultId: `${SHOWCASE_ID_PREFIX}12`, delta: 1, worksThisWeek: 2 },
-  { rank: 9, username: "campus_jay", displayName: "阿杰不写作业", score: 87, lessonTitle: LESSON_B.title, resultId: `${SHOWCASE_ID_PREFIX}05`, delta: 4, worksThisWeek: 3 },
-  { rank: 10, username: "soft_haze", displayName: "今天吃了吗", score: 87, lessonTitle: LESSON_A.title, resultId: `${SHOWCASE_ID_PREFIX}20`, delta: -1, worksThisWeek: 1 },
+  { rank: 1, username: "mira_flow", displayName: "米拉Mir", score: 97, lessonTitle: LESSON_WIL_A.title, resultId: `${SHOWCASE_ID_PREFIX}21`, delta: 0, worksThisWeek: 3 },
+  { rank: 2, username: "pulse_nova", displayName: "Nova233", score: 95, lessonTitle: LESSON_WIL_A.title, resultId: `${SHOWCASE_ID_PREFIX}14`, delta: 2, worksThisWeek: 4 },
+  { rank: 3, username: "prep_yuna", displayName: "Yuna练功中", score: 94, lessonTitle: LESSON_WIL_A.title, resultId: `${SHOWCASE_ID_PREFIX}02`, delta: -1, worksThisWeek: 2 },
+  { rank: 4, username: "mira_flow", displayName: "米拉Mir", score: 93, lessonTitle: LESSON_NNN_A.title, resultId: `${SHOWCASE_ID_PREFIX}11`, delta: 1, worksThisWeek: 3 },
+  { rank: 5, username: "beat_owen", displayName: "有点想摸鱼", score: 91, lessonTitle: LESSON_WIL_A.title, resultId: `${SHOWCASE_ID_PREFIX}06`, delta: 3, worksThisWeek: 2 },
+  { rank: 6, username: "studio_rex", displayName: "Rex不加班", score: 90, lessonTitle: LESSON_WIL_A.title, resultId: `${SHOWCASE_ID_PREFIX}08`, delta: 0, worksThisWeek: 2 },
+  { rank: 7, username: "urban_kai", displayName: "街舞Kai", score: 89, lessonTitle: LESSON_WIL_A.title, resultId: `${SHOWCASE_ID_PREFIX}04`, delta: -2, worksThisWeek: 2 },
+  { rank: 8, username: "prep_yuna", displayName: "Yuna练功中", score: 88, lessonTitle: LESSON_NNN_A.title, resultId: `${SHOWCASE_ID_PREFIX}12`, delta: 1, worksThisWeek: 2 },
+  { rank: 9, username: "campus_jay", displayName: "阿杰不写作业", score: 87, lessonTitle: LESSON_NNN_A.title, resultId: `${SHOWCASE_ID_PREFIX}05`, delta: 4, worksThisWeek: 3 },
+  { rank: 10, username: "soft_haze", displayName: "今天吃了吗", score: 87, lessonTitle: LESSON_WIL_A.title, resultId: `${SHOWCASE_ID_PREFIX}20`, delta: -1, worksThisWeek: 1 },
 ];
 
 export const MY_LEADERBOARD_PLACEHOLDER: LeaderboardRow = {
@@ -767,18 +845,18 @@ export const MY_LEADERBOARD_PLACEHOLDER: LeaderboardRow = {
 
 export const SONG_CHALLENGE_BOARDS: SongChallengeBoard[] = [
   {
-    lessonId: LESSON_A.id,
-    lessonTitle: LESSON_A.title,
+    lessonId: LESSON_WIL_A.id,
+    lessonTitle: LESSON_WIL_A.title,
     participants: 812,
     topScore: 97,
-    rows: WEEKLY_LEADERBOARD.filter((r) => r.lessonTitle === LESSON_A.title).slice(0, 5),
+    rows: WEEKLY_LEADERBOARD.filter((r) => r.lessonTitle === LESSON_WIL_A.title).slice(0, 5),
   },
   {
-    lessonId: LESSON_B.id,
-    lessonTitle: LESSON_B.title,
+    lessonId: LESSON_NNN_A.id,
+    lessonTitle: LESSON_NNN_A.title,
     participants: 472,
     topScore: 93,
-    rows: WEEKLY_LEADERBOARD.filter((r) => r.lessonTitle === LESSON_B.title).slice(0, 5),
+    rows: WEEKLY_LEADERBOARD.filter((r) => r.lessonTitle === LESSON_NNN_A.title).slice(0, 5),
   },
 ];
 
@@ -973,7 +1051,7 @@ export function getShowcaseSameSong(lessonId: string, excludeId?: string): Commu
   ).sort((a, b) => b.result.score - a.result.score);
 }
 
-export type ForYouReason = "同曲挑战" | "相似风格" | "热门飙升" | "新人高光" | "猜你也喜欢";
+export type ForYouReason = "同舞挑战" | "同曲挑战" | "相似风格" | "热门飙升" | "新人高光" | "猜你也喜欢";
 
 export interface ForYouRecommendation {
   item: CommunityFeedItem;
@@ -982,9 +1060,11 @@ export interface ForYouRecommendation {
 }
 
 /**
- * 抖音味「猜你喜欢」：同曲优先 → 标签/风格相近 → 热门 → 穿插探索（新人/低曝光）
+ * 抖音味「猜你喜欢」：同一支舞(danceKey)最优先 → 同课 → 标签/风格相近
+ * → 热门 → 穿插探索。跳完 what is love 就优先推其他人跳 what is love 的。
  */
 export function getForYouRecommendations(fromLessonId: string, limit = 12): ForYouRecommendation[] {
+  const fromDanceKey = danceKeyOf(fromLessonId);
   const fromMetaTags = new Set(
     SHOWCASE_FEED.filter((item) => item.result.lessonId === fromLessonId)
       .flatMap((item) => SHOWCASE_WORK_META[item.result.id]?.tags ?? [])
@@ -994,14 +1074,20 @@ export function getForYouRecommendations(fromLessonId: string, limit = 12): ForY
     const meta = SHOWCASE_WORK_META[item.result.id];
     const tags = meta?.tags ?? [];
     const tagOverlap = tags.filter((t) => fromMetaTags.has(t)).length;
-    const sameSong = item.result.lessonId === fromLessonId;
+    const sameLesson = item.result.lessonId === fromLessonId;
+    // 同一支舞(不同视频/不同课):whatislove 推 whatislove,nonono 推 nonono
+    const sameDance =
+      !sameLesson && fromDanceKey !== null && danceKeyOf(item.result.lessonId) === fromDanceKey;
     const isNewbie = tags.some((t) => /新人|入门/.test(t)) || item.result.likeCount < 160;
     const isHot = item.result.likeCount >= 400 || item.result.score >= 92;
 
     let score = item.result.likeCount * 0.35 + item.result.score * 8;
     let reason: ForYouReason = "猜你也喜欢";
 
-    if (sameSong) {
+    if (sameDance) {
+      score += 5200;
+      reason = "同舞挑战";
+    } else if (sameLesson) {
       score += 4200;
       reason = "同曲挑战";
     } else if (tagOverlap > 0) {
@@ -1023,7 +1109,9 @@ export function getForYouRecommendations(fromLessonId: string, limit = 12): ForY
     .sort((a, b) => b.score - a.score);
 
   // 前 60% 高相关，后段塞一些探索位
-  const head = ranked.filter((r) => r.reason === "同曲挑战" || r.reason === "相似风格").slice(0, Math.ceil(limit * 0.55));
+  const head = ranked
+    .filter((r) => r.reason === "同舞挑战" || r.reason === "同曲挑战" || r.reason === "相似风格")
+    .slice(0, Math.ceil(limit * 0.55));
   const explore = ranked
     .filter((r) => !head.some((h) => h.item.result.id === r.item.result.id))
     .slice(0, limit - head.length);
@@ -1134,7 +1222,7 @@ export function buildDemoProfilePageModel(input: {
   works?: CommunityFeedItem[];
 }): ProfilePageModel {
   const works = input.works ?? [];
-  const cover = works[0]?.previewThumbnail ?? LESSON_A.thumb;
+  const cover = works[0]?.previewThumbnail ?? LESSON_WIL_A.thumb;
   return {
     user: {
       id: `demo_${input.username}`,

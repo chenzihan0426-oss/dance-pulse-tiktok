@@ -3,6 +3,7 @@
 import {
   SHOWCASE_FEED,
   SHOWCASE_WORK_META,
+  danceKeyOf,
 } from "@/lib/communityShowcase";
 import type { CommunityFeedItem } from "@/lib/types";
 
@@ -33,10 +34,18 @@ export interface SimilarLessonRec {
 }
 
 const GENRE_BY_LESSON: Record<string, string> = {
-  antifragile_dp: "女团副歌",
-  les_122ea874306b: "夜练街舞",
+  les_1309562bc052: "What is Love",
+  les_05f402625586: "What is Love",
+  les_447df39da659: "NoNoNo",
+  les_acda7a42aa76: "NoNoNo",
+  les_5e65433a824b: "NoNoNo",
+  les_9f8a23a5e49f: "因为红",
+  les_05b3ba7ffbb5: "因为红",
+  les_d298f2568a8b: "女团编舞",
+  les_a92d53971b39: "Kpop 随跳",
+  les_41e26df37e17: "Kpop 随跳",
+  les_99b6f2be27a0: "Kpop 随跳",
   harry_dp: "流行同舞",
-  qlx_dp: "编舞挑战",
 };
 
 const HOOKS_SAME = [
@@ -134,14 +143,18 @@ export function getSimilarLessonRecommendations(
   limit = 8
 ): SimilarLessonRec[] {
   const fromGenre = genreOf(fromLessonId);
+  const fromDance = danceKeyOf(fromLessonId);
   const ranked = SHOWCASE_FEED.map((item) => {
     const h = hash(item.result.id + fromLessonId);
     const sameSong = item.result.lessonId === fromLessonId;
+    // 同一支舞(不同视频):优先级与同课等同,相似度给最高档
+    const sameDance =
+      !sameSong && fromDance !== null && danceKeyOf(item.result.lessonId) === fromDance;
     const sameGenre = genreOf(item.result.lessonId) === fromGenre;
     const metaTags = SHOWCASE_WORK_META[item.result.id]?.tags ?? [];
 
     let similarity = 62 + (h % 28);
-    if (sameSong) similarity = Math.min(98, similarity + 18);
+    if (sameSong || sameDance) similarity = Math.min(98, similarity + 18);
     else if (sameGenre) similarity = Math.min(94, similarity + 10);
     similarity = Math.max(68, Math.min(97, similarity));
 
@@ -169,7 +182,7 @@ export function getSimilarLessonRecommendations(
     if (item.result.likeCount >= 400 || metaTags.some((t) => /周冠|热/.test(t))) {
       tags.push({ kind: "hot", label: pick(HOT_LABELS, h >> 11) });
     }
-    if (sameSong || similarity >= 90) {
+    if (sameSong || sameDance || similarity >= 90) {
       tags.push({ kind: "sync", label: pick(SYNC_LABELS, h >> 13) });
     }
     if (h % 3 === 0) {
@@ -179,13 +192,14 @@ export function getSimilarLessonRecommendations(
       tags.push({ kind: "crew", label: pick(CREW_LABELS, h >> 17) });
     }
 
-    const hook = sameSong
+    const hook = sameSong || sameDance
       ? pick(HOOKS_SAME, h)
       : sameGenre
         ? pick(HOOKS_GENRE, h)
         : pick(HOOKS_OTHER, h);
 
     let score = similarity * 12 + friendsLearning * 40 + item.result.likeCount * 0.2;
+    if (sameDance) score += 1000; // 同一支舞的其他视频最优先
     if (sameSong) score += 800;
     if (sameGenre) score += 320;
 
