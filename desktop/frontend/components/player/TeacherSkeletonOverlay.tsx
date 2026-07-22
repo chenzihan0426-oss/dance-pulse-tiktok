@@ -101,10 +101,10 @@ export function TeacherSkeletonOverlay({
 
       // 双虚线骨架:每根骨头 = 两条平行虚线(沿骨骼方向左右各偏移),
       // 中空管状轮廓比单实线更清晰,虚线让画面不被遮死。
-      const HALF_GAP = 4; // 双线各偏移 4px(管径 8px)
+      const HALF_GAP = 5; // 双线各偏移 5px(管径 10px)
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
-      ctx.setLineDash([7, 5]);
+      ctx.setLineDash([10, 7]);
 
       const drawBonePass = (strokeStyle: string, lineWidth: number) => {
         ctx.strokeStyle = strokeStyle;
@@ -134,27 +134,26 @@ export function TeacherSkeletonOverlay({
       };
 
       // 底层深色描边托底(亮背景可读),上层纯白双虚线
-      drawBonePass("rgba(0,0,0,0.4)", 4);
-      drawBonePass("rgba(255,255,255,0.95)", 2);
+      drawBonePass("rgba(0,0,0,0.4)", 6.5);
+      drawBonePass("rgba(255,255,255,0.95)", 4);
 
       ctx.setLineDash([]);
 
       // 关节点:空心白圈(与中空管状骨骼呼应,不糊住关节)
-      ctx.lineWidth = 2;
       for (const idx of DRAWN_KEYPOINTS) {
         const p = pts[idx];
         if (!p || p.visibility < MIN_VIS) continue;
         const x = px(p);
         const y = py(p);
         ctx.beginPath();
-        ctx.arc(x, y, 4.5, 0, Math.PI * 2);
+        ctx.arc(x, y, 5.5, 0, Math.PI * 2);
         ctx.strokeStyle = "rgba(0,0,0,0.4)";
-        ctx.lineWidth = 3.5;
+        ctx.lineWidth = 5.5;
         ctx.stroke();
         ctx.beginPath();
-        ctx.arc(x, y, 4.5, 0, Math.PI * 2);
+        ctx.arc(x, y, 5.5, 0, Math.PI * 2);
         ctx.strokeStyle = "rgba(255,255,255,0.95)";
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 3.5;
         ctx.stroke();
       }
     };
