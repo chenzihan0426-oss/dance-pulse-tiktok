@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
+  Bone,
   Pause,
   Play,
   FlipHorizontal2,
@@ -22,6 +23,7 @@ import type { Lesson, Segment } from "@/lib/types";
 import { XuangeGuideOverlay } from "@/components/player/XuangeGuideOverlay";
 import { BeatCounterBadge } from "@/components/player/BeatCounterBadge";
 import { KeyActionScrubber } from "@/components/player/KeyActionScrubber";
+import { TeacherSkeletonOverlay } from "@/components/player/TeacherSkeletonOverlay";
 import { TeachingPanelKpop, parseBeatsRange } from "@/components/TeachingPanelKpop";
 import { useLearningProgress } from "@/hooks/useLearningProgress";
 import { lessonIsDemoReady } from "@/lib/demoReady";
@@ -438,6 +440,19 @@ export function DesktopPlayer({
   const [magnifierFollow, setMagnifierFollow] = React.useState(true);
   const [magnifierPart, setMagnifierPart] = React.useState(0);
   const [poseDoc, setPoseDoc] = React.useState<PoseFullDoc | null>(null);
+  // 老师骨架开关(记忆用户选择,默认开)
+  const [showSkeleton, setShowSkeleton] = React.useState(true);
+  React.useEffect(() => {
+    const saved = window.localStorage.getItem("dp_player_skeleton_v1");
+    if (saved !== null) setShowSkeleton(saved === "1");
+  }, []);
+  const toggleSkeleton = React.useCallback(() => {
+    setShowSkeleton((cur) => {
+      const next = !cur;
+      window.localStorage.setItem("dp_player_skeleton_v1", next ? "1" : "0");
+      return next;
+    });
+  }, []);
 
   const { learnedCount, total, setTotal, isLearned, toggleLearned, markLearned } =
     useLearningProgress(lesson.id);
@@ -742,6 +757,14 @@ export function DesktopPlayer({
 
             <XuangeGuideOverlay videoRef={videoRef} particleUrl={segment.particle_url} mirror={mirror} />
 
+            {/* 老师骨架(白色等宽线,开关可切) */}
+            <TeacherSkeletonOverlay
+              videoRef={videoRef}
+              poseDoc={poseDoc}
+              mirror={mirror}
+              visible={showSkeleton}
+            />
+
             {magnifier ? (
               <MagnifierLens
                 videoRef={videoRef}
@@ -840,6 +863,18 @@ export function DesktopPlayer({
               aria-label="镜像"
             >
               <FlipHorizontal2 className="h-3.5 w-3.5" />
+            </button>
+
+            <button
+              type="button"
+              onClick={toggleSkeleton}
+              className={`flex h-8 w-8 items-center justify-center rounded-full transition ${
+                showSkeleton ? "bg-white/25 text-white" : "bg-white/8 text-white/70 hover:bg-white/16"
+              }`}
+              aria-label="老师骨架"
+              title={showSkeleton ? "隐藏老师骨架" : "显示老师骨架"}
+            >
+              <Bone className="h-3.5 w-3.5" />
             </button>
 
             <button
