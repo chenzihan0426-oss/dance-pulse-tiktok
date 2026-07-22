@@ -99,44 +99,63 @@ export function TeacherSkeletonOverlay({
       };
       const py = (p: PoseKp) => p.y * vh * scale + offY;
 
-      // 白色骨架:柔和描边打底 + 白色主线,粗细均匀
+      // 双虚线骨架:每根骨头 = 两条平行虚线(沿骨骼方向左右各偏移),
+      // 中空管状轮廓比单实线更清晰,虚线让画面不被遮死。
+      const HALF_GAP = 4; // 双线各偏移 4px(管径 8px)
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
+      ctx.setLineDash([7, 5]);
 
-      // 底层:半透明深色描边,保证亮背景上也看得清
-      ctx.strokeStyle = "rgba(0,0,0,0.35)";
-      ctx.lineWidth = 7;
-      for (const [a, b] of POSE_CONNECTIONS) {
-        const pa = pts[a];
-        const pb = pts[b];
-        if (!pa || !pb || pa.visibility < MIN_VIS || pb.visibility < MIN_VIS) continue;
-        ctx.beginPath();
-        ctx.moveTo(px(pa), py(pa));
-        ctx.lineTo(px(pb), py(pb));
-        ctx.stroke();
-      }
+      const drawBonePass = (strokeStyle: string, lineWidth: number) => {
+        ctx.strokeStyle = strokeStyle;
+        ctx.lineWidth = lineWidth;
+        for (const [a, b] of POSE_CONNECTIONS) {
+          const pa = pts[a];
+          const pb = pts[b];
+          if (!pa || !pb || pa.visibility < MIN_VIS || pb.visibility < MIN_VIS) continue;
+          const x1 = px(pa);
+          const y1 = py(pa);
+          const x2 = px(pb);
+          const y2 = py(pb);
+          const dx = x2 - x1;
+          const dy = y2 - y1;
+          const len = Math.hypot(dx, dy);
+          if (len < 1) continue;
+          // 单位法向量:垂直于骨骼方向
+          const nx = (-dy / len) * HALF_GAP;
+          const ny = (dx / len) * HALF_GAP;
+          ctx.beginPath();
+          ctx.moveTo(x1 + nx, y1 + ny);
+          ctx.lineTo(x2 + nx, y2 + ny);
+          ctx.moveTo(x1 - nx, y1 - ny);
+          ctx.lineTo(x2 - nx, y2 - ny);
+          ctx.stroke();
+        }
+      };
 
-      // 主层:纯白等宽线
-      ctx.strokeStyle = "rgba(255,255,255,0.92)";
-      ctx.lineWidth = 4;
-      for (const [a, b] of POSE_CONNECTIONS) {
-        const pa = pts[a];
-        const pb = pts[b];
-        if (!pa || !pb || pa.visibility < MIN_VIS || pb.visibility < MIN_VIS) continue;
-        ctx.beginPath();
-        ctx.moveTo(px(pa), py(pa));
-        ctx.lineTo(px(pb), py(pb));
-        ctx.stroke();
-      }
+      // 底层深色描边托底(亮背景可读),上层纯白双虚线
+      drawBonePass("rgba(0,0,0,0.4)", 4);
+      drawBonePass("rgba(255,255,255,0.95)", 2);
 
-      // 关节点:白色小圆点,统一大小
-      ctx.fillStyle = "rgba(255,255,255,0.95)";
+      ctx.setLineDash([]);
+
+      // 关节点:空心白圈(与中空管状骨骼呼应,不糊住关节)
+      ctx.lineWidth = 2;
       for (const idx of DRAWN_KEYPOINTS) {
         const p = pts[idx];
         if (!p || p.visibility < MIN_VIS) continue;
+        const x = px(p);
+        const y = py(p);
         ctx.beginPath();
-        ctx.arc(px(p), py(p), 3.2, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.arc(x, y, 4.5, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(0,0,0,0.4)";
+        ctx.lineWidth = 3.5;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(x, y, 4.5, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(255,255,255,0.95)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
       }
     };
     raf = requestAnimationFrame(draw);
