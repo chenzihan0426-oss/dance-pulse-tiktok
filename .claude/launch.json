@@ -1,0 +1,13 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "frontend-debug",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "--hostname", "127.0.0.1", "--port", "3210"],
+      "cwd": "desktop/frontend",
+      "port": 3210,
+      "autoPort": false
+    }
+  ]
+}

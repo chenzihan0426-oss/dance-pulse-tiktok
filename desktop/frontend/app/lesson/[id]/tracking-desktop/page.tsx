@@ -378,7 +378,9 @@ export default function TrackingDesktopPage() {
     const scorable = lesson.segments.filter((s) => !s.deleted && !s.is_still);
     Promise.all(
       scorable.map(async (seg): Promise<SegmentMeta | null> => {
-        const url = seg.pose_full_url ?? seg.pose_url;
+        // 注意用 || 而非 ??:pose_full_url 缺失时是空字符串,?? 不会兜底,
+        // 会导致只有基础 pose 的课(如 harry_dp)整门评分失效
+        const url = seg.pose_full_url || seg.pose_url;
         if (!url) return null;
         try {
           const doc: PoseJsonDoc = await fetch(url).then((r) => r.json());
@@ -892,6 +894,14 @@ export default function TrackingDesktopPage() {
       setCameraError(err instanceof Error ? err.message : String(err));
     }
   };
+
+  // 自愈:点开始时姿态数据可能还没拉完(scoringSegments 异步加载),
+  // 那一刻 challengeActive 会错过激活;条件齐了这里补上,避免整场无评分。
+  React.useEffect(() => {
+    if (!challengeActive && cameraReady && playing && scoringSegments.length > 0) {
+      setChallengeActive(true);
+    }
+  }, [challengeActive, cameraReady, playing, scoringSegments]);
   if (loading) {
     return <main className="flex min-h-screen items-center justify-center bg-[#050505] text-white/65">加载课程...</main>;
   }
