@@ -89,7 +89,7 @@ function RecCard({
   videos: string[];
 }) {
   // 与详情页同一套严格对齐:封面取作品自身视频的抽帧图
-  const [aligned] = alignFeedMedia([rec.item], thumbs, videos);
+  const [aligned] = alignFeedMedia([rec.item], thumbs, videos);  // 封面对齐即可,过滤已在上层做
   const thumbPath = aligned?.previewThumbnail ?? rec.item.previewThumbnail;
   const thumb = thumbPath ? resolveMediaUrl(thumbPath) : null;
   const accent = index % 2 === 0 ? "#ccff00" : "#00f3ff";
@@ -163,15 +163,15 @@ function RecCard({
 }
 
 export function SimilarRecommendPanel({ lessonId }: { lessonId: string }) {
-  const { thumbs, videos } = useDemoCoverPool();
+  const { thumbs, videos, lessonIds } = useDemoCoverPool();
   // 过滤掉视频不存在的假推荐(与详情页 alignFeedMedia 同一判定)
   const recs = React.useMemo(() => {
     const all = getSimilarLessonRecommendations(lessonId, 16);
     if (!videos.length) return all.slice(0, 8);
     return all
-      .filter((rec) => alignFeedMedia([rec.item], thumbs, videos).length > 0)
+      .filter((rec) => alignFeedMedia([rec.item], thumbs, videos, lessonIds).length > 0)
       .slice(0, 8);
-  }, [lessonId, thumbs, videos]);
+  }, [lessonId, thumbs, videos, lessonIds]);
 
   return (
     <div className="relative">

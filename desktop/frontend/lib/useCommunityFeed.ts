@@ -46,7 +46,7 @@ export function useCommunityFeed(filter: PlazaFilter = "hot") {
 
       if (forceCommunityShowcase()) {
         if (!cancelled) {
-          setItems(alignFeedMedia(getShowcaseFeedSorted(filter), demo.thumbs, demo.videos));
+          setItems(alignFeedMedia(getShowcaseFeedSorted(filter), demo.thumbs, demo.videos, demo.lessonIds));
           setSource("showcase");
           setLoading(false);
         }
@@ -57,7 +57,7 @@ export function useCommunityFeed(filter: PlazaFilter = "hot") {
         const feed = await getCommunityFeed();
         if (cancelled) return;
         if (!feed.length) {
-          setItems(alignFeedMedia(getShowcaseFeedSorted(filter), demo.thumbs, demo.videos));
+          setItems(alignFeedMedia(getShowcaseFeedSorted(filter), demo.thumbs, demo.videos, demo.lessonIds));
           setSource("showcase");
         } else {
           // 真实 API 作品有自己的视频,只轮换缺失的封面,不动 videoUrl
@@ -66,7 +66,7 @@ export function useCommunityFeed(filter: PlazaFilter = "hot") {
         }
       } catch (err) {
         if (cancelled) return;
-        setItems(alignFeedMedia(getShowcaseFeedSorted(filter), demo.thumbs, demo.videos));
+        setItems(alignFeedMedia(getShowcaseFeedSorted(filter), demo.thumbs, demo.videos, demo.lessonIds));
         setSource("showcase");
         setError(err instanceof Error ? err.message : String(err));
       } finally {
@@ -106,7 +106,7 @@ export function useCommunityDetail(resultId: string) {
           } else {
             // alignFeedMedia:视频不存在的作品会被过滤成空 → 视为不存在;
             // 存在的用作品自身视频 + 其抽帧封面,与列表卡片一致
-            const [rotated] = alignFeedMedia([local.item], demo.thumbs, demo.videos);
+            const [rotated] = alignFeedMedia([local.item], demo.thumbs, demo.videos, demo.lessonIds);
             if (rotated) {
               setDetail({ ...local, item: rotated });
             } else {
@@ -130,7 +130,7 @@ export function useCommunityDetail(resultId: string) {
         const local = getShowcaseDetail(resultId);
         if (cancelled) return;
         if (local) {
-          const [rotated] = alignFeedMedia([local.item], demo.thumbs, demo.videos);
+          const [rotated] = alignFeedMedia([local.item], demo.thumbs, demo.videos, demo.lessonIds);
           setDetail({ ...local, item: rotated ?? local.item });
           setSource("showcase");
         } else {

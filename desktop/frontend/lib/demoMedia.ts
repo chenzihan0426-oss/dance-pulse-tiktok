@@ -1,12 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { getDemoMedia } from "@/lib/api";
+import { getDemoMedia, getLessons } from "@/lib/api";
 import type { CommunityFeedItem } from "@/lib/types";
 
 let cachedThumbs: string[] | null = null;
 let cachedVideos: string[] | null = null;
-let inflight: Promise<{ videos: string[]; thumbs: string[] }> | null = null;
+let cachedLessonIds: string[] | null = null;
+let inflight: Promise<{ videos: string[]; thumbs: string[]; lessonIds: string[] }> | null = null;
 
 function hashKey(input: string): number {
   let h = 2166136261;
@@ -17,21 +18,26 @@ function hashKey(input: string): number {
   return Math.abs(h);
 }
 
-/** 拉取并缓存本机 demo 媒体；空结果不长期缓存，便于后端起来后重试 */
-export async function loadDemoMedia(): Promise<{ videos: string[]; thumbs: string[] }> {
-  if (cachedThumbs && cachedVideos && (cachedThumbs.length > 0 || cachedVideos.length > 0)) {
-    return { videos: cachedVideos, thumbs: cachedThumbs };
+/** 拉取并缓存本机 demo 媒体 + 真实课程 id；空结果不长期缓存，便于后端起来后重试 */
+export async function loadDemoMedia(): Promise<{ videos: string[]; thumbs: string[]; lessonIds: string[] }> {
+  if (cachedThumbs && cachedVideos && cachedLessonIds && (cachedThumbs.length > 0 || cachedVideos.length > 0)) {
+    return { videos: cachedVideos, thumbs: cachedThumbs, lessonIds: cachedLessonIds };
   }
   if (!inflight) {
-    inflight = getDemoMedia()
-      .then((data) => {
+    inflight = Promise.all([
+      getDemoMedia().catch(() => ({ videos: [], thumbs: [] })),
+      getLessons().catch(() => []),
+    ])
+      .then(([data, lessons]) => {
         const videos = data.videos ?? [];
         const thumbs = data.thumbs ?? [];
+        const lessonIds = lessons.map((l) => l.id);
         if (videos.length || thumbs.length) {
           cachedVideos = videos;
           cachedThumbs = thumbs;
+          cachedLessonIds = lessonIds;
         }
-        return { videos, thumbs };
+        return { videos, thumbs, lessonIds };
       })
       .finally(() => {
         inflight = null;
@@ -101,20 +107,26 @@ export function rotateFeedMedia(
 /**
  * 演示作品的严格对齐:只保留"自身视频文件真实存在于本机"的作品,
  * 视频一律用作品自己的 videoUrl(不跨作品轮换),封面取该视频的抽帧图。
- * 视频不存在的假推荐直接过滤掉——宁缺毋滥,杜绝"点开不是封面那支"。
+ * 传入 lessonIds 时额外要求作品挂的课程真实存在(查看详情/跟跳这支
+ * 都能真实跳转)。视频不存在的假推荐直接过滤掉——宁缺毋滥。
  * videos 池为空(后端未就绪)时不过滤,退化为只轮换封面。
  */
 export function alignFeedMedia(
   items: CommunityFeedItem[],
   thumbs: string[],
-  videos: string[]
+  videos: string[],
+  lessonIds?: string[]
 ): CommunityFeedItem[] {
   if (!videos.length) return rotateFeedThumbs(items, thumbs);
   const videoTails = new Set(videos.map((v) => v.split("/").pop() ?? v));
+  const lessonSet = lessonIds && lessonIds.length ? new Set(lessonIds) : null;
   return items
     .filter((item) => {
       const tail = item.result.videoUrl?.split("?")[0].split("/").pop();
-      return Boolean(tail && videoTails.has(tail));
+      if (!tail || !videoTails.has(tail)) return false;
+      // 课程也必须真实存在,否则详情页"查看详情/跟跳这支"会 404
+      if (lessonSet && !lessonSet.has(item.result.lessonId)) return false;
+      return true;
     })
     .map((item, index) => {
       const key = item.result.id || `${item.user.username}-${index}`;
@@ -136,10 +148,11 @@ export function clearDemoMediaCache() {
   cachedVideos = null;
 }
 
-/** 各展示页统一用：封面池 + 视频池 + 是否已加载 */
+/** 各展示页统一用：封面池 + 视频池 + 真实课程 id + 是否已加载 */
 export function useDemoCoverPool() {
   const [thumbs, setThumbs] = React.useState<string[]>(cachedThumbs ?? []);
   const [videos, setVideos] = React.useState<string[]>(cachedVideos ?? []);
+  const [lessonIds, setLessonIds] = React.useState<string[]>(cachedLessonIds ?? []);
   const [ready, setReady] = React.useState(Boolean(cachedThumbs?.length));
 
   React.useEffect(() => {
@@ -148,6 +161,7 @@ export function useDemoCoverPool() {
       if (cancelled) return;
       setThumbs(demo.thumbs);
       setVideos(demo.videos);
+      setLessonIds(demo.lessonIds);
       setReady(true);
     });
     return () => {
@@ -160,5 +174,5 @@ export function useDemoCoverPool() {
     [thumbs]
   );
 
-  return { thumbs, videos, ready, coverFor };
+  return { thumbs, videos, lessonIds, ready, coverFor };
 }

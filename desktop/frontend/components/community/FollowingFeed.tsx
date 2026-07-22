@@ -13,10 +13,10 @@ import { resolveMediaUrl } from "@/lib/api";
 import { alignFeedMedia, useDemoCoverPool } from "@/lib/demoMedia";
 
 export function FollowingFeed() {
-  const { thumbs, videos } = useDemoCoverPool();
+  const { thumbs, videos, lessonIds } = useDemoCoverPool();
   const friendWorks = React.useMemo(
-    () => alignFeedMedia(getShowcaseFeedSorted("following"), thumbs, videos).slice(0, 8),
-    [thumbs, videos]
+    () => alignFeedMedia(getShowcaseFeedSorted("following"), thumbs, videos, lessonIds).slice(0, 8),
+    [thumbs, videos, lessonIds]
   );
   const friendPulse = ACTIVITY_PULSE.filter((item) =>
     (FOLLOWING_USERNAMES as readonly string[]).includes(item.username)

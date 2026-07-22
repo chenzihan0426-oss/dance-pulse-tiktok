@@ -25,7 +25,7 @@ export default function ForYouPage() {
       // 严格对齐:视频文件不存在的假推荐直接过滤,封面取视频自己的抽帧图
       const next = getForYouRecommendations(lessonId, 24)
         .map((rec) => {
-          const [aligned] = alignFeedMedia([rec.item], demo.thumbs, demo.videos);
+          const [aligned] = alignFeedMedia([rec.item], demo.thumbs, demo.videos, demo.lessonIds);
           return aligned ? { ...rec, item: aligned } : null;
         })
         .filter((rec): rec is ForYouRecommendation => rec !== null)
