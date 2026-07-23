@@ -700,6 +700,25 @@ export async function submitTrackingSession(
   });
 }
 
+export type TrackingSessionSummary = {
+  sessionId: string;
+  overallScore: number;
+  frameCount: number;
+  poseSource: string;
+  createdAt: string;
+};
+
+export async function listTrackingSessions(lessonId: string): Promise<TrackingSessionSummary[]> {
+  if (USE_MOCK) {
+    await sleep(80);
+    return [];
+  }
+  const res = await http<{ sessions: TrackingSessionSummary[] }>(
+    `/api/lessons/${lessonId}/tracking/sessions`
+  );
+  return res.sessions ?? [];
+}
+
 // 逐动作难度聚合（Phase 3/4）。scope: 'global' | 'me'
 export interface DifficultyAggregate {
   segmentId: string;

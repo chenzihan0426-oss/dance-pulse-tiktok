@@ -177,7 +177,7 @@ export function LessonCoverFocusPlayer({
 
     Promise.all(
       loadable.map(async (seg) => {
-        const url = seg.pose_full_url ?? seg.pose_url;
+        const url = seg.pose_full_url || seg.pose_url;
         if (!url) return [] as TeacherFrame[];
         try {
           const doc: PoseJsonDoc = await fetch(url).then((r) => r.json());

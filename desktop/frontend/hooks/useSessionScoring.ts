@@ -2,38 +2,38 @@
 
 // 随拍挑战实时评分 hook。
 //
-// 职责:挑战进行中,以约 15fps 对用户摄像头跑 MediaPipe 姿态识别,
-// 把每帧喂给 SessionAccumulator(按 segment/关节/拍累加)。挑战结束
-// 调用 finish() 拿 SessionResult。
-//
-// MediaPipe 推理走主线程(复用现有 getPoseLandmarker 单例)。配合阶段1
-// 的主线程减负,15fps 足够;若后续仍卡,可迁到 Web Worker + OffscreenCanvas。
+// - 摄像头就绪即识别（叠骨架）
+// - 挑战中写入累加器
+// - 整支视频全程计分：任意播放头取最近老师帧比对
 
 import * as React from "react";
 
-import { pickLiveHotspot, type LiveHotspot } from "@/lib/feedback/liveHotspot";
+import {
+  pickLiveHotspot,
+  scoreToTier,
+  type LiveHotspot,
+  type LiveScoreTier,
+} from "@/lib/feedback/liveHotspot";
+import { softenLiveScore01 } from "@/lib/feedback/scoreMap";
 import { getPoseLandmarker, landmarksToKeypoints } from "@/lib/pose/mediapipeClient";
-import type { Keypoint } from "@/lib/pose/types";
 import { scoreFrameFused, type Kpt, type TeacherFrame } from "@/lib/pose/scoring";
 import {
   SessionAccumulator,
   type SegmentMeta,
   type SessionResult,
 } from "@/lib/pose/sessionAccumulator";
+import type { Keypoint } from "@/lib/pose/types";
 
 const POSE_SOURCE = "browser_mediapipe_lite_v1";
 const TARGET_FPS = 15;
+const HUD_UI_FPS = 5;
 
-// BlazePose 左右对称关节索引对(镜像时需交换)。
-// 摄像头自拍是镜像画面:用户抬右手,识别落在画面右侧,与老师坐标系左右相反。
-// 评分前必须把用户姿态翻转回与老师一致的手性,否则角度比对系统性偏低。
 const MIRROR_PAIRS: Array<[number, number]> = [
   [1, 4], [2, 5], [3, 6], [7, 8], [9, 10],
   [11, 12], [13, 14], [15, 16], [17, 18], [19, 20],
   [21, 22], [23, 24], [25, 26], [27, 28], [29, 30], [31, 32],
 ];
 
-// x 轴翻转 + 交换左右关节,得到与老师一致手性的姿态。
 function mirrorKpts(kpts: Kpt[]): Kpt[] {
   const flipped = kpts.map((k) => ({ ...k, x: 1 - k.x }));
   const out = flipped.slice();
@@ -45,68 +45,93 @@ function mirrorKpts(kpts: Kpt[]): Kpt[] {
   return out;
 }
 
-const INDEX_MIRROR: Record<number, number> = Object.fromEntries(
-  MIRROR_PAIRS.flatMap(([a, b]) => [
-    [a, b],
-    [b, a],
-  ])
-);
-
-function mirrorIndex(i: number): number {
-  return INDEX_MIRROR[i] ?? i;
-}
-
-function mirrorHotspotIndices(h: LiveHotspot): LiveHotspot {
-  return {
-    ...h,
-    vertex: mirrorIndex(h.vertex),
-    edges: h.edges.map(([a, b]) => [mirrorIndex(a), mirrorIndex(b)] as [number, number]),
-  };
-}
+export type LiveScoreStatus =
+  | "booting" // 模型加载中
+  | "no_pose" // 未识别到人
+  | "no_teacher" // 整课没有可用老师姿态
+  | "live"; // 正在出分
 
 interface Options {
-  active: boolean; // 挑战进行中为 true
+  detectActive: boolean;
+  scoringActive: boolean;
   lessonId: string;
-  videoRef: React.RefObject<HTMLVideoElement>; // 用户摄像头
-  playheadRef: React.MutableRefObject<number>; // 老师播放头(绝对 lesson 秒)
-  segments: SegmentMeta[]; // 参与统计的动作(含老师帧)
-  mirror: boolean; // 摄像头是否镜像显示(与 userMirror 一致);true 时评分前翻转回老师手性
+  videoRef: React.RefObject<HTMLVideoElement>;
+  playheadRef: React.MutableRefObject<number>;
+  segments: SegmentMeta[];
+  mirror: boolean;
 }
 
 export interface SessionScoringState {
-  liveScore: number; // 0-100,当前段的平滑分,用于实时显示
-  ready: boolean; // MediaPipe 是否就绪
+  /** null = 当前未计分（不要显示成 0） */
+  liveScore: number | null;
+  liveTier: LiveScoreTier;
+  scoreStatus: LiveScoreStatus;
+  ready: boolean;
+  detected: boolean;
   error: string | null;
-  /** 当前最需纠正的关节名(中文);无明显问题时为 null */
   hotspotLabel: string | null;
-  /** 该关节的角度误差 0-1 */
   hotspotError: number;
 }
 
-// [x_norm, y_norm, visibility] -> Kpt
 function toKpt(row: [number, number, number]): Kpt {
   return { x: row[0], y: row[1], z: 0, visibility: row[2] ?? 1 };
 }
 
+function kptsToDrawKeypoints(kpts: Kpt[]): Keypoint[] {
+  return kpts.map((k) => [k.x, k.y, k.visibility ?? 1]);
+}
+
+/** 整支视频：段内用该段；否则取时间最近段（无距离上限）。 */
+function findScoringSegment(segments: SegmentMeta[], playhead: number): SegmentMeta | null {
+  if (!segments.length) return null;
+  const exact = segments.find(
+    (sm) => playhead >= sm.start && playhead < sm.end && sm.frames.length > 0,
+  );
+  if (exact) return exact;
+
+  let best: SegmentMeta | null = null;
+  let bestDist = Number.POSITIVE_INFINITY;
+  for (const sm of segments) {
+    if (!sm.frames.length) continue;
+    const dist =
+      playhead < sm.start ? sm.start - playhead : playhead > sm.end ? playhead - sm.end : 0;
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = sm;
+    }
+  }
+  return best;
+}
+
 export function useSessionScoring(opts: Options): {
   state: SessionScoringState;
+  latestKptsRef: React.MutableRefObject<Keypoint[] | null>;
+  hotspotRef: React.MutableRefObject<LiveHotspot | null>;
   finish: () => SessionResult | null;
   reset: () => void;
-  /** 最新一帧用户关键点([x,y,vis],原始镜头坐标未翻转),给实时骨架叠层用 */
-  kptsRef: React.MutableRefObject<Keypoint[] | null>;
-  /** 当前最差关节热点(索引已按镜像翻回镜头坐标),给骨架高亮用 */
-  hotspotRef: React.MutableRefObject<LiveHotspot | null>;
 } {
-  const { active, lessonId, videoRef, playheadRef, segments, mirror } = opts;
+  const {
+    detectActive,
+    scoringActive,
+    lessonId,
+    videoRef,
+    playheadRef,
+    segments,
+    mirror,
+  } = opts;
 
   const accRef = React.useRef<SessionAccumulator | null>(null);
-  const kptsRef = React.useRef<Keypoint[] | null>(null);
-  const hotspotRef = React.useRef<LiveHotspot | null>(null);
   const segmentsRef = React.useRef<SegmentMeta[]>(segments);
   const mirrorRef = React.useRef(mirror);
+  const scoringActiveRef = React.useRef(scoringActive);
+  const latestKptsRef = React.useRef<Keypoint[] | null>(null);
+  const hotspotRef = React.useRef<LiveHotspot | null>(null);
   const [state, setState] = React.useState<SessionScoringState>({
-    liveScore: 0,
+    liveScore: null,
+    liveTier: "miss",
+    scoreStatus: "booting",
     ready: false,
+    detected: false,
     error: null,
     hotspotLabel: null,
     hotspotError: 0,
@@ -119,6 +144,10 @@ export function useSessionScoring(opts: Options): {
   React.useEffect(() => {
     segmentsRef.current = segments;
   }, [segments]);
+
+  React.useEffect(() => {
+    scoringActiveRef.current = scoringActive;
+  }, [scoringActive]);
 
   const reset = React.useCallback(() => {
     accRef.current = new SessionAccumulator({
@@ -133,21 +162,55 @@ export function useSessionScoring(opts: Options): {
   }, []);
 
   React.useEffect(() => {
-    if (!active) return;
-
-    // 每次开始挑战重建累加器(用最新的 segments 快照)
+    if (!scoringActive) return;
     accRef.current = new SessionAccumulator({
       lessonId,
       poseSource: POSE_SOURCE,
       segments: segmentsRef.current,
     });
+  }, [scoringActive, lessonId]);
+
+  React.useEffect(() => {
+    if (!detectActive) {
+      latestKptsRef.current = null;
+      hotspotRef.current = null;
+      setState((s) => ({
+        ...s,
+        ready: false,
+        detected: false,
+        liveScore: null,
+        scoreStatus: "booting",
+        hotspotLabel: null,
+        hotspotError: 0,
+      }));
+      return;
+    }
 
     let rafId = 0;
     let disposed = false;
     let lastInferMs = 0;
+    let lastHudMs = 0;
     let lastMpTs = -1;
-    // 滑动平均实时分(15 帧窗口)
     const scoreBuf: number[] = [];
+
+    const patchHud = ( partial: Partial<SessionScoringState>) => {
+      setState((prev) => {
+        const next = { ...prev, ...partial };
+        if (
+          prev.liveScore === next.liveScore &&
+          prev.liveTier === next.liveTier &&
+          prev.scoreStatus === next.scoreStatus &&
+          prev.detected === next.detected &&
+          prev.ready === next.ready &&
+          prev.hotspotLabel === next.hotspotLabel &&
+          Math.abs(prev.hotspotError - (next.hotspotError ?? 0)) < 0.04 &&
+          prev.error === next.error
+        ) {
+          return prev;
+        }
+        return next;
+      });
+    };
 
     const run = async () => {
       let landmarker: Awaited<ReturnType<typeof getPoseLandmarker>>;
@@ -155,12 +218,17 @@ export function useSessionScoring(opts: Options): {
         landmarker = await getPoseLandmarker();
       } catch (err) {
         if (!disposed) {
-          setState((s) => ({ ...s, error: err instanceof Error ? err.message : String(err) }));
+          patchHud({
+            error: err instanceof Error ? err.message : String(err),
+            ready: false,
+            scoreStatus: "booting",
+            liveScore: null,
+          });
         }
         return;
       }
       if (disposed) return;
-      setState((s) => ({ ...s, ready: true, error: null }));
+      patchHud({ ready: true, error: null });
 
       const tick = () => {
         if (disposed) return;
@@ -183,49 +251,89 @@ export function useSessionScoring(opts: Options): {
             kpts = landmarksToKeypoints(result.landmarks[0] as never).map(toKpt);
           }
         } catch {
-          return; // 单帧失败不中断
+          return;
         }
-        if (!kpts || kpts.length < 33) return;
 
-        // 发布原始镜头坐标关键点(未做手性翻转)给骨架叠层
-        kptsRef.current = kpts.map((k) => [k.x, k.y, k.visibility] as Keypoint);
-
-        // 镜像画面下,评分前把用户姿态翻转回与老师一致的手性。
-        if (mirrorRef.current) kpts = mirrorKpts(kpts);
-
-        const playhead = playheadRef.current;
-        const acc = accRef.current;
-        if (!acc) return;
-        acc.pushFrame(playhead, kpts);
-
-        // 实时分:用当前帧对最近老师帧的融合分(近似,给 UI 用)
-        // 直接从累加器最近一次 pushFrame 派生成本高,这里单独快速算一次
-        const seg = segmentsRef.current.find(
-          (sm) => playhead >= sm.start && playhead < sm.end && sm.frames.length
-        );
-        if (seg) {
-          const nearest = nearestFrame(seg.frames, playhead);
-          if (nearest) {
-            // 轻量:直接用 scoreWithDTW 的最近帧融合分近似
-            const s01 = quickScore(kpts, nearest.keypoints);
-            scoreBuf.push(s01);
-            if (scoreBuf.length > 15) scoreBuf.shift();
-            const avg = scoreBuf.reduce((a, b) => a + b, 0) / scoreBuf.length;
-
-            // 最差关节热点:kpts 此刻已是老师手性;叠层画在镜头坐标上,
-            // 镜像时需把索引翻回去
-            const hotspot = pickLiveHotspot(kpts, nearest.keypoints);
-            hotspotRef.current =
-              hotspot && mirrorRef.current ? mirrorHotspotIndices(hotspot) : hotspot;
-
-            setState((prev) => {
-              const next = Math.round(avg * 100);
-              const label = hotspot?.label ?? null;
-              const err = hotspot?.error ?? 0;
-              if (prev.liveScore === next && prev.hotspotLabel === label) return prev;
-              return { ...prev, liveScore: next, hotspotLabel: label, hotspotError: err };
+        if (!kpts || kpts.length < 33) {
+          latestKptsRef.current = null;
+          hotspotRef.current = null;
+          if (now - lastHudMs >= 1000 / HUD_UI_FPS) {
+            lastHudMs = now;
+            patchHud({
+              detected: false,
+              liveScore: null,
+              scoreStatus: "no_pose",
+              hotspotLabel: null,
+              hotspotError: 0,
             });
           }
+          return;
+        }
+
+        latestKptsRef.current = kptsToDrawKeypoints(kpts);
+
+        let scoreKpts = kpts;
+        if (mirrorRef.current) scoreKpts = mirrorKpts(kpts);
+
+        const playhead = playheadRef.current;
+        if (scoringActiveRef.current) {
+          accRef.current?.pushFrame(playhead, scoreKpts);
+        }
+
+        const seg = findScoringSegment(segmentsRef.current, playhead);
+        if (!seg) {
+          hotspotRef.current = null;
+          if (now - lastHudMs >= 1000 / HUD_UI_FPS) {
+            lastHudMs = now;
+            patchHud({
+              detected: true,
+              liveScore: null,
+              scoreStatus: "no_teacher",
+              hotspotLabel: null,
+              hotspotError: 0,
+            });
+          }
+          return;
+        }
+
+        const nearest = nearestFrame(seg.frames, playhead);
+        if (!nearest) {
+          hotspotRef.current = null;
+          if (now - lastHudMs >= 1000 / HUD_UI_FPS) {
+            lastHudMs = now;
+            patchHud({
+              detected: true,
+              liveScore: null,
+              scoreStatus: "no_teacher",
+              hotspotLabel: null,
+              hotspotError: 0,
+            });
+          }
+          return;
+        }
+
+        const raw01 = scoreFrameFused(scoreKpts, nearest.keypoints);
+        const soft01 = softenLiveScore01(raw01);
+        scoreBuf.push(soft01);
+        if (scoreBuf.length > 15) scoreBuf.shift();
+        const avg = scoreBuf.reduce((a, b) => a + b, 0) / scoreBuf.length;
+        const liveScore = Math.round(avg * 100);
+        const liveTier = scoreToTier(liveScore);
+
+        const hotspot = pickLiveHotspot(scoreKpts, nearest.keypoints);
+        hotspotRef.current =
+          hotspot && mirrorRef.current ? mirrorHotspotIndices(hotspot) : hotspot;
+
+        if (now - lastHudMs >= 1000 / HUD_UI_FPS) {
+          lastHudMs = now;
+          patchHud({
+            detected: true,
+            liveScore,
+            liveTier,
+            scoreStatus: "live",
+            hotspotLabel: hotspot?.label ?? null,
+            hotspotError: hotspot?.error ?? 0,
+          });
         }
       };
 
@@ -235,17 +343,34 @@ export function useSessionScoring(opts: Options): {
     void run();
     return () => {
       disposed = true;
-      kptsRef.current = null;
-      hotspotRef.current = null;
       if (rafId) cancelAnimationFrame(rafId);
+      latestKptsRef.current = null;
+      hotspotRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active, lessonId]);
+  }, [detectActive, lessonId]);
 
-  return { state, finish, reset, kptsRef, hotspotRef };
+  return { state, latestKptsRef, hotspotRef, finish, reset };
 }
 
-// —— 内部小工具(避免额外 import 造成的循环) ——
+const INDEX_MIRROR: Record<number, number> = Object.fromEntries(
+  MIRROR_PAIRS.flatMap(([a, b]) => [
+    [a, b],
+    [b, a],
+  ]),
+);
+
+function mirrorIndex(i: number): number {
+  return INDEX_MIRROR[i] ?? i;
+}
+
+function mirrorHotspotIndices(h: LiveHotspot): LiveHotspot {
+  return {
+    ...h,
+    vertex: mirrorIndex(h.vertex),
+    edges: h.edges.map(([a, b]) => [mirrorIndex(a), mirrorIndex(b)]),
+  };
+}
 
 function nearestFrame(frames: TeacherFrame[], tSec: number): TeacherFrame | null {
   if (!frames.length) return null;
@@ -260,9 +385,4 @@ function nearestFrame(frames: TeacherFrame[], tSec: number): TeacherFrame | null
   const prev = lo > 0 ? frames[lo - 1] : null;
   if (!prev) return cur;
   return Math.abs(prev.t - tSec) < Math.abs(cur.t - tSec) ? prev : cur;
-}
-
-// 只为实时 UI 用的轻量融合分
-function quickScore(u: Kpt[], t: Kpt[]): number {
-  return scoreFrameFused(u, t);
 }

@@ -2,7 +2,9 @@
 
 import * as React from "react";
 
-import type { TeacherFrame } from "@/lib/pose/scoring";
+import { alignTeacherToUserAuto } from "@/lib/pose/alignSkeleton";
+import type { Kpt, TeacherFrame } from "@/lib/pose/scoring";
+import type { Keypoint } from "@/lib/pose/types";
 
 type SkeletonTuning = {
   scale: number;
@@ -264,6 +266,35 @@ function drawJoint(
   ctx.fill();
 }
 
+function toAlignedCanvasPoint(
+  point: Kpt,
+  width: number,
+  height: number,
+  mirror: boolean,
+  tuning: SkeletonTuning,
+): DrawPoint {
+  // 与 UserSkeletonOverlay 同一套镜面映射，再叠加微调面板的位移/缩放
+  const skeletonScale = tuning.skeletonScale ?? 1;
+  let nx = mirror ? 1 - point.x : point.x;
+  let ny = point.y;
+  nx = 0.5 + (nx - 0.5) * tuning.scale * skeletonScale + (tuning.skeletonOffsetX ?? 0) * 0.5 + tuning.offsetX * 0.5;
+  ny = 0.5 + (ny - 0.5) * tuning.scale * skeletonScale + (tuning.skeletonOffsetY ?? 0) * 0.5 + tuning.offsetY * 0.5;
+  return {
+    x: nx * width,
+    y: ny * height,
+    vis: normalizedVisibility(point.visibility),
+  };
+}
+
+function keypointsToKpts(kp: Keypoint[]): Kpt[] {
+  return kp.map((row) => ({
+    x: row[0],
+    y: row[1],
+    z: 0,
+    visibility: row[2] ?? 1,
+  }));
+}
+
 export default function AdaptiveSkeletonOverlay({
   framesRef,
   currentTimeSec,
@@ -272,6 +303,7 @@ export default function AdaptiveSkeletonOverlay({
   mirror = true,
   active = true,
   sourceAspect = DEFAULT_SOURCE_ASPECT,
+  userKptsRef,
   className,
 }: {
   framesRef: React.MutableRefObject<TeacherFrame[]>;
@@ -281,13 +313,17 @@ export default function AdaptiveSkeletonOverlay({
   mirror?: boolean;
   active?: boolean;
   sourceAspect?: number;
+  /** 用户实时关键点：有则把老师骨架刚体对齐到用户身上 */
+  userKptsRef?: React.MutableRefObject<Keypoint[] | null>;
   className?: string;
 }) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const timeRef = React.useRef(currentTimeSec ?? 0);
   const tuningRef = React.useRef(tuning);
   const sourceAspectRef = React.useRef(sourceAspect);
+  const mirrorRef = React.useRef(mirror);
   const previousPointsRef = React.useRef<DrawPoint[]>([]);
+  const [alignedMode, setAlignedMode] = React.useState(false);
 
   React.useEffect(() => {
     if (typeof currentTimeSec === "number") timeRef.current = currentTimeSec;
@@ -296,6 +332,10 @@ export default function AdaptiveSkeletonOverlay({
   React.useEffect(() => {
     tuningRef.current = tuning;
   }, [tuning]);
+
+  React.useEffect(() => {
+    mirrorRef.current = mirror;
+  }, [mirror]);
 
   React.useEffect(() => {
     sourceAspectRef.current =
@@ -307,12 +347,10 @@ export default function AdaptiveSkeletonOverlay({
     let raf = 0;
     let disposed = false;
     let lastDrawMs = 0;
-    // Cache the canvas rect so getBoundingClientRect() is never called inside
-    // the hot RAF loop (it forces layout). Updated by a ResizeObserver instead.
     let cachedWidth = 0;
     let cachedHeight = 0;
-    // Preallocate the smoothed-points array once; reuse every frame to avoid GC.
     let pointsBuf: DrawPoint[] = [];
+    let lastAlignedFlag: boolean | null = null;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -353,33 +391,49 @@ export default function AdaptiveSkeletonOverlay({
       ctx.clearRect(0, 0, width, height);
 
       const frame = nearestFrame(framesRef.current, currentTimeRef?.current ?? timeRef.current);
-      if (frame?.keypoints?.length) {
-        const target = frame.keypoints.map((point) =>
-          toCanvasPoint(point, width, height, tuningRef.current, sourceAspectRef.current)
-        );
-        const previous = previousPointsRef.current;
-        // Reuse pointsBuf to avoid allocating a new array every frame.
-        if (pointsBuf.length !== target.length) pointsBuf = new Array(target.length);
-        for (let i = 0; i < target.length; i++) {
-          const t = target[i];
-          const prev = previous[i];
-          pointsBuf[i] = prev
-            ? { x: prev.x + (t.x - prev.x) * SMOOTHING, y: prev.y + (t.y - prev.y) * SMOOTHING, vis: t.vis }
-            : t;
-        }
-        previousPointsRef.current = pointsBuf.slice();
+      if (!frame?.keypoints?.length) return;
 
-        // Use source-over instead of "lighter" — lighter forces an expensive
-        // compositing pass and causes colour blowout; plain strokes look cleaner.
-        ctx.save();
-        const intensity = Math.max(0.55, Math.min(1.65, tuningRef.current.skeletonIntensity ?? 1.15));
-        for (const [from, to] of EDGES) {
-          const a = pointsBuf[from];
-          const b = pointsBuf[to];
-          if (a && b) drawDoubleRail(ctx, a, b, from, to, dpr, intensity);
-        }
-        ctx.restore();
+      const userKp = userKptsRef?.current;
+      const canAlign = !!(userKp && userKp.length >= 33);
+      if (lastAlignedFlag !== canAlign) {
+        lastAlignedFlag = canAlign;
+        setAlignedMode(canAlign);
+        previousPointsRef.current = [];
       }
+
+      let target: DrawPoint[];
+      if (canAlign && userKp) {
+        const user = keypointsToKpts(userKp);
+        const aligned = alignTeacherToUserAuto(frame.keypoints, user);
+        const src = aligned?.points ?? frame.keypoints;
+        target = src.map((point) =>
+          toAlignedCanvasPoint(point, width, height, mirrorRef.current, tuningRef.current),
+        );
+      } else {
+        target = frame.keypoints.map((point) =>
+          toCanvasPoint(point, width, height, tuningRef.current, sourceAspectRef.current),
+        );
+      }
+
+      const previous = previousPointsRef.current;
+      if (pointsBuf.length !== target.length) pointsBuf = new Array(target.length);
+      for (let i = 0; i < target.length; i++) {
+        const t = target[i];
+        const prev = previous[i];
+        pointsBuf[i] = prev
+          ? { x: prev.x + (t.x - prev.x) * SMOOTHING, y: prev.y + (t.y - prev.y) * SMOOTHING, vis: t.vis }
+          : t;
+      }
+      previousPointsRef.current = pointsBuf.slice();
+
+      ctx.save();
+      const intensity = Math.max(0.55, Math.min(1.65, tuningRef.current.skeletonIntensity ?? 1.15));
+      for (const [from, to] of EDGES) {
+        const a = pointsBuf[from];
+        const b = pointsBuf[to];
+        if (a && b) drawDoubleRail(ctx, a, b, from, to, dpr, intensity);
+      }
+      ctx.restore();
     };
 
     raf = requestAnimationFrame(tick);
@@ -388,14 +442,15 @@ export default function AdaptiveSkeletonOverlay({
       cancelAnimationFrame(raf);
       ro.disconnect();
     };
-  }, [active, currentTimeRef, framesRef]);
+  }, [active, currentTimeRef, framesRef, userKptsRef]);
 
   return (
     <canvas
       ref={canvasRef}
       data-adaptive-skeleton="true"
       className={className ?? "pointer-events-none absolute inset-0 z-[24] h-full w-full"}
-      style={{ transform: mirror ? "scaleX(-1)" : "none" }}
+      // 对齐到用户后改由绘制函数做镜像；未对齐时保持旧的 CSS 翻转
+      style={{ transform: !alignedMode && mirror ? "scaleX(-1)" : "none" }}
       aria-hidden
     />
   );

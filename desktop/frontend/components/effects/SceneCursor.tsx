@@ -27,8 +27,16 @@ export function SceneCursor({
   React.useEffect(() => {
     if (!enabled) return;
 
-    const previous = document.body.style.cursor;
-    document.body.style.cursor = "none";
+    // 强制隐藏系统光标（含 button/a 上的 cursor:pointer 手形），只保留自定义指针。
+    const style = document.createElement("style");
+    style.setAttribute("data-dp-hide-native-cursor", "1");
+    style.textContent = `
+      html.dp-custom-cursor, html.dp-custom-cursor * , html.dp-custom-cursor *::before, html.dp-custom-cursor *::after {
+        cursor: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+    document.documentElement.classList.add("dp-custom-cursor");
 
     let x = -1000;
     let y = -1000;
@@ -86,7 +94,8 @@ export function SceneCursor({
       cancelAnimationFrame(raf);
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseover", onOver);
-      document.body.style.cursor = previous;
+      document.documentElement.classList.remove("dp-custom-cursor");
+      style.remove();
     };
   }, [enabled, variant]);
 

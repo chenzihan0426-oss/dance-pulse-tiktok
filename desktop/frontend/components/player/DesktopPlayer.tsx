@@ -657,8 +657,10 @@ export function DesktopPlayer({
         body {
           font-family: "Michroma", "Noto Sans SC", sans-serif;
           background: #050505;
-          cursor: ${showCustomCursor ? "none" : "auto"};
         }
+        ${showCustomCursor
+          ? `html, body, html *, html *::before, html *::after { cursor: none !important; }`
+          : ""}
         @keyframes dp-step-hint-in {
           from { opacity: 0; transform: translate(-50%, -8px); }
           to   { opacity: 1; transform: translate(-50%, 0); }
@@ -778,7 +780,7 @@ export function DesktopPlayer({
             ) : null}
 
             <div className="pointer-events-none absolute left-3 top-3 rounded-full border border-white/15 bg-black/60 px-3 py-1 text-[11px] font-semibold text-white/95">
-              {`${segment.section_label} · 第 ${segment.index + 1}`}
+              {`${segment.section_label} · 第 ${Math.max(1, idx + 1)}`}
             </div>
 
             <div className="pointer-events-none absolute right-3 top-3 rounded-full border border-white/15 bg-black/60 px-3 py-1 text-[11px] font-semibold text-white/95">
@@ -1049,7 +1051,7 @@ export function DesktopPlayer({
             </div>
 
             <div className="min-h-0 flex-1 space-y-2 overflow-y-auto px-4 pb-5">
-              {practiceSegments.map((s) => {
+              {practiceSegments.map((s, practiceIdx) => {
                 const active = s.id === segment.id;
                 const rowDifficulty = clampDifficulty(s.difficulty);
                 return (
@@ -1069,7 +1071,7 @@ export function DesktopPlayer({
                     />
                     <div className="min-w-0 flex-1">
                       <div className={`truncate text-[17px] font-semibold ${active ? "text-white" : "text-white/82"}`}>
-                        {`${s.section_label} · 第 ${s.index + 1}`}
+                        {`${s.section_label} · 第 ${practiceIdx + 1}`}
                       </div>
                       <div className="mt-0.5 flex items-center gap-2 text-[12px] text-white/48">
                         <span>{s.duration.toFixed(1)}s</span>

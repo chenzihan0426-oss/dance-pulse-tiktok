@@ -1,27 +1,26 @@
-"use client";
+﻿"use client";
 
 // Tracking challenge: camera view with a selectable teacher skeleton or silhouette layer.
 
 import * as React from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Camera, Pause, Play, Maximize2, Minimize2, Volume2, VolumeX } from "lucide-react";
 
 import AdaptiveSkeletonOverlay from "@/components/tracking/AdaptiveSkeletonOverlay";
-import UserSkeletonOverlay from "@/components/tracking/UserSkeletonOverlay";
 import MatteOverlay, { type MatteOverlayStatus } from "@/components/tracking/MatteOverlay";
 import SegmentParticleLayer from "@/components/tracking/SegmentParticleLayer";
 import CameraPicker from "@/components/tracking/CameraPicker";
 import CameraControls from "@/components/tracking/CameraControls";
 import MatteTuningPanel, { type MatteTuning, type TrackingOverlayLayer } from "@/components/tracking/MatteTuningPanel";
 import TeacherMiniWindow from "@/components/tracking/TeacherMiniWindow";
+import UserSkeletonOverlay from "@/components/tracking/UserSkeletonOverlay";
 import { Button } from "@/components/ui/button";
-import { getLesson } from "@/lib/api";
+import { getLesson, submitTrackingSession } from "@/lib/api";
+import { buildFeedbackReport, saveFeedbackReport, tierLabel } from "@/lib/feedback";
 import type { Kpt, TeacherFrame } from "@/lib/pose/scoring";
 import type { SegmentMeta } from "@/lib/pose/sessionAccumulator";
-import { JOINT_LABELS_ZH } from "@/lib/feedback/liveHotspot";
 import { useSessionScoring } from "@/hooks/useSessionScoring";
-import { submitTrackingSession } from "@/lib/api";
 import type { Lesson, Segment } from "@/lib/types";
 import { fmtTime } from "@/lib/utils";
 
@@ -288,13 +287,12 @@ function DotFieldBackground({ mouseRef }: { mouseRef: React.MutableRefObject<{ x
 
 export default function TrackingDesktopPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const lessonId = params?.id ?? "";
 
   const [lesson, setLesson] = React.useState<Lesson | null>(null);
   const [loadError, setLoadError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
-  const [challengeDone, setChallengeDone] = React.useState(false);
-
   const [cameraReady, setCameraReady] = React.useState(false);
   const [cameraError, setCameraError] = React.useState<string | null>(null);
   const cameraRef = React.useRef<HTMLVideoElement>(null);
@@ -331,32 +329,28 @@ export default function TrackingDesktopPage() {
   // 所有可评分 segment 的老师帧(供实时比对),挑战开始时用它构建 SessionAccumulator。
   const [scoringSegments, setScoringSegments] = React.useState<SegmentMeta[]>([]);
   const [challengeActive, setChallengeActive] = React.useState(false);
-  const [sessionSummary, setSessionSummary] = React.useState<
-    {
-      overallScore: number;
-      hardest: { label: string; score: number } | null;
-      // 改进建议:最薄弱的 2-3 段,各自的最差关节与得分
-      improvements: Array<{ label: string; joint: string | null; score: number }>;
-    } | null
-  >(null);
+  /** 开始跟拍前的 3-2-1 倒计时；null 表示未在倒计时 */
+  const [countdown, setCountdown] = React.useState<number | null>(null);
   // Mirror state drives both the camera video transform and the matte overlay.
   // 评分链路也用它决定是否翻转用户姿态,故声明在 useSessionScoring 之前。
   const [userMirror, setUserMirror] = React.useState(true);
 
-  // 实时评分 hook:挑战进行中对摄像头跑姿态识别并累加比对结果。
+  // 实时姿态：摄像头就绪即识别并叠用户骨架；挑战进行中才写入评分累加器。
   const {
     state: scoringState,
+    latestKptsRef,
+    hotspotRef,
     finish: finishScoring,
-    kptsRef: userKptsRef,
-    hotspotRef: userHotspotRef,
   } = useSessionScoring({
-    active: challengeActive,
+    detectActive: cameraReady,
+    scoringActive: challengeActive,
     lessonId,
     videoRef: cameraRef,
     playheadRef: teacherPlayheadRef,
     segments: scoringSegments,
     mirror: userMirror,
   });
+  const [buildingReport, setBuildingReport] = React.useState(false);
 
   // Preload matte and particle assets into the HTTP cache when a lesson loads.
   React.useEffect(() => {
@@ -373,18 +367,16 @@ export default function TrackingDesktopPage() {
     return () => { controllers.forEach((c) => c.abort()); };
   }, [lesson]);
 
-  // 预加载所有可评分 segment 的老师姿态帧,构建 scoringSegments(供实时比对)。
+  // 预加载整课所有带 pose 的切片（含静止段），保证整支视频都能计分。
   React.useEffect(() => {
     if (!lesson) {
       setScoringSegments([]);
       return;
     }
     let cancelled = false;
-    const scorable = lesson.segments.filter((s) => !s.deleted && !s.is_still);
+    const scorable = lesson.segments.filter((s) => !s.deleted);
     Promise.all(
       scorable.map(async (seg): Promise<SegmentMeta | null> => {
-        // 注意用 || 而非 ??:pose_full_url 缺失时是空字符串,?? 不会兜底,
-        // 会导致只有基础 pose 的课(如 harry_dp)整门评分失效
         const url = seg.pose_full_url || seg.pose_url;
         if (!url) return null;
         try {
@@ -656,57 +648,80 @@ export default function TrackingDesktopPage() {
     video.srcObject = cameraStream;
     if (cameraStream) void video.play().catch(() => null);
   }, [cameraStream, cameraReady]);
-  // 结束挑战:停止评分、汇总结果、POST 给后端、生成本地摘要。
+  // 结束挑战:空闲时构建报告，避免大对象计算卡主线程；完成后再跳转。
   const finishChallenge = React.useCallback(async () => {
     if (!challengeActive) return;
     setChallengeActive(false);
     const result = finishScoring();
     if (!result || result.segments.length === 0) return;
 
-    // 找最难的动作(分最低)做本地摘要展示
-    let hardest: { label: string; score: number } | null = null;
-    for (const seg of result.segments) {
-      if (!hardest || seg.score < hardest.score) {
-        const meta = lesson?.segments.find((s) => s.id === seg.segmentId);
-        hardest = { label: meta?.section_label ?? seg.segmentId, score: seg.score };
+    setBuildingReport(true);
+
+    const segmentLabels: Record<string, string> = {};
+    for (const seg of lesson?.segments ?? []) {
+      segmentLabels[seg.id] = seg.section_label;
+    }
+    const lessonTitle = lesson?.title;
+    const lid = lessonId;
+
+    await new Promise<void>((resolve) => {
+      const runBuild = () => {
+        try {
+          const report = buildFeedbackReport(result, {
+            lessonTitle,
+            segmentLabels,
+          });
+          saveFeedbackReport(report);
+
+          // 后端会话总分用骨段主分，与最终报告一致
+          void submitTrackingSession(lid, {
+            ...result,
+            overallScore: report.overallBoneScore,
+            overallBoneScore: report.overallBoneScore,
+          }).catch((err) => console.warn("[tracking] session 提交失败:", err));
+        } finally {
+          setBuildingReport(false);
+          resolve();
+        }
+      };
+      const ric = (window as unknown as {
+        requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => void;
+      }).requestIdleCallback;
+      if (typeof ric === "function") {
+        ric(() => runBuild(), { timeout: 600 });
+      } else {
+        window.setTimeout(runBuild, 0);
       }
-    }
+    });
 
-    // 改进建议:得分最低的 2-3 段(只挑低于 85 的),标出各自最差关节
-    const improvements = [...result.segments]
-      .sort((a, b) => a.score - b.score)
-      .filter((seg) => seg.score < 85)
-      .slice(0, 3)
-      .map((seg) => {
-        const meta = lesson?.segments.find((s) => s.id === seg.segmentId);
-        return {
-          label: meta?.section_label ?? seg.segmentId,
-          joint: seg.worstJoint ? JOINT_LABELS_ZH[seg.worstJoint] ?? seg.worstJoint : null,
-          score: seg.score,
-        };
-      });
+    router.push(`/lesson/${lid}/feedback`);
+  }, [challengeActive, finishScoring, lesson, lessonId, router]);
 
-    setSessionSummary({ overallScore: result.overallScore, hardest, improvements });
-
-    try {
-      await submitTrackingSession(lessonId, result);
-    } catch (err) {
-      // 提交失败不阻断用户,只在控制台留痕
-      console.warn("[tracking] session 提交失败:", err);
-    }
-  }, [challengeActive, finishScoring, lesson, lessonId]);
-
-  const stopCameraStream = React.useCallback(() => {
-    void finishChallenge();
+  // 只关轨道/画面，不触发结算跳转（供卸载与内部重置）
+  const stopCameraTracks = React.useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
     setCameraStream(null);
     setCameraReady(false);
     teacherRef.current?.pause();
     setPlaying(false);
-  }, [finishChallenge]);
+    setCountdown(null);
+  }, []);
 
-  React.useEffect(() => () => { stopCameraStream(); }, [stopCameraStream]);
+  // 用户点「关闭摄像头」：先尝试结算，再关摄像头
+  const stopCameraStream = React.useCallback(() => {
+    void finishChallenge();
+    stopCameraTracks();
+  }, [finishChallenge, stopCameraTracks]);
+
+  // 仅在组件真正卸载时释放摄像头；切勿依赖 finishChallenge，
+  // 否则 challengeActive 一变就会跑 cleanup，表现为「一点开始就闪退」。
+  React.useEffect(() => {
+    return () => {
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    };
+  }, []);
 
   // Switch front/back cameras by clearing deviceId and reopening the stream if active.
   const reopenWithFacing = React.useCallback(async (facing: "user" | "environment") => {
@@ -812,7 +827,8 @@ export default function TrackingDesktopPage() {
     const onSpace = (e: KeyboardEvent) => {
       if (e.key !== " " && e.code !== "Space") return;
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      e.preventDefault(); // 防止页面滚动/聚焦按钮被空格误触发
+      e.preventDefault();
+      if (countdown != null) return;
       if (playing) {
         setPlaying(false);
       } else if (cameraReady) {
@@ -821,7 +837,7 @@ export default function TrackingDesktopPage() {
     };
     window.addEventListener("keydown", onSpace);
     return () => window.removeEventListener("keydown", onSpace);
-  }, [playing, cameraReady, startTeacherPlayback, teacherMuted]);
+  }, [playing, cameraReady, startTeacherPlayback, teacherMuted, countdown]);
 
   const handleTeacherVideoError = React.useCallback(() => {
     const sources = teacherVideoSourcesRef.current;
@@ -861,10 +877,9 @@ export default function TrackingDesktopPage() {
       }, 0);
       return;
     }
-    // 整支跳完:停止播放并结算本次挑战，再进入猜你喜欢。
+    // 整支跳完:停止播放并结算 → 进入 Feedback 最终报告（不再跳猜你喜欢）
     setPlaying(false);
     void finishChallenge();
-    setChallengeDone(true);
   }, [finishChallenge, setTeacherPlayheadNow, startTeacherPlayback, teacherMuted]);
 
   const toggleTeacherSound = React.useCallback(async () => {
@@ -890,30 +905,45 @@ export default function TrackingDesktopPage() {
     teacherVideoIndexRef.current = 0;
     setTeacherVideoIndex(0);
     setTeacherPlayheadNow(0);
-    setChallengeDone(false);
   }, [setTeacherPlayheadNow]);
 
+  const launchChallengePlayback = React.useCallback(async () => {
+    await startTeacherPlayback(true, true);
+    if (scoringSegments.length > 0) setChallengeActive(true);
+  }, [scoringSegments.length, startTeacherPlayback]);
+
+  const launchChallengePlaybackRef = React.useRef(launchChallengePlayback);
+  launchChallengePlaybackRef.current = launchChallengePlayback;
+
+  // 3 → 2 → 1 → 开始跟拍（只依赖 countdown，避免 launch 引用变化重置倒计时）
+  React.useEffect(() => {
+    if (countdown == null) return;
+    if (countdown <= 0) {
+      setCountdown(null);
+      void launchChallengePlaybackRef.current().catch((err) => {
+        setCameraError(err instanceof Error ? err.message : String(err));
+      });
+      return;
+    }
+    const timer = window.setTimeout(() => setCountdown((c) => (c == null ? null : c - 1)), 1000);
+    return () => window.clearTimeout(timer);
+  }, [countdown]);
+
   const handleStart = async () => {
+    if (countdown != null) return;
     resetChallengeState();
-    setSessionSummary(null);
+    setChallengeActive(false);
     try {
-      await startTeacherPlayback(true, true);
       await ensureCameraReady();
       setCameraError(null);
-      // 摄像头就绪后开始评分(有可评分 segment 才启动)
-      if (scoringSegments.length > 0) setChallengeActive(true);
+      // 先开摄像头，倒计时结束后再播老师视频并计分
+      teacherRef.current?.pause();
+      setPlaying(false);
+      setCountdown(3);
     } catch (err) {
       setCameraError(err instanceof Error ? err.message : String(err));
     }
   };
-
-  // 自愈:点开始时姿态数据可能还没拉完(scoringSegments 异步加载),
-  // 那一刻 challengeActive 会错过激活;条件齐了这里补上,避免整场无评分。
-  React.useEffect(() => {
-    if (!challengeActive && cameraReady && playing && scoringSegments.length > 0) {
-      setChallengeActive(true);
-    }
-  }, [challengeActive, cameraReady, playing, scoringSegments]);
   if (loading) {
     return <main className="flex min-h-screen items-center justify-center bg-[#050505] text-white/65">加载课程...</main>;
   }
@@ -937,77 +967,15 @@ export default function TrackingDesktopPage() {
     >
       <DotFieldBackground mouseRef={mouseRef} />
 
-      {challengeDone ? (
-        <div className="absolute inset-0 z-[60] flex items-center justify-center bg-black/75 px-6 backdrop-blur-sm">
-          <div className="max-w-md border border-white/15 bg-[#0a0a0a] px-6 py-7 text-center">
-            <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#ccff00]">Challenge Complete</div>
-            <h2
-              className="mt-3 text-[32px] font-black tracking-tight"
-              style={{ fontFamily: "'Black Han Sans', 'Noto Sans SC', sans-serif" }}
-            >
-              跟练完成
-            </h2>
-            {sessionSummary ? (
-              <div className="mt-2 font-mono text-[44px] font-black leading-none text-[#ccff00]">
-                {sessionSummary.overallScore}
-              </div>
-            ) : null}
-
-            {sessionSummary && sessionSummary.improvements.length > 0 ? (
-              <div className="mt-5 border border-white/10 bg-white/[0.04] px-4 py-3 text-left">
-                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#ff5c8a]">
-                  需要改进
-                </div>
-                <ul className="mt-2 space-y-1.5">
-                  {sessionSummary.improvements.map((item) => (
-                    <li key={item.label} className="flex items-center justify-between gap-3 text-[12px]">
-                      <span className="text-white/80">
-                        {item.label}
-                        {item.joint ? (
-                          <span className="text-white/45">
-                            {" "}· {item.joint}偏差最大
-                          </span>
-                        ) : null}
-                      </span>
-                      <span className="shrink-0 font-mono text-[#ff9cbb]">{item.score} 分</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : sessionSummary ? (
-              <p className="mt-3 text-[13px] text-white/50">各段完成度都不错,保持!</p>
-            ) : null}
-
-            <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
-              <Link
-                href={`/lesson/${lessonId}/for-you`}
-                className="bg-[#ccff00] px-5 py-2.5 text-[13px] font-bold text-black transition hover:bg-white"
-                style={{ transform: "skewX(-6deg)" }}
-              >
-                <span style={{ transform: "skewX(6deg)", display: "inline-block" }}>立即查看推荐</span>
-              </Link>
-              <button
-                type="button"
-                onClick={() => {
-                  setChallengeDone(false);
-                  void handleStart();
-                }}
-                className="border border-white/20 px-5 py-2.5 text-[13px] text-white/75 transition hover:border-white/40 hover:text-white"
-              >
-                再练一次
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
       <style jsx global>{`
         @import url("https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Michroma&family=Noto+Sans+SC:wght@500;700;900&display=swap");
         body {
           font-family: "Michroma", "Noto Sans SC", sans-serif;
           background: #050505;
-          cursor: ${showCustomCursor ? "none" : "auto"};
         }
+        ${showCustomCursor
+          ? `html, body, html *, html *::before, html *::after { cursor: none !important; }`
+          : ""}
         .tracking-neon {
           font-family: "Black Han Sans", "Noto Sans SC", sans-serif;
           background: linear-gradient(90deg, #ff0055, #ffaa00, #ccff00, #00f3ff, #9d4edd, #ff0055);
@@ -1089,25 +1057,13 @@ export default function TrackingDesktopPage() {
 
           <div className="relative h-full w-full overflow-hidden rounded-[18px] border border-white/12 bg-transparent">
             {cameraReady ? (
-              <>
-                <video
-                  ref={cameraRef}
-                  className="absolute inset-0 h-full w-full object-cover"
-                  style={{ transform: userMirror ? "scaleX(-1)" : "none" }}
-                  muted
-                  playsInline
-                />
-                {/* 用户实时骨架(镜头跟踪,黄绿色):关键点来自评分 hook,零额外推理 */}
-                {challengeActive ? (
-                  <UserSkeletonOverlay
-                    videoRef={cameraRef}
-                    kptsRef={userKptsRef}
-                    hotspotRef={userHotspotRef}
-                    mirror={userMirror}
-                    active={challengeActive}
-                  />
-                ) : null}
-              </>
+              <video
+                ref={cameraRef}
+                className="absolute inset-0 h-full w-full object-cover"
+                style={{ transform: userMirror ? "scaleX(-1)" : "none" }}
+                muted
+                playsInline
+              />
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-4 text-center text-white/70">
                 <Camera className="h-10 w-10 text-[#00f3ff]" />
@@ -1131,37 +1087,109 @@ export default function TrackingDesktopPage() {
               </div>
             )}
 
-            {/* 实时评分徽标 + 最差关节提示 */}
-            {cameraReady && challengeActive ? (
-              <div className="pointer-events-none absolute right-3 top-3 z-40 flex flex-col items-end gap-1.5">
-                <div className="flex items-center gap-2 rounded-full border border-white/15 bg-black/55 px-3 py-1 backdrop-blur">
-                  <span className="text-[10px] uppercase tracking-[0.15em] text-white/50">Live</span>
-                  <span
-                    className={`font-mono text-[15px] font-bold ${
-                      scoringState.liveScore >= 85
-                        ? "text-[#ccff00]"
-                        : scoringState.liveScore >= 70
-                          ? "text-[#00f3ff]"
-                          : scoringState.liveScore >= 50
-                            ? "text-amber-300"
-                            : "text-red-300"
-                    }`}
-                  >
-                    {scoringState.ready ? scoringState.liveScore : "…"}
-                  </span>
-                </div>
-                {scoringState.hotspotLabel ? (
-                  <div className="flex items-center gap-1.5 rounded-full border border-[#ff5c8a]/40 bg-black/60 px-2.5 py-0.5 backdrop-blur">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#ff5c8a]" />
-                    <span className="text-[11px] font-semibold text-[#ff9cbb]">
-                      注意{scoringState.hotspotLabel}
+            {/* 阶段3 实时纠正面板 */}
+            {cameraReady ? (
+              <div className="pointer-events-none absolute left-3 top-3 z-[80] w-[min(280px,46%)]">
+                <div
+                  className={`rounded-2xl border px-3.5 py-3 shadow-[0_12px_40px_rgba(0,0,0,0.45)] backdrop-blur-md ${
+                    scoringState.scoreStatus !== "live"
+                      ? "border-white/20 bg-black/70"
+                      : scoringState.liveTier === "great"
+                        ? "border-[#ccff00]/50 bg-black/70"
+                        : scoringState.liveTier === "good"
+                          ? "border-[#00f3ff]/50 bg-black/70"
+                          : scoringState.liveTier === "ok"
+                            ? "border-amber-300/50 bg-black/70"
+                            : "border-[#ff5c8a]/55 bg-black/75"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-[0.22em] text-[#ccff00]">
+                      Feedback · 阶段3
+                    </span>
+                    <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-white/60">
+                      {challengeActive ? "计分中" : "预览中"}
                     </span>
                   </div>
-                ) : null}
+                  <div className="mt-2 flex items-end gap-2">
+                    <span
+                      className={`font-mono text-4xl font-black leading-none ${
+                        scoringState.scoreStatus !== "live"
+                          ? "text-white/35"
+                          : scoringState.liveTier === "great"
+                            ? "text-[#ccff00]"
+                            : scoringState.liveTier === "good"
+                              ? "text-[#00f3ff]"
+                              : scoringState.liveTier === "ok"
+                                ? "text-amber-300"
+                                : "text-[#ff8fb3]"
+                      }`}
+                    >
+                      {scoringState.liveScore == null ? "—" : scoringState.liveScore}
+                    </span>
+                    <div className="mb-0.5">
+                      <div className="text-[13px] font-bold text-white">
+                        {scoringState.scoreStatus === "booting"
+                          ? "加载模型"
+                          : scoringState.scoreStatus === "no_pose"
+                            ? "等待入镜"
+                            : scoringState.scoreStatus === "no_teacher"
+                              ? "缺少老师姿态"
+                              : tierLabel(scoringState.liveTier)}
+                      </div>
+                      <div className="text-[10px] text-white/45">
+                        {scoringState.scoreStatus === "live" ? "全程实时相似度" : "当前不计分"}
+                      </div>
+                    </div>
+                  </div>
+                  {scoringState.scoreStatus === "no_teacher" ? (
+                    <div className="mt-3 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-[12px] text-white/70">
+                      本课没有可用的老师姿态数据，无法计分。
+                    </div>
+                  ) : null}
+                  {scoringState.hotspotLabel ? (
+                    <div className="mt-3 rounded-xl border border-[#ff5c8a]/50 bg-[#ff0055]/25 px-3 py-2">
+                      <div className="text-[10px] uppercase tracking-wider text-[#ffb3c9]/80">当前需纠正</div>
+                      <div className="mt-0.5 text-[16px] font-black text-white">
+                        {scoringState.hotspotLabel}
+                        <span className="ml-2 font-mono text-[12px] font-semibold text-[#ff8fb3]">
+                          {Math.round(scoringState.hotspotError * 100)}%
+                        </span>
+                      </div>
+                      <div className="mt-1 text-[11px] text-white/65">粉红脉动 = 该关节 · 蓝点老师骨架已贴合你</div>
+                    </div>
+                  ) : scoringState.scoreStatus === "live" ? (
+                    <div className="mt-3 rounded-xl border border-[#ccff00]/25 bg-[#ccff00]/10 px-3 py-2 text-[12px] text-[#ccff00]/90">
+                      动作整体不错 · 黄绿=你 · 蓝点=老师（已自适应）
+                    </div>
+                  ) : scoringState.scoreStatus === "no_pose" ? (
+                    <div className="mt-3 text-[12px] text-white/55">站入画面后开始实时纠正</div>
+                  ) : null}
+                  {scoringState.error ? (
+                    <div className="mt-2 text-[11px] leading-4 text-red-300">姿态引擎：{scoringState.error}</div>
+                  ) : null}
+                </div>
               </div>
             ) : null}
 
-            {/* 挑战结束摘要已整合进 challengeDone 完成弹窗(含改进建议) */}
+            {buildingReport ? (
+              <div className="absolute inset-0 z-[90] flex items-center justify-center bg-black/55 text-[13px] text-white/85 backdrop-blur-sm">
+                正在生成反馈报告…
+              </div>
+            ) : null}
+
+            {countdown != null && countdown > 0 ? (
+              <div className="absolute inset-0 z-[85] flex flex-col items-center justify-center bg-black/55 backdrop-blur-sm">
+                <div className="text-[11px] font-bold uppercase tracking-[0.35em] text-white/50">准备跟拍</div>
+                <div
+                  key={countdown}
+                  className="mt-3 animate-pulse font-mono text-[110px] font-black leading-none text-transparent bg-clip-text bg-gradient-to-br from-[#ff0055] via-[#ccff00] to-[#00f3ff]"
+                >
+                  {countdown}
+                </div>
+                <div className="mt-4 text-[14px] text-white/70">站好位置，对准摄像头</div>
+              </div>
+            ) : null}
 
             {cameraReady && trackingOverlayLayer === "silhouette" && currentSegment?.matte_rgb_url && currentSegment?.matte_mask_url ? (
               <MatteOverlay
@@ -1194,6 +1222,18 @@ export default function TrackingDesktopPage() {
                 mirror={userMirror}
                 active={cameraReady && trackingOverlayLayer === "skeleton"}
                 sourceAspect={teacherPoseAspect}
+                userKptsRef={latestKptsRef}
+              />
+            ) : null}
+
+            {/* 用户实时骨架（黄绿色）——始终叠在摄像头上，与老师幽灵骨架区分 */}
+            {cameraReady ? (
+              <UserSkeletonOverlay
+                videoRef={cameraRef}
+                kptsRef={latestKptsRef}
+                hotspotRef={hotspotRef}
+                mirror={userMirror}
+                active={cameraReady}
               />
             ) : null}
 
@@ -1225,6 +1265,7 @@ export default function TrackingDesktopPage() {
         <footer className="mx-auto mb-3 flex w-[calc(100%-16px)] max-w-[1480px] items-center gap-2 rounded-2xl border border-white/12 bg-black/30 px-2.5 py-1.5 backdrop-blur-md">
           <Button
             onClick={() => {
+              if (countdown != null) return;
               if (playing) {
                 setPlaying(false);
                 return;
@@ -1235,10 +1276,11 @@ export default function TrackingDesktopPage() {
               }
               void handleStart();
             }}
-            className="rounded-full bg-gradient-to-r from-[#ff0055] via-[#9d4edd] to-[#00f3ff] px-3.5 py-1.5 text-[12px] text-white hover:brightness-110"
+            disabled={countdown != null}
+            className="rounded-full bg-gradient-to-r from-[#ff0055] via-[#9d4edd] to-[#00f3ff] px-3.5 py-1.5 text-[12px] text-white hover:brightness-110 disabled:opacity-60"
           >
             {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-            {playing ? "暂停" : cameraReady ? "继续" : "开始挑战"}
+            {countdown != null ? `倒计时 ${countdown}` : playing ? "暂停" : cameraReady ? "继续" : "开始挑战"}
           </Button>
 
           <div className="flex min-w-0 flex-1 items-center gap-2">

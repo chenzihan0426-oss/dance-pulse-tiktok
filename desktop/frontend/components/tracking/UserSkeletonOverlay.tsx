@@ -1,8 +1,7 @@
 "use client";
 
-// 在摄像头画面上绘制用户实时骨架(关键点由 useSessionScoring 提供)。
-// 摘取自 feature/feedback 分支;按 hotspotRef 高亮当前最差关节
-// (粉红描边 + 脉动圆点)。
+// 在摄像头画面上绘制用户实时骨架（关键点由 useSessionScoring 提供）。
+// 阶段 3：按 hotspotRef 高亮当前最差关节（粉红描边 + 脉动圆点）。
 
 import * as React from "react";
 
@@ -71,7 +70,6 @@ export default function UserSkeletonOverlay({
         minVisibility: 0.35,
       });
 
-      // 最差关节高亮:粉红描边 + 脉动圆点(与 feature/feedback 同款)
       const hot = hotspotRef?.current;
       if (!hot) return;
 
@@ -79,6 +77,7 @@ export default function UserSkeletonOverlay({
       const py = (ny: number) => ny * canvas.height;
       const visOk = (i: number) => (kp[i]?.[2] ?? 0) >= 0.35;
 
+      // 脉动：按时间缩放半径
       const pulse = 0.65 + 0.35 * Math.sin(performance.now() / 180);
 
       ctx.save();
@@ -122,7 +121,7 @@ export default function UserSkeletonOverlay({
   return (
     <canvas
       ref={canvasRef}
-      className={className ?? "pointer-events-none absolute inset-0 z-[30] h-full w-full object-cover"}
+      className={className ?? "pointer-events-none absolute inset-0 z-[30] h-full w-full"}
       aria-hidden
     />
   );
