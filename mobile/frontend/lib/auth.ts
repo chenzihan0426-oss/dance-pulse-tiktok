@@ -60,6 +60,45 @@ export function hasAuthSession(): boolean {
   return Boolean(getAuthSession()?.token);
 }
 
+/** 演示假登录 token（本机写入，后端不认） */
+export function isDemoAuthToken(token: string | null | undefined): boolean {
+  return Boolean(token && token.startsWith("demo_"));
+}
+
+export function isDemoAuthSession(session: AuthSession | null | undefined): boolean {
+  return isDemoAuthToken(session?.token) || Boolean(session?.user?.id?.startsWith("demo_"));
+}
+
+/** 演示假登录：账号/密码任意非空字符串即可，写入本机 session。 */
+export function loginWithAnyPassword(account: string, password: string): AuthSession {
+  const name = account.trim();
+  if (!name) throw new Error("请输入账号");
+  if (!password.trim()) throw new Error("请输入密码");
+
+  const slug = name
+    .toLowerCase()
+    .replace(/[^a-z0-9_\u4e00-\u9fff]+/gi, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 24);
+  const username = slug || `user_${Date.now().toString(36).slice(-6)}`;
+  const now = new Date().toISOString();
+  const session: AuthSession = {
+    token: `demo_${username}_${Date.now().toString(36)}`,
+    user: {
+      id: `demo_${username}`,
+      phone: "",
+      username,
+      displayName: name,
+      avatar: null,
+      bio: "演示账号 · 任意密码登录",
+      isVerified: false,
+      createdAt: now,
+    },
+  };
+  setAuthSession(session);
+  return session;
+}
+
 export function buildLocalProgressSnapshot(): LocalProgressSnapshot {
   return {
     learnedByLesson: getAllLearnedByLesson(),

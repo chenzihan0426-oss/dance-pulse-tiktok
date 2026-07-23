@@ -164,6 +164,17 @@ export default function LearnPage() {
           继续最近的舞蹈，或者导入新的编舞开始练习。
         </p>
 
+        <Link
+          href="/lesson/antifragile_dp/tracking-desktop"
+          className="mt-4 flex min-h-[52px] items-center justify-between gap-3 rounded-[20px] border border-[#ff0055]/40 bg-gradient-to-r from-[#ff0055]/25 to-[#9d4edd]/15 px-4 py-3"
+        >
+          <div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#ff8fb3]">跟拍挑战</div>
+            <div className="mt-0.5 text-[15px] font-semibold text-white">ANTIFRAGILE · 立即开练</div>
+          </div>
+          <span className="rounded-full bg-white px-3 py-1.5 text-[12px] font-bold text-black">GO</span>
+        </Link>
+
         {!isAuthenticated ? <SyncPromptCard variant="compact" /> : null}
 
         <section className="mt-7 space-y-3">

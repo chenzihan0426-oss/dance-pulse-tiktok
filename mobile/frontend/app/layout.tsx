@@ -28,8 +28,14 @@ export default function RootLayout({
     <html lang="zh-CN" className="dark">
       <head>
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Michroma&family=Noto+Sans+SC:wght@400;500;700;900&display=swap"
+        />
       </head>
-      <body className="min-h-screen bg-bg-root text-[var(--fg)] antialiased">{children}</body>
+      <body className="min-h-screen bg-bg-root font-[Michroma,'Noto_Sans_SC',sans-serif] text-[var(--fg)] antialiased">
+        {children}
+      </body>
     </html>
   );
 }

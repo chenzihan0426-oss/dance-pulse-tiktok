@@ -1,84 +1,167 @@
 "use client";
 
 import * as React from "react";
-import { Flame, Loader2, Sparkles } from "lucide-react";
-import { CommunityResultCard } from "@/components/community/CommunityResultCard";
-import { getCommunityFeed } from "@/lib/api";
-import type { CommunityFeedItem } from "@/lib/types";
+import { Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { ArenaHero } from "@/components/community/ArenaHero";
+import { CommunityFeedGrid } from "@/components/community/CommunityFeedGrid";
+import { CommunityHubTabs } from "@/components/community/CommunityHubTabs";
+import { FollowingFeed } from "@/components/community/FollowingFeed";
+import { LeaderboardPanel } from "@/components/community/LeaderboardPanel";
+import { ScoreDuel } from "@/components/community/ScoreDuel";
+import {
+  WEEKLY_CHALLENGE,
+  WEEKLY_SCORE_DUEL,
+  type CommunityHubTab,
+} from "@/lib/communityShowcase";
+import { useDemoCoverPool } from "@/lib/demoMedia";
+import { useCommunityFeed } from "@/lib/useCommunityFeed";
+
+function parseTab(raw: string | null): CommunityHubTab {
+  if (raw === "hot" || raw === "recommend" || raw === "following" || raw === "arena") return raw;
+  if (raw === "plaza" || raw === "board") return raw === "board" ? "arena" : "hot";
+  if (raw === "pulse") return "following";
+  return "hot";
+}
 
 export default function CommunityPage() {
-  const [items, setItems] = React.useState<CommunityFeedItem[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
+  return (
+    <Suspense
+      fallback={
+        <main className="mx-auto flex min-h-[50vh] max-w-md items-center justify-center px-5 text-white/45">
+          <Loader2 className="h-5 w-5 animate-spin" />
+        </main>
+      }
+    >
+      <CommunityPageInner />
+    </Suspense>
+  );
+}
+
+function CommunityPageInner() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const tabParam = searchParams?.get("tab") ?? null;
+  const [tab, setTab] = React.useState<CommunityHubTab>(() => parseTab(tabParam));
+  const feedFilter = tab === "recommend" ? "recommend" : tab === "following" ? "following" : "hot";
+  const { items, loading } = useCommunityFeed(tab === "arena" ? "hot" : feedFilter);
+  const { coverFor } = useDemoCoverPool();
+
+  const arenaChallenge = React.useMemo(
+    () => ({
+      ...WEEKLY_CHALLENGE,
+      thumb: coverFor("arena-hero", WEEKLY_CHALLENGE.thumb) ?? WEEKLY_CHALLENGE.thumb,
+    }),
+    [coverFor]
+  );
+
+  const arenaDuel = React.useMemo(
+    () => ({
+      ...WEEKLY_SCORE_DUEL,
+      champion: {
+        ...WEEKLY_SCORE_DUEL.champion,
+        thumb:
+          coverFor(`duel-${WEEKLY_SCORE_DUEL.champion.resultId}`, WEEKLY_SCORE_DUEL.champion.thumb) ??
+          WEEKLY_SCORE_DUEL.champion.thumb,
+      },
+      challenger: {
+        ...WEEKLY_SCORE_DUEL.challenger,
+        thumb:
+          coverFor(
+            `duel-${WEEKLY_SCORE_DUEL.challenger.resultId}`,
+            WEEKLY_SCORE_DUEL.challenger.thumb
+          ) ?? WEEKLY_SCORE_DUEL.challenger.thumb,
+      },
+    }),
+    [coverFor]
+  );
 
   React.useEffect(() => {
-    let cancelled = false;
+    setTab(parseTab(tabParam));
+  }, [tabParam]);
 
-    void getCommunityFeed()
-      .then((feed) => {
-        if (!cancelled) {
-          setItems(feed);
-          setError(null);
-        }
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : String(err));
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      });
+  function changeTab(next: CommunityHubTab) {
+    setTab(next);
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
+    params.set("tab", next);
+    router.replace(`/community?${params.toString()}`, { scroll: false });
+  }
 
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const subtitle =
+    tab === "hot"
+      ? "全站飙升同舞 · 刷到就是缘分"
+      : tab === "recommend"
+        ? "按你的练习口味猜你想跟"
+        : tab === "following"
+          ? "朋友刚练完、刚打卡、刚上分"
+          : "同舞挑战 · 榜单对决 · 跟跳上榜";
 
   return (
-    <main className="mx-auto min-h-screen max-w-md px-5 pb-10 pt-10 text-white">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-brand/12 px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-brand-light">
-            <Sparkles className="h-3.5 w-3.5" />
-            Community
-          </div>
-          <h1 className="mt-4 text-[30px] font-semibold tracking-tight text-white">作品社区</h1>
-          <p className="mt-3 text-[14px] leading-6 text-white/45">
-            看别人怎么跳、怎么拿分，也能顺手点进主页继续挖同风格作品。
-          </p>
-        </div>
+    <main className="relative mx-auto min-h-screen max-w-md px-5 pb-4 pt-8 text-white">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[360px] bg-[radial-gradient(ellipse_at_top,rgba(255,0,85,0.12),transparent_60%)]" />
 
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#421B2B] text-[#FF7C9D]">
-          <Flame className="h-5 w-5" />
+      <div className="relative mb-6 space-y-5">
+        <div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#ccff00]/80">
+            DancePulse Community
+          </div>
+          <h1
+            className="mt-2 text-[32px] font-black tracking-tight text-white"
+            style={{ fontFamily: "'Black Han Sans', 'Noto Sans SC', sans-serif", transform: "skewX(-4deg)" }}
+          >
+            社区
+          </h1>
+          <p className="mt-2 text-[14px] text-white/50">{subtitle}</p>
         </div>
+        <CommunityHubTabs value={tab} onChange={changeTab} />
       </div>
 
-      {loading ? (
-        <div className="mt-10 flex h-48 items-center justify-center rounded-[28px] bg-bg-surface text-white/50">
-          <Loader2 className="h-5 w-5 animate-spin" />
+      {tab === "hot" || tab === "recommend" ? (
+        <div className="relative space-y-5">
+          {tab === "hot" ? (
+            <div className="flex flex-col gap-3 border border-white/10 bg-black/35 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="text-[13px] text-white/70">
+                <span className="font-bold text-[#ff0055]">热门飙升</span>
+                <span className="mx-2 text-white/25">·</span>
+                今天已有 {WEEKLY_CHALLENGE.participants.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} 人参与同舞
+              </div>
+              <button
+                type="button"
+                onClick={() => changeTab("arena")}
+                className="min-h-[44px] text-left text-[13px] font-semibold text-[#ccff00] active:underline sm:min-h-0"
+              >
+                去竞技场 →
+              </button>
+            </div>
+          ) : (
+            <div className="border border-white/10 bg-black/35 px-4 py-3 text-[13px] text-white/60">
+              <span className="font-bold text-[#00f3ff]">为你推荐</span>
+              <span className="mx-2 text-white/25">·</span>
+              根据你的练习挑了一些作品
+            </div>
+          )}
+
+          {loading ? (
+            <div className="flex items-center justify-center py-20 text-white/45">
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              加载中...
+            </div>
+          ) : (
+            <CommunityFeedGrid items={items} />
+          )}
         </div>
-      ) : error ? (
-        <div className="mt-10 rounded-[24px] border border-state-danger/20 bg-state-danger/10 px-4 py-5 text-sm text-red-200">
-          {error}
+      ) : null}
+
+      {tab === "following" ? <FollowingFeed /> : null}
+
+      {tab === "arena" ? (
+        <div className="relative space-y-5">
+          <ArenaHero challenge={arenaChallenge} />
+          <ScoreDuel duel={arenaDuel} />
+          <LeaderboardPanel />
         </div>
-      ) : items.length === 0 ? (
-        <div className="mt-10 rounded-[28px] border border-white/8 bg-bg-surface px-5 py-6 text-sm text-white/45">
-          还没有公开作品。先去课程里完成一次跟拍挑战，发布后这里就会出现第一批作品。
-        </div>
-      ) : (
-        <div className="mt-8 space-y-4">
-          {items.map((item) => (
-            <CommunityResultCard
-              key={item.result.id}
-              item={item}
-              href={`/community/result/${item.result.id}`}
-            />
-          ))}
-        </div>
-      )}
+      ) : null}
     </main>
   );
 }
