@@ -30,6 +30,7 @@ import {
   buildLocalProgressSnapshot,
   clearAuthSession,
   getAuthToken,
+  isDemoAuthToken,
 } from "./auth";
 
 // Default to real backend mode once the app is integrated.
@@ -231,7 +232,7 @@ async function http<T>(
 
     if (!res.ok) {
       const text = await res.text().catch(() => "");
-      if (res.status === 401 && authToken) {
+      if (res.status === 401 && authToken && !isDemoAuthToken(authToken)) {
         clearAuthSession();
       }
       throw new Error(`${res.status} ${res.statusText}: ${text}`);
@@ -390,7 +391,8 @@ let syncTimer: number | null = null;
 
 export function requestLocalSnapshotSync(): void {
   if (USE_MOCK) return;
-  if (!getAuthToken() || typeof window === "undefined") return;
+  const token = getAuthToken();
+  if (!token || isDemoAuthToken(token) || typeof window === "undefined") return;
 
   if (syncTimer !== null) {
     window.clearTimeout(syncTimer);
@@ -636,7 +638,7 @@ export async function submitTrackingVideo(
   });
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    if (res.status === 401 && authToken) {
+    if (res.status === 401 && authToken && !isDemoAuthToken(authToken)) {
       clearAuthSession();
     }
     throw new Error(`${res.status} ${res.statusText}: ${text}`);
@@ -651,6 +653,70 @@ export async function getTrackingResults(lessonId: string): Promise<TrackingResu
   }
   const response = await http<TrackingResultsResponse>(`/api/lessons/${lessonId}/tracking/results`);
   return response.results.map(normalizeTrackingResult);
+}
+
+/** 姿态比对会话：挑战结束把 SessionResult POST 给后端。 */
+export interface SubmitSessionResponse {
+  sessionId: string;
+  overallScore: number;
+  segments: number;
+}
+
+export async function submitTrackingSession(
+  lessonId: string,
+  payload: unknown
+): Promise<SubmitSessionResponse> {
+  if (USE_MOCK) {
+    await sleep(120);
+    return { sessionId: `sess_mock_${Date.now()}`, overallScore: 0, segments: 0 };
+  }
+  return http<SubmitSessionResponse>(`/api/lessons/${lessonId}/tracking/sessions`, {
+    method: "POST",
+    json: payload,
+  });
+}
+
+export type TrackingSessionSummary = {
+  sessionId: string;
+  overallScore: number;
+  frameCount: number;
+  poseSource: string;
+  createdAt: string;
+};
+
+export async function listTrackingSessions(lessonId: string): Promise<TrackingSessionSummary[]> {
+  if (USE_MOCK) {
+    await sleep(80);
+    return [];
+  }
+  const res = await http<{ sessions: TrackingSessionSummary[] }>(
+    `/api/lessons/${lessonId}/tracking/sessions`
+  );
+  return res.sessions ?? [];
+}
+
+export interface DifficultyAggregate {
+  segmentId: string;
+  attempts: number;
+  avgScore: number;
+  scoreVariance: number;
+  measuredDifficulty: number;
+  topWorstJoint: string | null;
+  updatedAt: string;
+}
+
+export async function getTrackingDifficulty(
+  lessonId: string,
+  scope: "global" | "me" = "global"
+): Promise<DifficultyAggregate[]> {
+  if (USE_MOCK) {
+    await sleep(80);
+    return [];
+  }
+  const res = await http<{ aggregates: DifficultyAggregate[] }>(
+    `/api/lessons/${lessonId}/tracking/difficulty?scope=${scope}`
+  );
+  return res.aggregates;
 }
 
 export async function publishTrackingResult(resultId: string): Promise<TrackingResult> {
@@ -752,6 +818,18 @@ export async function getCommunityFeed(): Promise<CommunityFeedItem[]> {
   }
   const response = await http<CommunityFeedResponse>("/api/community/feed");
   return response.items.map(normalizeCommunityFeedItem);
+}
+
+/** 扫描本机 backend/data 下的 demo 视频与封面（不入库，丢文件即出现） */
+export async function getDemoMedia(): Promise<{ videos: string[]; thumbs: string[] }> {
+  if (USE_MOCK) {
+    return { videos: [], thumbs: [] };
+  }
+  try {
+    return await http<{ videos: string[]; thumbs: string[] }>("/api/demo-media");
+  } catch {
+    return { videos: [], thumbs: [] };
+  }
 }
 
 export async function getCommunityTrackingDetail(

@@ -2,7 +2,9 @@
 
 import * as React from "react";
 
-import type { TeacherFrame } from "@/lib/pose/scoring";
+import { alignTeacherToUserAuto } from "@/lib/pose/alignSkeleton";
+import type { Kpt, TeacherFrame } from "@/lib/pose/scoring";
+import type { Keypoint } from "@/lib/pose/types";
 
 type SkeletonTuning = {
   scale: number;
@@ -29,6 +31,8 @@ type GlowColor = {
 const DEFAULT_SOURCE_ASPECT = 9 / 16;
 const MIN_VIS = 0.06;
 const SMOOTHING = 0.42;
+const SKELETON_MAX_DPR = 1.25;
+const SKELETON_TARGET_FPS = 30;
 
 const EDGES: Array<[number, number]> = [
   [0, 11],
@@ -170,8 +174,9 @@ function drawDoubleRail(
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
 
-  ctx.shadowColor = `${color.halo} ${0.52 * alpha * intensity})`;
-  ctx.shadowBlur = 18 * dpr * intensity;
+  // No shadowBlur — it forces an expensive per-pixel blur pass on every stroke
+  // and is the main canvas 2D cost here. The double-rail dot pattern reads
+  // clearly without it.
   ctx.lineWidth = 11 * dpr;
   ctx.strokeStyle = `${color.halo} ${0.12 * alpha * intensity})`;
   for (const side of [-1, 1]) {
@@ -183,8 +188,6 @@ function drawDoubleRail(
     ctx.stroke();
   }
 
-  ctx.shadowColor = `${color.halo} ${0.46 * alpha * intensity})`;
-  ctx.shadowBlur = 9 * dpr * intensity;
   ctx.strokeStyle = `${color.core} ${0.24 * alpha})`;
   ctx.lineWidth = 1.5 * dpr;
   ctx.beginPath();
@@ -192,8 +195,6 @@ function drawDoubleRail(
   ctx.lineTo(b.x, b.y);
   ctx.stroke();
 
-  ctx.shadowBlur = 8 * dpr * intensity;
-  ctx.shadowColor = `${color.halo} ${0.78 * alpha * intensity})`;
   for (const side of [-1, 1]) {
     const ox = nx * railGap * side;
     const oy = ny * railGap * side;
@@ -265,36 +266,76 @@ function drawJoint(
   ctx.fill();
 }
 
+function toAlignedCanvasPoint(
+  point: Kpt,
+  width: number,
+  height: number,
+  mirror: boolean,
+  tuning: SkeletonTuning,
+): DrawPoint {
+  // 与 UserSkeletonOverlay 同一套镜面映射，再叠加微调面板的位移/缩放
+  const skeletonScale = tuning.skeletonScale ?? 1;
+  let nx = mirror ? 1 - point.x : point.x;
+  let ny = point.y;
+  nx = 0.5 + (nx - 0.5) * tuning.scale * skeletonScale + (tuning.skeletonOffsetX ?? 0) * 0.5 + tuning.offsetX * 0.5;
+  ny = 0.5 + (ny - 0.5) * tuning.scale * skeletonScale + (tuning.skeletonOffsetY ?? 0) * 0.5 + tuning.offsetY * 0.5;
+  return {
+    x: nx * width,
+    y: ny * height,
+    vis: normalizedVisibility(point.visibility),
+  };
+}
+
+function keypointsToKpts(kp: Keypoint[]): Kpt[] {
+  return kp.map((row) => ({
+    x: row[0],
+    y: row[1],
+    z: 0,
+    visibility: row[2] ?? 1,
+  }));
+}
+
 export default function AdaptiveSkeletonOverlay({
   framesRef,
   currentTimeSec,
+  currentTimeRef,
   tuning,
   mirror = true,
   active = true,
   sourceAspect = DEFAULT_SOURCE_ASPECT,
+  userKptsRef,
   className,
 }: {
   framesRef: React.MutableRefObject<TeacherFrame[]>;
-  currentTimeSec: number;
+  currentTimeSec?: number;
+  currentTimeRef?: React.MutableRefObject<number>;
   tuning: SkeletonTuning;
   mirror?: boolean;
   active?: boolean;
   sourceAspect?: number;
+  /** 用户实时关键点：有则把老师骨架刚体对齐到用户身上 */
+  userKptsRef?: React.MutableRefObject<Keypoint[] | null>;
   className?: string;
 }) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
-  const timeRef = React.useRef(currentTimeSec);
+  const timeRef = React.useRef(currentTimeSec ?? 0);
   const tuningRef = React.useRef(tuning);
   const sourceAspectRef = React.useRef(sourceAspect);
+  const mirrorRef = React.useRef(mirror);
   const previousPointsRef = React.useRef<DrawPoint[]>([]);
+  const [alignedMode, setAlignedMode] = React.useState(false);
 
   React.useEffect(() => {
-    timeRef.current = currentTimeSec;
+    if (typeof currentTimeSec === "number") timeRef.current = currentTimeSec;
   }, [currentTimeSec]);
 
   React.useEffect(() => {
     tuningRef.current = tuning;
   }, [tuning]);
+
+  React.useEffect(() => {
+    mirrorRef.current = mirror;
+  }, [mirror]);
 
   React.useEffect(() => {
     sourceAspectRef.current =
@@ -305,79 +346,111 @@ export default function AdaptiveSkeletonOverlay({
     if (!active) return;
     let raf = 0;
     let disposed = false;
+    let lastDrawMs = 0;
+    let cachedWidth = 0;
+    let cachedHeight = 0;
+    let pointsBuf: DrawPoint[] = [];
+    let lastAlignedFlag: boolean | null = null;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const updateSize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, SKELETON_MAX_DPR);
+      const rect = canvas.getBoundingClientRect();
+      const w = Math.max(1, Math.round(rect.width * dpr));
+      const h = Math.max(1, Math.round(rect.height * dpr));
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+        previousPointsRef.current = [];
+        pointsBuf = [];
+      }
+      cachedWidth = w;
+      cachedHeight = h;
+    };
+    updateSize();
+
+    const ro = new ResizeObserver(updateSize);
+    ro.observe(canvas);
 
     const tick = () => {
       if (disposed) return;
-      const canvas = canvasRef.current;
-      if (!canvas) {
-        raf = requestAnimationFrame(tick);
-        return;
-      }
+      raf = requestAnimationFrame(tick);
+      const now = performance.now();
+      if (now - lastDrawMs < 1000 / SKELETON_TARGET_FPS) return;
+      lastDrawMs = now;
 
-      const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      const width = Math.max(1, Math.round(rect.width * dpr));
-      const height = Math.max(1, Math.round(rect.height * dpr));
-      if (canvas.width !== width || canvas.height !== height) {
-        canvas.width = width;
-        canvas.height = height;
+      const width = cachedWidth;
+      const height = cachedHeight;
+      if (!width || !height) return;
+
+      const dpr = Math.min(window.devicePixelRatio || 1, SKELETON_MAX_DPR);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      ctx.clearRect(0, 0, width, height);
+
+      const frame = nearestFrame(framesRef.current, currentTimeRef?.current ?? timeRef.current);
+      if (!frame?.keypoints?.length) return;
+
+      const userKp = userKptsRef?.current;
+      const canAlign = !!(userKp && userKp.length >= 33);
+      if (lastAlignedFlag !== canAlign) {
+        lastAlignedFlag = canAlign;
+        setAlignedMode(canAlign);
         previousPointsRef.current = [];
       }
 
-      const ctx = canvas.getContext("2d");
-      if (!ctx) {
-        raf = requestAnimationFrame(tick);
-        return;
-      }
-      ctx.clearRect(0, 0, width, height);
-
-      const frame = nearestFrame(framesRef.current, timeRef.current);
-      if (frame?.keypoints?.length) {
-        const target = frame.keypoints.map((point) =>
-          toCanvasPoint(point, width, height, tuningRef.current, sourceAspectRef.current)
+      let target: DrawPoint[];
+      if (canAlign && userKp) {
+        const user = keypointsToKpts(userKp);
+        const aligned = alignTeacherToUserAuto(frame.keypoints, user);
+        const src = aligned?.points ?? frame.keypoints;
+        target = src.map((point) =>
+          toAlignedCanvasPoint(point, width, height, mirrorRef.current, tuningRef.current),
         );
-        const previous = previousPointsRef.current;
-        const points = target.map((point, index) => {
-          const prev = previous[index];
-          if (!prev) return point;
-          return {
-            x: prev.x + (point.x - prev.x) * SMOOTHING,
-            y: prev.y + (point.y - prev.y) * SMOOTHING,
-            vis: point.vis,
-          };
-        });
-        previousPointsRef.current = points;
-
-        ctx.save();
-        ctx.globalCompositeOperation = "lighter";
-        const intensity = Math.max(0.55, Math.min(1.65, tuningRef.current.skeletonIntensity ?? 1.15));
-        for (const [from, to] of EDGES) {
-          const a = points[from];
-          const b = points[to];
-          if (a && b) drawDoubleRail(ctx, a, b, from, to, dpr, intensity);
-        }
-        const now = performance.now();
-        drawHeadRing(ctx, points, dpr, intensity);
-        points.forEach((point, index) => drawJoint(ctx, point, index, now, dpr, intensity));
-        ctx.restore();
+      } else {
+        target = frame.keypoints.map((point) =>
+          toCanvasPoint(point, width, height, tuningRef.current, sourceAspectRef.current),
+        );
       }
 
-      raf = requestAnimationFrame(tick);
+      const previous = previousPointsRef.current;
+      if (pointsBuf.length !== target.length) pointsBuf = new Array(target.length);
+      for (let i = 0; i < target.length; i++) {
+        const t = target[i];
+        const prev = previous[i];
+        pointsBuf[i] = prev
+          ? { x: prev.x + (t.x - prev.x) * SMOOTHING, y: prev.y + (t.y - prev.y) * SMOOTHING, vis: t.vis }
+          : t;
+      }
+      previousPointsRef.current = pointsBuf.slice();
+
+      ctx.save();
+      const intensity = Math.max(0.55, Math.min(1.65, tuningRef.current.skeletonIntensity ?? 1.15));
+      for (const [from, to] of EDGES) {
+        const a = pointsBuf[from];
+        const b = pointsBuf[to];
+        if (a && b) drawDoubleRail(ctx, a, b, from, to, dpr, intensity);
+      }
+      ctx.restore();
     };
 
     raf = requestAnimationFrame(tick);
     return () => {
       disposed = true;
       cancelAnimationFrame(raf);
+      ro.disconnect();
     };
-  }, [active, framesRef]);
+  }, [active, currentTimeRef, framesRef, userKptsRef]);
 
   return (
     <canvas
       ref={canvasRef}
       data-adaptive-skeleton="true"
       className={className ?? "pointer-events-none absolute inset-0 z-[24] h-full w-full"}
-      style={{ transform: mirror ? "scaleX(-1)" : "none" }}
+      // 对齐到用户后改由绘制函数做镜像；未对齐时保持旧的 CSS 翻转
+      style={{ transform: !alignedMode && mirror ? "scaleX(-1)" : "none" }}
       aria-hidden
     />
   );

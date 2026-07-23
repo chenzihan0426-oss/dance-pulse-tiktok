@@ -1,5 +1,5 @@
-import { PhoneAuthCard } from "@/components/auth/PhoneAuthCard";
+import { DemoPasswordAuthCard } from "@/components/auth/DemoPasswordAuthCard";
 
 export default function LoginPage() {
-  return <PhoneAuthCard mode="login" />;
+  return <DemoPasswordAuthCard mode="login" />;
 }

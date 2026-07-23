@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 
 from routes.auth import router as auth_router
 from routes.community import router as community_router
+from routes.demo_media import router as demo_media_router
 from routes.import_video import router as import_router
 from routes.lessons import router as lessons_router
 from routes.me import router as me_router
@@ -78,6 +79,12 @@ def _parse_cors_origins() -> list[str]:
         "http://127.0.0.1:3002",
         "http://localhost:3004",
         "http://127.0.0.1:3004",
+        "http://localhost:3100",
+        "http://127.0.0.1:3100",
+        "http://localhost:3200",
+        "http://127.0.0.1:3200",
+        "http://localhost:3202",
+        "http://127.0.0.1:3202",
     ]
 
 
@@ -117,6 +124,7 @@ app.include_router(auth_router)
 app.include_router(community_router)
 app.include_router(me_router)
 app.include_router(tracking_router)
+app.include_router(demo_media_router)
 
 
 def _mount_data_static(route: str, name: str, *parts: str) -> None:

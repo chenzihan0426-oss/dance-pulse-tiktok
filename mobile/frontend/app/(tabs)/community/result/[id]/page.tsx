@@ -3,16 +3,19 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Heart, Loader2, MessageCircle, Send, Trash2 } from "lucide-react";
+import { ArrowLeft, BookOpen, Heart, Loader2, MessageCircle, Send, Trash2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   addCommunityComment,
   deleteCommunityTrackingResult,
   getCommunityTrackingDetail,
+  getLesson,
+  resolveMediaUrl,
   toggleCommunityFollow,
   toggleCommunityLike,
   unpublishTrackingResult,
 } from "@/lib/api";
+import { SHOWCASE_WORK_META } from "@/lib/communityShowcase";
 import type { CommunityComment, CommunityTrackingDetailResponse } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -26,6 +29,8 @@ export default function CommunityResultDetailPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [commentDraft, setCommentDraft] = React.useState("");
   const [sending, setSending] = React.useState(false);
+  const [openingLesson, setOpeningLesson] = React.useState(false);
+  const [toast, setToast] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -132,6 +137,33 @@ export default function CommunityResultDetailPage() {
     router.push("/community");
   }
 
+  function flash(message: string) {
+    setToast(message);
+    window.setTimeout(() => setToast(null), 2200);
+  }
+
+  async function handleOpenLessonDetail() {
+    if (!detail || openingLesson) return;
+    const lessonId = detail.item.result.lessonId;
+    setOpeningLesson(true);
+    try {
+      const lesson = await getLesson(lessonId);
+      const hasPage =
+        Boolean(lesson?.id) &&
+        Array.isArray(lesson.segments) &&
+        lesson.segments.some((s) => !s.deleted);
+      if (!hasPage) {
+        flash("页面不存在");
+        return;
+      }
+      router.push(`/lesson/${lesson.id}`);
+    } catch {
+      flash("页面不存在");
+    } finally {
+      setOpeningLesson(false);
+    }
+  }
+
   if (loading) {
     return (
       <main className="mx-auto min-h-screen max-w-md px-5 py-8 text-white">
@@ -153,9 +185,19 @@ export default function CommunityResultDetailPage() {
   }
 
   const isOwnProfile = user?.username === detail.item.user.username;
+  const meta = SHOWCASE_WORK_META[detail.item.result.id];
+  const videoSrc = resolveMediaUrl(detail.item.result.videoUrl);
+  const poster = detail.item.previewThumbnail
+    ? resolveMediaUrl(detail.item.previewThumbnail)
+    : undefined;
 
   return (
     <main className="mx-auto min-h-screen max-w-md px-5 pb-10 pt-8 text-white">
+      {toast ? (
+        <div className="fixed left-1/2 top-6 z-50 -translate-x-1/2 rounded-full border border-[#ccff00]/40 bg-black/90 px-4 py-2 text-[13px] text-[#ccff00]">
+          {toast}
+        </div>
+      ) : null}
       <Link
         href="/community"
         className="inline-flex items-center gap-2 text-sm text-white/45 transition hover:text-white"
@@ -167,8 +209,8 @@ export default function CommunityResultDetailPage() {
       <section className="mt-6 overflow-hidden rounded-[30px] border border-white/8 bg-bg-raised">
         <div className="aspect-[9/16] bg-black">
           <video
-            src={detail.item.result.videoUrl}
-            poster={detail.item.previewThumbnail ?? undefined}
+            src={videoSrc}
+            poster={poster}
             className="h-full w-full object-contain"
             controls
             playsInline
@@ -183,6 +225,9 @@ export default function CommunityResultDetailPage() {
               </Link>
               <div className="mt-1 text-[13px] text-white/45">@{detail.item.user.username}</div>
               <div className="mt-2 text-[13px] text-white/45">{detail.item.lessonTitle}</div>
+              {meta?.caption ? (
+                <p className="mt-2 text-[13px] leading-6 text-white/55">{meta.caption}</p>
+              ) : null}
             </div>
 
             {!isOwnProfile ? (
@@ -235,6 +280,29 @@ export default function CommunityResultDetailPage() {
               </div>
               <div className="mt-3 text-[32px] font-semibold text-white">{detail.item.result.commentCount}</div>
             </div>
+          </div>
+
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+            <button
+              type="button"
+              onClick={() => void handleOpenLessonDetail()}
+              disabled={openingLesson}
+              className="flex flex-1 items-center justify-center gap-2 rounded-[18px] border border-[#ccff00]/60 bg-transparent px-4 py-3.5 text-[14px] font-bold text-[#ccff00] transition hover:bg-[#ccff00]/10 disabled:opacity-60"
+            >
+              {openingLesson ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <BookOpen className="h-4 w-4" />
+              )}
+              查看详情
+            </button>
+            <Link
+              href={`/lesson/${detail.item.result.lessonId}/tracking-desktop`}
+              className="flex flex-1 items-center justify-center gap-2 rounded-[18px] bg-[#ccff00] px-4 py-3.5 text-[14px] font-bold text-black transition hover:bg-white"
+            >
+              <Zap className="h-4 w-4" />
+              跟跳这支
+            </Link>
           </div>
 
           <div className="space-y-3">
