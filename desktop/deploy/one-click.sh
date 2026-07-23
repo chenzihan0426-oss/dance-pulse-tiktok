@@ -15,6 +15,7 @@ set -euo pipefail
 REPO_URL="https://github.com/chenzihan0426-oss/dance-pulse-tiktok.git"
 CLONE_DIR=/opt/dancepulse-repo
 APP="$CLONE_DIR/desktop"
+MOBILE="$CLONE_DIR/mobile/frontend"
 
 echo "==> [1/8] 公网 IP 与域名"
 IP="$(curl -fsSL --max-time 8 https://ifconfig.me 2>/dev/null || curl -fsSL --max-time 8 https://api.ipify.org)"
@@ -79,6 +80,11 @@ cd "$APP/frontend"
 npm install --no-audit --no-fund
 NEXT_PUBLIC_API_BASE="https://${DOMAIN}" npm run build
 
+echo "    构建手机版(mobile/frontend,同一后端)"
+cd "$MOBILE"
+npm install --no-audit --no-fund
+NEXT_PUBLIC_API_BASE="https://${DOMAIN}" npm run build
+
 echo "==> [8/8] systemd + Caddy HTTPS"
 cat > /etc/systemd/system/dancepulse-backend.service <<EOF
 [Unit]
@@ -108,12 +114,31 @@ Environment=NODE_ENV=production
 WantedBy=multi-user.target
 EOF
 
+cat > /etc/systemd/system/dancepulse-mobile.service <<EOF
+[Unit]
+Description=DancePulse Next.js mobile frontend
+After=network.target
+[Service]
+WorkingDirectory=${MOBILE}
+ExecStart=$(command -v npx) next start -H 127.0.0.1 -p 3100
+Restart=always
+RestartSec=3
+Environment=NODE_ENV=production
+[Install]
+WantedBy=multi-user.target
+EOF
+
 cat > /etc/caddy/Caddyfile <<EOF
 ${DOMAIN} {
     encode gzip
     @backend path /api/* /videos/* /clips/* /thumbs/* /pose/* /matte/* /pose_full/* /particles/* /tracking-videos/* /docs /openapi.json
     handle @backend {
         reverse_proxy 127.0.0.1:8000
+    }
+    # 手机 User-Agent → 手机版(3100),其它 → 桌面版(3200)
+    @mobile header_regexp ua User-Agent (?i)(android|iphone|ipod|iemobile|blackberry|mobile)
+    handle @mobile {
+        reverse_proxy 127.0.0.1:3100
     }
     handle {
         reverse_proxy 127.0.0.1:3200
@@ -122,14 +147,15 @@ ${DOMAIN} {
 EOF
 
 systemctl daemon-reload
-systemctl enable --now dancepulse-backend dancepulse-frontend >/dev/null
-systemctl restart dancepulse-backend dancepulse-frontend caddy
+systemctl enable --now dancepulse-backend dancepulse-frontend dancepulse-mobile >/dev/null
+systemctl restart dancepulse-backend dancepulse-frontend dancepulse-mobile caddy
 
 sleep 3
 echo ""
 echo "=================================================="
 echo "  ✅ 部署完成"
 echo "  访问: https://${DOMAIN}"
+echo "  电脑打开=桌面版,手机打开=手机版(按 User-Agent 自动分流)"
 echo "  (证书首次签发需 30-60 秒,打不开等一下再刷)"
 echo "=================================================="
-systemctl is-active dancepulse-backend dancepulse-frontend caddy || true
+systemctl is-active dancepulse-backend dancepulse-frontend dancepulse-mobile caddy || true
