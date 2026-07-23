@@ -8,8 +8,8 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Sparkles, Check, Trash2 } from "lucide-react";
-import { deleteLesson, getLessons } from "@/lib/api";
+import { Plus, Sparkles, Check } from "lucide-react";
+import { getLessons } from "@/lib/api";
 import { buildLessonProgressMaps, type ProgressMap, type ResumeMap } from "@/lib/lesson-progress";
 import { PROGRESS_UPDATED_EVENT } from "@/lib/storage";
 import { useUserLessonStates } from "@/hooks/useUserLessonStates";
@@ -27,26 +27,6 @@ export default function LearnPageDesktop() {
   const [resumeMap, setResumeMap] = React.useState<ResumeMap>({});
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-  const [deletingId, setDeletingId] = React.useState<string | null>(null);
-
-  // 删除课程:确认 → 后端连原视频/切片等全部清掉 → 从列表移除
-  const handleDelete = React.useCallback(async (e: React.MouseEvent, lesson: LessonListItem) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const ok = window.confirm(
-      `确定删除《${lesson.title}》吗?\n将同时删除下载的原视频、切片等全部本地文件,不可恢复。`
-    );
-    if (!ok) return;
-    setDeletingId(lesson.id);
-    try {
-      await deleteLesson(lesson.id);
-      setLessons((prev) => prev.filter((l) => l.id !== lesson.id));
-    } catch (err) {
-      window.alert(`删除失败: ${err instanceof Error ? err.message : String(err)}`);
-    } finally {
-      setDeletingId(null);
-    }
-  }, []);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -164,17 +144,6 @@ export default function LearnPageDesktop() {
                     {pct}%
                   </div>
                 ) : null}
-
-                <button
-                  type="button"
-                  onClick={(e) => handleDelete(e, lesson)}
-                  disabled={deletingId === lesson.id}
-                  className="absolute right-3 top-11 z-10 flex h-7 w-7 items-center justify-center rounded-full border border-white/15 bg-black/60 text-white/55 opacity-0 backdrop-blur transition hover:border-red-400/60 hover:bg-red-500/25 hover:text-red-200 group-hover:opacity-100 disabled:opacity-60"
-                  aria-label={`删除课程 ${lesson.title}`}
-                  title="删除课程(含原视频等本地文件)"
-                >
-                  <Trash2 className={`h-3 w-3 ${deletingId === lesson.id ? "animate-pulse" : ""}`} />
-                </button>
 
                 <div className="absolute inset-x-0 bottom-0 p-4">
                   <div className="line-clamp-1 text-[16px] font-semibold text-white">{lesson.title}</div>

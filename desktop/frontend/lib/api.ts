@@ -328,20 +328,6 @@ export async function getLessons(): Promise<LessonListItem[]> {
   return items.map(normalizeLessonListItem);
 }
 
-// 删除课程及其全部本地文件(原视频/切片/缩略图/姿态等),释放磁盘空间。
-export interface DeleteLessonResponse {
-  deleted: boolean;
-  freedBytes: number;
-  removed: number;
-}
-
-export async function deleteLesson(lessonId: string): Promise<DeleteLessonResponse> {
-  if (USE_MOCK) {
-    await sleep(120);
-    return { deleted: true, freedBytes: 0, removed: 0 };
-  }
-  return http<DeleteLessonResponse>(`/api/lessons/${lessonId}`, { method: "DELETE" });
-}
 
 export async function sendSmsCode(phone: string): Promise<SendSmsResponse> {
   if (USE_MOCK) {

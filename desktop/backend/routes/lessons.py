@@ -5,7 +5,7 @@ from fastapi import APIRouter
 from models import ConfirmLessonResponse, Lesson, LessonListItem, RegenerateLessonRequest
 from services.clip_reexport import reexport_lesson_clips
 from services.regenerate_lesson import regenerate_lesson_segments
-from services.lesson_store import delete_lesson, load_lesson, list_lessons, save_lesson
+from services.lesson_store import load_lesson, list_lessons, save_lesson
 from services.teaching_queue import teaching_queue
 
 
@@ -15,12 +15,6 @@ router = APIRouter(prefix="/api/lessons", tags=["lessons"])
 @router.get("", response_model=list[LessonListItem])
 def get_lessons() -> list[LessonListItem]:
     return list_lessons()
-
-
-@router.delete("/{lesson_id}")
-def remove_lesson(lesson_id: str) -> dict:
-    """删除课程及其全部本地文件(原视频/切片/缩略图/姿态/matte/粒子)。"""
-    return delete_lesson(lesson_id)
 
 
 @router.get("/{lesson_id}", response_model=Lesson)
